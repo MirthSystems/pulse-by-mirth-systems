@@ -13,7 +13,7 @@ var db =
 var cache = 
     builder.AddRedis("cache")
         .WithDataBindMount(
-            source: @"..\..\data\valkey",
+            source: @"..\..\data\redis",
             isReadOnly: false
         )
         .WithRedisInsight()
