@@ -6,6 +6,7 @@ var db =
             source: @"..\..\data\postgresql",
             isReadOnly: false
         )
+        .WithImage("postgis/postgis")
         .WithPgAdmin()
         .WithPgWeb()
         .AddDatabase("application-db");
