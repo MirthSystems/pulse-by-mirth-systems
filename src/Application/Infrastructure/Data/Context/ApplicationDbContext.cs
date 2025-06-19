@@ -2,10 +2,11 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Application.Domain.Entities;
+using DayOfWeek = Application.Domain.Entities.DayOfWeek;
 
 namespace Application.Infrastructure.Data.Context;
 
-public class ApplicationDbContext : IdentityDbContext<
+public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext<
     ApplicationUser,
     ApplicationRole, 
     long,
@@ -14,11 +15,13 @@ public class ApplicationDbContext : IdentityDbContext<
     ApplicationUserLogin,
     ApplicationRoleClaim,
     ApplicationUserToken>
+    (options)
 {
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-        : base(options)
-    {
-    }
+
+    public DbSet<Venue> Venues => Set<Venue>();
+    public DbSet<VenueCategory> VenueCategories => Set<VenueCategory>();
+    public DbSet<BusinessHours> BusinessHours => Set<BusinessHours>();
+    public DbSet<DayOfWeek> DayOfWeeks => Set<DayOfWeek>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

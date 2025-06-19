@@ -14,7 +14,10 @@ public class Program
 
         builder.Services.AddProblemDetails();
 
-        builder.Services.AddApplicationServices();
+        builder.Services.AddApplication(options =>
+        {
+            builder.Configuration.Bind("Application", options);
+        });
 
         builder.Services.AddControllers();
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

@@ -102,16 +102,6 @@ public class ApplicationUserConfiguration : IEntityTypeConfiguration<Application
         #endregion
 
         #region Seed Data
-        builder.HasData(new ApplicationUser
-        {
-            Id = 1,
-            UserName = "system",
-            NormalizedUserName = "SYSTEM",
-            Email = "system@mirthsystems.com",
-            NormalizedEmail = "SYSTEM@MIRTHSYSTEMS.COM",
-            EmailConfirmed = true,
-            SecurityStamp = Guid.NewGuid().ToString(),
-        });
         #endregion
     }
 }

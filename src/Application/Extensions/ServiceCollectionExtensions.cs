@@ -5,10 +5,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using Common.Options;
+
 using global::Application.Domain.Entities;
 using global::Application.Infrastructure.Data.Context;
 
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 using NodaTime;
@@ -24,8 +27,13 @@ public static class ServiceCollectionExtensions
     /// <param name="services">The service collection</param>
     /// <param name="configuration">Configuration action</param>
     /// <returns>The service collection for chaining</returns>
-    public static IServiceCollection AddApplicationServices(this IServiceCollection services)
+    public static IServiceCollection AddApplication(this IServiceCollection services, Action<ApplicationOptions> configuration)
     {
+        var config = new ApplicationOptions();
+        configuration(config);
+
+        // Register configuration
+        services.AddSingleton(config);
 
         // Configure logging with Serilog
         ConfigureSerilog(services);
@@ -38,7 +46,7 @@ public static class ServiceCollectionExtensions
 
         // Register application services
         RegisterApplicationServices(services);
-        RegisterInfrastructureServices(services);
+        RegisterInfrastructureServices(services, config);
 
         // Configure SignalR
         ConfigureSignalR(services);
@@ -98,7 +106,7 @@ public static class ServiceCollectionExtensions
         // services.AddScoped<IActivityThreadService, ActivityThreadService>();
     }
 
-    private static void RegisterInfrastructureServices(IServiceCollection services)
+    private static void RegisterInfrastructureServices(IServiceCollection services, ApplicationOptions config)
     {
         // Register repositories
         RegisterRepositories(services);
@@ -108,11 +116,11 @@ public static class ServiceCollectionExtensions
         // services.AddScoped<INotificationService, SignalRNotificationService>();
 
         // Azure Maps services (if key provided)
-        //if (!string.IsNullOrWhiteSpace(config.AzureMapsKey))
-        //{
-        //    // TODO: Register Azure Maps services
-        //    // services.AddScoped<IGeocodingService, AzureMapsGeocodingService>();
-        //}
+        if (!string.IsNullOrWhiteSpace(config.AzureMapsKey))
+        {
+            // TODO: Register Azure Maps services
+            // services.AddScoped<IGeocodingService, AzureMapsGeocodingService>();
+        }
     }
 
     private static void RegisterRepositories(IServiceCollection services)
