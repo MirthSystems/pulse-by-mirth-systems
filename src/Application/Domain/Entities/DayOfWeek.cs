@@ -1,7 +1,4 @@
-﻿
-using System.Collections.Generic;
-
-namespace Application.Domain.Entities;
+﻿namespace Application.Domain.Entities;
 
 public class DayOfWeek
 {
