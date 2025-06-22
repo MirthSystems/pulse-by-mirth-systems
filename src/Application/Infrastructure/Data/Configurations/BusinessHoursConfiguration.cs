@@ -12,19 +12,10 @@ public class BusinessHoursConfiguration : IEntityTypeConfiguration<BusinessHours
 {
     public void Configure(EntityTypeBuilder<BusinessHours> builder)
     {
-        #region Entity Configuration
-        builder.ToTable("business_hours");
+        builder.HasIndex(bh => new { bh.VenueId, bh.DayOfWeekId })
+               .IsUnique();
+
         builder.HasKey(bh => bh.Id);
-
-        builder.Property(bh => bh.VenueId)
-               .IsRequired();
-
-        builder.Property(bh => bh.DayOfWeekId)
-               .IsRequired();
-
-        builder.Property(bh => bh.IsClosed)
-               .IsRequired()
-               .HasDefaultValue(false);
 
         builder.HasOne(bh => bh.Venue)
                .WithMany(v => v.BusinessHours)
@@ -35,10 +26,6 @@ public class BusinessHoursConfiguration : IEntityTypeConfiguration<BusinessHours
                .WithMany(dow => dow.BusinessHours)
                .HasForeignKey(bh => bh.DayOfWeekId)
                .OnDelete(DeleteBehavior.Restrict);
-
-        builder.HasIndex(bh => new { bh.VenueId, bh.DayOfWeekId })
-               .IsUnique();
-        #endregion
 
         #region Data Seed
         builder.HasData(

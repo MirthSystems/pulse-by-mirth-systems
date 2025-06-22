@@ -1,21 +1,10 @@
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Application.Domain.Entities;
 using DayOfWeek = Application.Domain.Entities.DayOfWeek;
 
 namespace Application.Infrastructure.Data.Context;
 
-public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext<
-    ApplicationUser,
-    ApplicationRole, 
-    long,
-    ApplicationUserClaim,
-    ApplicationUserRole,
-    ApplicationUserLogin,
-    ApplicationRoleClaim,
-    ApplicationUserToken>
-    (options)
+public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
 {
 
     public DbSet<Venue> Venues => Set<Venue>();

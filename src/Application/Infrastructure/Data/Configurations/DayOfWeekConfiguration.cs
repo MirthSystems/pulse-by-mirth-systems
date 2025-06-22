@@ -12,20 +12,10 @@ public class DayOfWeekConfiguration : IEntityTypeConfiguration<DayOfWeek>
 {
     public void Configure(EntityTypeBuilder<DayOfWeek> builder)
     {
-        #region Entity Configuration
-        builder.ToTable("days_of_week");
-        builder.HasKey(d => d.Id);
-
-        builder.Property(d => d.Name)
-               .IsRequired()
-               .HasMaxLength(20);
-
-        builder.Property(d => d.ShortName)
-               .IsRequired()
-               .HasMaxLength(3);
         builder.HasIndex(d => d.IsoNumber)
                .IsUnique();
-        #endregion
+
+        builder.HasKey(d => d.Id);
 
         #region Data Seed
         builder.HasData(new DayOfWeek

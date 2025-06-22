@@ -10,54 +10,11 @@ public class VenueConfiguration : IEntityTypeConfiguration<Venue>
 {
     public void Configure(EntityTypeBuilder<Venue> builder)
     {
-        #region Entity Configuration
-        builder.ToTable("venues");
+        builder.HasIndex(v => v.Name);
+        builder.HasIndex(v => v.Location)
+               .HasMethod("GIST");
+
         builder.HasKey(v => v.Id);
-
-        builder.Property(v => v.Name)
-               .IsRequired()
-               .HasMaxLength(100);
-
-        builder.Property(v => v.Description)
-               .HasMaxLength(500);
-
-        builder.Property(v => v.PhoneNumber)
-               .HasMaxLength(20);
-
-        builder.Property(v => v.Website)
-               .HasMaxLength(200);
-
-        builder.Property(v => v.Email)
-               .HasMaxLength(100);
-
-        builder.Property(v => v.ProfileImage)
-               .HasMaxLength(500);
-
-        builder.Property(v => v.StreetAddress)
-               .IsRequired()
-               .HasMaxLength(200);
-
-        builder.Property(v => v.SecondaryAddress)
-               .HasMaxLength(100);
-
-        builder.Property(v => v.Locality)
-               .IsRequired()
-               .HasMaxLength(100);
-
-        builder.Property(v => v.Region)
-               .IsRequired()
-               .HasMaxLength(50);
-
-        builder.Property(v => v.PostalCode)
-               .IsRequired()
-               .HasMaxLength(20);
-
-        builder.Property(v => v.Country)
-               .IsRequired()
-               .HasMaxLength(50);
-
-        builder.Property(v => v.Location)
-               .HasColumnType("geography (point)");
 
         builder.HasOne(v => v.Category)
                .WithMany(vc => vc.Venues)
@@ -69,11 +26,6 @@ public class VenueConfiguration : IEntityTypeConfiguration<Venue>
                .WithOne(bh => bh.Venue)
                .HasForeignKey(bh => bh.VenueId)
                .OnDelete(DeleteBehavior.Cascade);
-
-        builder.HasIndex(v => v.Name);
-        builder.HasIndex(v => v.Location)
-               .HasMethod("GIST");
-        #endregion
 
         #region Data Seed
         builder.HasData(

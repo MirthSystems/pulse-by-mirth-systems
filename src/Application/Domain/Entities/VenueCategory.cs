@@ -1,19 +1,29 @@
-﻿namespace Application.Domain.Entities;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
+namespace Application.Domain.Entities;
+
+[Table("venue_category")]
 public class VenueCategory
 {
-    #region Identity and primary fields
+    [Column("id")]
     public int Id { get; set; }
-    public required string Name { get; set; }
+
+    [Column("name")]
+    [Required]
+    [MaxLength(50)]
+    public string Name { get; set; } = null!;
+
+    [Column("description")]
+    [MaxLength(200)]
     public string? Description { get; set; }
-    #endregion
 
-    #region Metadata properties
+    [Column("icon")]
+    [MaxLength(10)]
     public string? Icon { get; set; }
-    public int SortOrder { get; set; }
-    #endregion
 
-    #region Navigation properties
+    [Column("sort_order")]
+    public int SortOrder { get; set; }
+
     public List<Venue> Venues { get; set; } = new List<Venue>();
-    #endregion
 }

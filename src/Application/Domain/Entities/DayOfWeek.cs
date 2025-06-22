@@ -1,19 +1,32 @@
-﻿namespace Application.Domain.Entities;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
+namespace Application.Domain.Entities;
+
+[Table("day_of_week")]
 public class DayOfWeek
 {
-    #region Identity and primary fields
+    [Column("id")]
     public int Id { get; set; }
-    public required string Name { get; set; }
-    public required string ShortName { get; set; }
-    #endregion    
-    #region Metadata fields
-    public int IsoNumber { get; set; }
-    public bool IsWeekday { get; set; }
-    public int SortOrder { get; set; }
-    #endregion
 
-    #region Navigation properties
+    [Column("name")]
+    [Required]
+    [MaxLength(20)]
+    public string Name { get; set; } = null!;
+
+    [Column("short_name")]
+    [Required]
+    [MaxLength(3)]
+    public string ShortName { get; set; } = null!;
+
+    [Column("iso_number")]
+    public int IsoNumber { get; set; }
+
+    [Column("is_weekday")]
+    public bool IsWeekday { get; set; }
+
+    [Column("sort_order")]
+    public int SortOrder { get; set; }
+
     public List<BusinessHours> BusinessHours { get; set; } = new List<BusinessHours>();
-    #endregion
 }
