@@ -10,7 +10,6 @@ using Common.Options;
 using global::Application.Domain.Entities;
 using global::Application.Infrastructure.Data.Context;
 
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -41,8 +40,8 @@ public static class ServiceCollectionExtensions
         // Register NodaTime IClock
         services.AddSingleton<IClock>(SystemClock.Instance);
 
-        // Configure ASP.NET Core Identity
-        ConfigureIdentity(services);
+        // Configure Auth 
+        ConfigureAuth(services);
 
         // Register application services
         RegisterApplicationServices(services);
@@ -67,34 +66,9 @@ public static class ServiceCollectionExtensions
         services.AddLogging(builder => builder.AddSerilog(dispose: true));
     }
 
-    private static void ConfigureIdentity(IServiceCollection services)
+    private static void ConfigureAuth(IServiceCollection services)
     {
-        services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
-        {
-            // Password settings
-            options.Password.RequireDigit = true;
-            options.Password.RequireLowercase = true;
-            options.Password.RequireUppercase = true;
-            options.Password.RequireNonAlphanumeric = true;
-            options.Password.RequiredLength = 8;
-
-            // Lockout settings
-            options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
-            options.Lockout.MaxFailedAccessAttempts = 5;
-            options.Lockout.AllowedForNewUsers = true;
-
-            // User settings
-            options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
-            options.User.RequireUniqueEmail = true;
-
-            // Sign in settings
-            options.SignIn.RequireConfirmedEmail = false;
-            options.SignIn.RequireConfirmedPhoneNumber = false;
-        })
-        .AddEntityFrameworkStores<ApplicationDbContext>()
-        .AddDefaultTokenProviders();
-
-        // Cookie configuration will be done in the consuming application
+        // TODO: Configure Auth
     }
 
     private static void RegisterApplicationServices(IServiceCollection services)
