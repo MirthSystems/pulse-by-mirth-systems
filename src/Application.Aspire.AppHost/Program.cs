@@ -1,5 +1,11 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
+var keycloak =
+    builder.AddKeycloak("keycloak", 8080)
+        .WithDataBindMount(
+            source: @"..\..\data\keycloak"
+        );
+
 var db = 
     builder.AddPostgres("postgres")        
         .WithDataBindMount(
@@ -30,7 +36,9 @@ var server =
     builder.AddProject<Projects.Application_Services_API>("api-server")
         .WithReference(db)
         .WithReference(cache)
+        .WithReference(keycloak)
         .WaitForCompletion(databaseMigrations)
-        .WaitFor(cache);
+        .WaitFor(cache)
+        .WaitFor(keycloak);
 
 builder.Build().Run();

@@ -6,6 +6,12 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <Compile Remove="Infrastructure\Data\Migrations\**" />
+      <EmbeddedResource Remove="Infrastructure\Data\Migrations\**" />
+      <None Remove="Infrastructure\Data\Migrations\**" />
+    </ItemGroup>
+
 	<ItemGroup>
 		<PackageReference Include="Azure.Maps.Common" Version="1.0.0-beta.4" />
 		<PackageReference Include="Azure.Maps.Geolocation" Version="1.0.0-beta.3" />
@@ -53,7 +59,6 @@
         <Folder Include="Infrastructure\Authorization\Services\" />
         <Folder Include="Infrastructure\Common\Interfaces\" />
         <Folder Include="Infrastructure\Data\Interceptors\" />
-        <Folder Include="Infrastructure\Data\Migrations\" />
         <Folder Include="Infrastructure\Data\Repositories\" />
         <Folder Include="Infrastructure\Identity\Models\" />
         <Folder Include="Infrastructure\Identity\Services\" />
