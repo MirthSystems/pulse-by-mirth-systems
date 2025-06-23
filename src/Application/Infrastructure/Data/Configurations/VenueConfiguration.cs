@@ -20,8 +20,7 @@ public class VenueConfiguration : IEntityTypeConfiguration<Venue>
                .WithMany(vc => vc.Venues)
                .HasForeignKey(v => v.CategoryId)
                .OnDelete(DeleteBehavior.Restrict)
-               .IsRequired();
-
+               .IsRequired();        
         builder.HasMany(v => v.BusinessHours)
                .WithOne(bh => bh.Venue)
                .HasForeignKey(bh => bh.VenueId)
