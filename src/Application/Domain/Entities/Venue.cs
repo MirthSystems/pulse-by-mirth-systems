@@ -85,4 +85,5 @@ public class Venue
 
     public VenueCategory Category { get; set; } = null!;
     public List<BusinessHours> BusinessHours { get; set; } = new List<BusinessHours>();
+    public List<Special> Specials { get; set; } = new List<Special>();
 }

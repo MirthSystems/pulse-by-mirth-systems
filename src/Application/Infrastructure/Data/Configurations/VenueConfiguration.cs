@@ -25,6 +25,10 @@ public class VenueConfiguration : IEntityTypeConfiguration<Venue>
                .WithOne(bh => bh.Venue)
                .HasForeignKey(bh => bh.VenueId)
                .OnDelete(DeleteBehavior.Cascade);
+        builder.HasMany(v => v.Specials)
+               .WithOne(s => s.Venue)
+               .HasForeignKey(s => s.VenueId)
+               .OnDelete(DeleteBehavior.Cascade);
 
         #region Data Seed
         builder.HasData(
