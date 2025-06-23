@@ -40,9 +40,6 @@ public static class ServiceCollectionExtensions
         // Register NodaTime IClock
         services.AddSingleton<IClock>(SystemClock.Instance);
 
-        // Configure Auth 
-        ConfigureAuth(services);
-
         // Register application services
         RegisterApplicationServices(services);
         RegisterInfrastructureServices(services, config);
@@ -64,11 +61,6 @@ public static class ServiceCollectionExtensions
 
         Log.Logger = loggerConfiguration.CreateLogger();
         services.AddLogging(builder => builder.AddSerilog(dispose: true));
-    }
-
-    private static void ConfigureAuth(IServiceCollection services)
-    {
-        // TODO: Configure Auth
     }
 
     private static void RegisterApplicationServices(IServiceCollection services)
