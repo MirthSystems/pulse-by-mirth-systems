@@ -5,12 +5,13 @@ using DayOfWeek = Application.Domain.Entities.DayOfWeek;
 namespace Application.Infrastructure.Data.Context;
 
 public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
-{
-
+{    
     public DbSet<Venue> Venues => Set<Venue>();
     public DbSet<VenueCategory> VenueCategories => Set<VenueCategory>();
     public DbSet<BusinessHours> BusinessHours => Set<BusinessHours>();
     public DbSet<DayOfWeek> DayOfWeeks => Set<DayOfWeek>();
+    public DbSet<Special> Specials => Set<Special>();
+    public DbSet<SpecialCategory> SpecialCategories => Set<SpecialCategory>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
