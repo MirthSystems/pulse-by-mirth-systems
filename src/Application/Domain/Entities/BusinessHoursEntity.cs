@@ -7,7 +7,7 @@ using NodaTime;
 namespace Application.Domain.Entities;
 
 [Table("business_hours")]
-public class BusinessHours
+public class BusinessHoursEntity
 {
     [Column("id")]
     public long Id { get; set; }
@@ -30,6 +30,6 @@ public class BusinessHours
     [DefaultValue(false)]
     public bool IsClosed { get; set; }
 
-    public Venue Venue { get; set; } = null!;
-    public DayOfWeek DayOfWeek { get; set; } = null!;
+    public VenueEntity Venue { get; set; } = null!;
+    public DayOfWeekEntity DayOfWeek { get; set; } = null!;
 }

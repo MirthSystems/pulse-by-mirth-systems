@@ -5,9 +5,9 @@ namespace Application.Infrastructure.Data.Configurations;
 /// <summary>
 /// Entity configuration for VenueCategory entity
 /// </summary>
-public class VenueCategoryConfiguration : IEntityTypeConfiguration<VenueCategory>
+public class VenueCategoryEntityConfiguration : IEntityTypeConfiguration<VenueCategoryEntity>
 {
-    public void Configure(EntityTypeBuilder<VenueCategory> builder)
+    public void Configure(EntityTypeBuilder<VenueCategoryEntity> builder)
     {
         builder.HasIndex(vc => vc.Name)
                .IsUnique();
@@ -21,7 +21,7 @@ public class VenueCategoryConfiguration : IEntityTypeConfiguration<VenueCategory
 
         #region Data Seed
         builder.HasData(
-            new VenueCategory 
+            new VenueCategoryEntity 
             { 
                 Id = 1, 
                 Name = "Restaurant", 
@@ -29,7 +29,7 @@ public class VenueCategoryConfiguration : IEntityTypeConfiguration<VenueCategory
                 Icon = "🍽️",
                 SortOrder = 1,
             },
-            new VenueCategory 
+            new VenueCategoryEntity 
             { 
                 Id = 2, 
                 Name = "Bar", 
@@ -37,7 +37,7 @@ public class VenueCategoryConfiguration : IEntityTypeConfiguration<VenueCategory
                 Icon = "🍸",
                 SortOrder = 2,
             },
-            new VenueCategory 
+            new VenueCategoryEntity 
             { 
                 Id = 3, 
                 Name = "Cafe", 
@@ -45,7 +45,7 @@ public class VenueCategoryConfiguration : IEntityTypeConfiguration<VenueCategory
                 Icon = "☕",
                 SortOrder = 3,
             },
-            new VenueCategory 
+            new VenueCategoryEntity 
             { 
                 Id = 4, 
                 Name = "Nightclub", 
@@ -53,7 +53,7 @@ public class VenueCategoryConfiguration : IEntityTypeConfiguration<VenueCategory
                 Icon = "🪩",
                 SortOrder = 4,
             },
-            new VenueCategory 
+            new VenueCategoryEntity 
             { 
                 Id = 5, 
                 Name = "Pub", 
@@ -61,7 +61,7 @@ public class VenueCategoryConfiguration : IEntityTypeConfiguration<VenueCategory
                 Icon = "🍺",
                 SortOrder = 5,
             },
-            new VenueCategory 
+            new VenueCategoryEntity 
             { 
                 Id = 6, 
                 Name = "Winery", 
@@ -69,7 +69,7 @@ public class VenueCategoryConfiguration : IEntityTypeConfiguration<VenueCategory
                 Icon = "🍷",
                 SortOrder = 6,
             },
-            new VenueCategory 
+            new VenueCategoryEntity 
             { 
                 Id = 7, 
                 Name = "Brewery", 
@@ -77,7 +77,7 @@ public class VenueCategoryConfiguration : IEntityTypeConfiguration<VenueCategory
                 Icon = "🍻",
                 SortOrder = 7,
             },
-            new VenueCategory 
+            new VenueCategoryEntity 
             { 
                 Id = 9, 
                 Name = "Lounge", 
@@ -85,7 +85,7 @@ public class VenueCategoryConfiguration : IEntityTypeConfiguration<VenueCategory
                 Icon = "🛋️",
                 SortOrder = 8,
             },
-            new VenueCategory 
+            new VenueCategoryEntity 
             { 
                 Id = 10, 
                 Name = "Bistro", 

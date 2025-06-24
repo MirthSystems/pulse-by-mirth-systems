@@ -1,16 +1,15 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Application.Domain.Entities;
-using DayOfWeek = Application.Domain.Entities.DayOfWeek;
 
 namespace Application.Infrastructure.Data.Configurations;
 
 /// <summary>
 /// Entity configuration for DayOfWeek entity
 /// </summary>
-public class DayOfWeekConfiguration : IEntityTypeConfiguration<DayOfWeek>
+public class DayOfWeekEntityConfiguration : IEntityTypeConfiguration<DayOfWeekEntity>
 {
-    public void Configure(EntityTypeBuilder<DayOfWeek> builder)
+    public void Configure(EntityTypeBuilder<DayOfWeekEntity> builder)
     {
         builder.HasIndex(d => d.IsoNumber)
                .IsUnique();
@@ -18,7 +17,7 @@ public class DayOfWeekConfiguration : IEntityTypeConfiguration<DayOfWeek>
         builder.HasKey(d => d.Id);
 
         #region Data Seed
-        builder.HasData(new DayOfWeek
+        builder.HasData(new DayOfWeekEntity
             {
                 Id = 1,
                 Name = "Sunday",
@@ -27,7 +26,7 @@ public class DayOfWeekConfiguration : IEntityTypeConfiguration<DayOfWeek>
                 IsWeekday = false,
                 SortOrder = 1
             },
-            new DayOfWeek
+            new DayOfWeekEntity
             {
                 Id = 2,
                 Name = "Monday",
@@ -36,7 +35,7 @@ public class DayOfWeekConfiguration : IEntityTypeConfiguration<DayOfWeek>
                 IsWeekday = true,
                 SortOrder = 2
             },
-            new DayOfWeek
+            new DayOfWeekEntity
             {
                 Id = 3,
                 Name = "Tuesday",
@@ -45,7 +44,7 @@ public class DayOfWeekConfiguration : IEntityTypeConfiguration<DayOfWeek>
                 IsWeekday = true,
                 SortOrder = 3
             },
-            new DayOfWeek
+            new DayOfWeekEntity
             {
                 Id = 4,
                 Name = "Wednesday",
@@ -54,7 +53,7 @@ public class DayOfWeekConfiguration : IEntityTypeConfiguration<DayOfWeek>
                 IsWeekday = true,
                 SortOrder = 4
             },
-            new DayOfWeek
+            new DayOfWeekEntity
             {
                 Id = 5,
                 Name = "Thursday",
@@ -63,7 +62,7 @@ public class DayOfWeekConfiguration : IEntityTypeConfiguration<DayOfWeek>
                 IsWeekday = true,
                 SortOrder = 5
             },
-            new DayOfWeek
+            new DayOfWeekEntity
             {
                 Id = 6,
                 Name = "Friday",
@@ -72,7 +71,7 @@ public class DayOfWeekConfiguration : IEntityTypeConfiguration<DayOfWeek>
                 IsWeekday = true,
                 SortOrder = 6
             },
-            new DayOfWeek
+            new DayOfWeekEntity
             {
                 Id = 7,
                 Name = "Saturday",

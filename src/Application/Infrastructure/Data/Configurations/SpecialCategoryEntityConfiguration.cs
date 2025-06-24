@@ -1,19 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using Application.Domain.Entities;
+﻿using Application.Domain.Entities;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Application.Infrastructure.Data.Configurations;
 
-public class SpecialCategoryConfiguration : IEntityTypeConfiguration<SpecialCategory>
+public class SpecialCategoryEntityConfiguration : IEntityTypeConfiguration<SpecialCategoryEntity>
 {
-    public void Configure(EntityTypeBuilder<SpecialCategory> builder)
+    public void Configure(EntityTypeBuilder<SpecialCategoryEntity> builder)
     {
         builder.HasIndex(sc => sc.Name)
                .IsUnique();
@@ -22,7 +16,7 @@ public class SpecialCategoryConfiguration : IEntityTypeConfiguration<SpecialCate
 
         #region Data Seed
         builder.HasData(
-            new SpecialCategory
+            new SpecialCategoryEntity
             {
                 Id = 1,
                 Name = "Food",
@@ -30,7 +24,7 @@ public class SpecialCategoryConfiguration : IEntityTypeConfiguration<SpecialCate
                 Icon = "🍔",
                 SortOrder = 1,
             },
-            new SpecialCategory
+            new SpecialCategoryEntity
             {
                 Id = 2,
                 Name = "Drink",
@@ -38,7 +32,7 @@ public class SpecialCategoryConfiguration : IEntityTypeConfiguration<SpecialCate
                 Icon = "🍺",
                 SortOrder = 2,
             },
-            new SpecialCategory
+            new SpecialCategoryEntity
             {
                 Id = 3,
                 Name = "Entertainment",

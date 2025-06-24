@@ -8,16 +8,18 @@
 
     <ItemGroup>
       <Compile Remove="Infrastructure\Data\Migrations\**" />
+      <Compile Remove="Infrastructure\Services\AzureMaps\**" />
       <EmbeddedResource Remove="Infrastructure\Data\Migrations\**" />
+      <EmbeddedResource Remove="Infrastructure\Services\AzureMaps\**" />
       <None Remove="Infrastructure\Data\Migrations\**" />
+      <None Remove="Infrastructure\Services\AzureMaps\**" />
     </ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Azure.Maps.Common" Version="1.0.0-beta.4" />
 		<PackageReference Include="Azure.Maps.Geolocation" Version="1.0.0-beta.3" />
-		<PackageReference Include="Azure.Maps.Rendering" Version="2.0.0-beta.1" />
-		<PackageReference Include="Azure.Maps.Routing" Version="1.0.0-beta.4" />
 		<PackageReference Include="Azure.Maps.Search" Version="2.0.0-beta.5" />
+		<PackageReference Include="Azure.Maps.TimeZones" Version="1.0.0-beta.1" />
 		<PackageReference Include="EFCore.NamingConventions" Version="9.0.0" />
 		<PackageReference Include="FluentValidation" Version="12.0.0" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.6" />
@@ -39,7 +41,6 @@
 
 	<ItemGroup>
         <Folder Include="Common\Behaviors\" />
-        <Folder Include="Common\Interfaces\" />
         <Folder Include="Common\Mappings\" />
         <Folder Include="Domain\Constants\" />
         <Folder Include="Domain\Enums\" />
@@ -64,7 +65,6 @@
         <Folder Include="Infrastructure\Identity\Services\" />
         <Folder Include="Infrastructure\Identity\Stores\" />
         <Folder Include="Infrastructure\Logging\" />
-        <Folder Include="Infrastructure\Services\AzureMaps\" />
         <Folder Include="Infrastructure\Services\FileStorage\" />
         <Folder Include="Infrastructure\Services\Notifications\" />
         <Folder Include="Presentation\Controllers\" />

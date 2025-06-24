@@ -1,17 +1,17 @@
 using Microsoft.EntityFrameworkCore;
 using Application.Domain.Entities;
-using DayOfWeek = Application.Domain.Entities.DayOfWeek;
+using DayOfWeekEntity = Application.Domain.Entities.DayOfWeekEntity;
 
 namespace Application.Infrastructure.Data.Context;
 
 public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
 {    
-    public DbSet<Venue> Venues => Set<Venue>();
-    public DbSet<VenueCategory> VenueCategories => Set<VenueCategory>();
-    public DbSet<BusinessHours> BusinessHours => Set<BusinessHours>();
-    public DbSet<DayOfWeek> DayOfWeeks => Set<DayOfWeek>();
-    public DbSet<Special> Specials => Set<Special>();
-    public DbSet<SpecialCategory> SpecialCategories => Set<SpecialCategory>();
+    public DbSet<VenueEntity> Venues => Set<VenueEntity>();
+    public DbSet<VenueCategoryEntity> VenueCategories => Set<VenueCategoryEntity>();
+    public DbSet<BusinessHoursEntity> BusinessHours => Set<BusinessHoursEntity>();
+    public DbSet<DayOfWeekEntity> DaysOfWeek => Set<DayOfWeekEntity>();
+    public DbSet<SpecialEntity> Specials => Set<SpecialEntity>();
+    public DbSet<SpecialCategoryEntity> SpecialCategories => Set<SpecialCategoryEntity>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

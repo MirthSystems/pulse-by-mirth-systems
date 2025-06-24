@@ -9,8 +9,8 @@ using NodaTime;
 
 namespace Application.Domain.Entities;
 
-[Table("venue")]
-public class Venue
+[Table("venues")]
+public class VenueEntity
 {
     [Column("id")]
     public long Id { get; set; }
@@ -83,7 +83,7 @@ public class Venue
     [DefaultValue(true)]
     public bool IsActive { get; set; }
 
-    public VenueCategory Category { get; set; } = null!;
-    public List<BusinessHours> BusinessHours { get; set; } = new List<BusinessHours>();
-    public List<Special> Specials { get; set; } = new List<Special>();
+    public VenueCategoryEntity Category { get; set; } = null!;
+    public List<BusinessHoursEntity> BusinessHours { get; set; } = new List<BusinessHoursEntity>();
+    public List<SpecialEntity> Specials { get; set; } = new List<SpecialEntity>();
 }

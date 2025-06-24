@@ -3,8 +3,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Application.Domain.Entities;
 
-[Table("day_of_week")]
-public class DayOfWeek
+[Table("days_of_week")]
+public class DayOfWeekEntity
 {
     [Column("id")]
     public int Id { get; set; }
@@ -28,5 +28,5 @@ public class DayOfWeek
     [Column("sort_order")]
     public int SortOrder { get; set; }
 
-    public List<BusinessHours> BusinessHours { get; set; } = new List<BusinessHours>();
+    public List<BusinessHoursEntity> BusinessHours { get; set; } = new List<BusinessHoursEntity>();
 }

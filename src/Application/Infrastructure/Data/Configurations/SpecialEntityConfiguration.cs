@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using Application.Domain.Entities;
+﻿using Application.Domain.Entities;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -13,9 +7,9 @@ using NodaTime;
 
 namespace Application.Infrastructure.Data.Configurations;
 
-public class SpecialConfiguration : IEntityTypeConfiguration<Special>
+public class SpecialEntityConfiguration : IEntityTypeConfiguration<SpecialEntity>
 {
-    public void Configure(EntityTypeBuilder<Special> builder)
+    public void Configure(EntityTypeBuilder<SpecialEntity> builder)
     {
         builder.HasKey(s => s.Id);
 
@@ -31,7 +25,7 @@ public class SpecialConfiguration : IEntityTypeConfiguration<Special>
         #region Data Seed       
         builder.HasData(
         #region Bullfrog Brewery Specials
-            new Special
+            new SpecialEntity
             {
                 Id = 1,
                 VenueId = 1, // Bullfrog Brewery
@@ -45,7 +39,7 @@ public class SpecialConfiguration : IEntityTypeConfiguration<Special>
                 CronSchedule = "0 21 * * 5,6", // Every Friday and Saturday at 9 PM
                 IsActive = true
             },
-            new Special
+            new SpecialEntity
             {
                 Id = 2,
                 VenueId = 1, // Bullfrog Brewery
@@ -62,7 +56,7 @@ public class SpecialConfiguration : IEntityTypeConfiguration<Special>
         #endregion
 
         #region The Brickyard Restaurant & Ale House Specials
-            new Special
+            new SpecialEntity
             {
                 Id = 3,
                 VenueId = 2, // The Brickyard
@@ -76,7 +70,7 @@ public class SpecialConfiguration : IEntityTypeConfiguration<Special>
                 IsRecurring = false,
                 IsActive = true
             },
-            new Special
+            new SpecialEntity
             {
                 Id = 4,
                 VenueId = 2, // The Brickyard
@@ -90,7 +84,7 @@ public class SpecialConfiguration : IEntityTypeConfiguration<Special>
                 CronSchedule = "0 21 * * 3", // Every Wednesday at 9 PM
                 IsActive = true
             },
-            new Special
+            new SpecialEntity
             {
                 Id = 5,
                 VenueId = 2, // The Brickyard
@@ -107,7 +101,7 @@ public class SpecialConfiguration : IEntityTypeConfiguration<Special>
         #endregion
 
         #region The Crooked Goose Specials
-            new Special
+            new SpecialEntity
             {
                 Id = 6,
                 VenueId = 3, // The Crooked Goose
@@ -121,7 +115,7 @@ public class SpecialConfiguration : IEntityTypeConfiguration<Special>
                 CronSchedule = "0 10 * * 0", // Every Sunday at 10 AM
                 IsActive = true
             },
-            new Special
+            new SpecialEntity
             {
                 Id = 7,
                 VenueId = 3, // The Crooked Goose
