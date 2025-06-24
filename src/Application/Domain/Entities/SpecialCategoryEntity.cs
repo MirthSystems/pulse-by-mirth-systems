@@ -8,8 +8,8 @@ using System.Threading.Tasks;
 
 namespace Application.Domain.Entities;
 
-[Table("special_category")]
-public class SpecialCategory
+[Table("special_categories")]
+public class SpecialCategoryEntity
 {
     [Column("id")]
     public int Id { get; set; }
@@ -30,6 +30,6 @@ public class SpecialCategory
     [Column("sort_order")]
     public int SortOrder { get; set; }
 
-    public List<Special> Specials { get; set; } = new List<Special>();
+    public List<SpecialEntity> Specials { get; set; } = new List<SpecialEntity>();
 }
 

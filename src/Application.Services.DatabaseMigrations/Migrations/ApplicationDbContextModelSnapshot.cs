@@ -32,7 +32,7 @@ namespace Application.Services.DatabaseMigrations.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "postgis_topology");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Application.Domain.Entities.BusinessHours", b =>
+            modelBuilder.Entity("Application.Domain.Entities.BusinessHoursEntity", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -263,7 +263,7 @@ namespace Application.Services.DatabaseMigrations.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Application.Domain.Entities.DayOfWeek", b =>
+            modelBuilder.Entity("Application.Domain.Entities.DayOfWeekEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -297,13 +297,13 @@ namespace Application.Services.DatabaseMigrations.Migrations
                         .HasColumnName("sort_order");
 
                     b.HasKey("Id")
-                        .HasName("pk_day_of_week");
+                        .HasName("pk_days_of_week");
 
                     b.HasIndex("IsoNumber")
                         .IsUnique()
-                        .HasDatabaseName("ix_day_of_week_iso_number");
+                        .HasDatabaseName("ix_days_of_week_iso_number");
 
-                    b.ToTable("day_of_week", (string)null);
+                    b.ToTable("days_of_week", (string)null);
 
                     b.HasData(
                         new
@@ -371,7 +371,72 @@ namespace Application.Services.DatabaseMigrations.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Application.Domain.Entities.Special", b =>
+            modelBuilder.Entity("Application.Domain.Entities.SpecialCategoryEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("description");
+
+                    b.Property<string>("Icon")
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("icon");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("name");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer")
+                        .HasColumnName("sort_order");
+
+                    b.HasKey("Id")
+                        .HasName("pk_special_categories");
+
+                    b.HasIndex("Name")
+                        .IsUnique()
+                        .HasDatabaseName("ix_special_categories_name");
+
+                    b.ToTable("special_categories", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Description = "Food specials, appetizers, and meal deals",
+                            Icon = "🍔",
+                            Name = "Food",
+                            SortOrder = 1
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Description = "Drink specials, happy hours, and beverage promotions",
+                            Icon = "🍺",
+                            Name = "Drink",
+                            SortOrder = 2
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Description = "Live music, DJs, trivia, karaoke, and other events",
+                            Icon = "🎵",
+                            Name = "Entertainment",
+                            SortOrder = 3
+                        });
+                });
+
+            modelBuilder.Entity("Application.Domain.Entities.SpecialEntity", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -429,15 +494,15 @@ namespace Application.Services.DatabaseMigrations.Migrations
                         .HasColumnName("venue_id");
 
                     b.HasKey("Id")
-                        .HasName("pk_special");
+                        .HasName("pk_specials");
 
                     b.HasIndex("SpecialCategoryId")
-                        .HasDatabaseName("ix_special_special_category_id");
+                        .HasDatabaseName("ix_specials_special_category_id");
 
                     b.HasIndex("VenueId")
-                        .HasDatabaseName("ix_special_venue_id");
+                        .HasDatabaseName("ix_specials_venue_id");
 
-                    b.ToTable("special", (string)null);
+                    b.ToTable("specials", (string)null);
 
                     b.HasData(
                         new
@@ -540,7 +605,7 @@ namespace Application.Services.DatabaseMigrations.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Application.Domain.Entities.SpecialCategory", b =>
+            modelBuilder.Entity("Application.Domain.Entities.VenueCategoryEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -570,42 +635,90 @@ namespace Application.Services.DatabaseMigrations.Migrations
                         .HasColumnName("sort_order");
 
                     b.HasKey("Id")
-                        .HasName("pk_special_category");
+                        .HasName("pk_venue_categories");
 
                     b.HasIndex("Name")
                         .IsUnique()
-                        .HasDatabaseName("ix_special_category_name");
+                        .HasDatabaseName("ix_venue_categories_name");
 
-                    b.ToTable("special_category", (string)null);
+                    b.ToTable("venue_categories", (string)null);
 
                     b.HasData(
                         new
                         {
                             Id = 1,
-                            Description = "Food specials, appetizers, and meal deals",
-                            Icon = "🍔",
-                            Name = "Food",
+                            Description = "Dining establishments offering food and beverages",
+                            Icon = "🍽️",
+                            Name = "Restaurant",
                             SortOrder = 1
                         },
                         new
                         {
                             Id = 2,
-                            Description = "Drink specials, happy hours, and beverage promotions",
-                            Icon = "🍺",
-                            Name = "Drink",
+                            Description = "Venues focused on drinks and nightlife",
+                            Icon = "🍸",
+                            Name = "Bar",
                             SortOrder = 2
                         },
                         new
                         {
                             Id = 3,
-                            Description = "Live music, DJs, trivia, karaoke, and other events",
-                            Icon = "🎵",
-                            Name = "Entertainment",
+                            Description = "Casual spots for coffee and light meals",
+                            Icon = "☕",
+                            Name = "Cafe",
                             SortOrder = 3
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Description = "Venues for dancing and late-night entertainment",
+                            Icon = "🪩",
+                            Name = "Nightclub",
+                            SortOrder = 4
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Description = "Casual venues with food, drinks, and often live music",
+                            Icon = "🍺",
+                            Name = "Pub",
+                            SortOrder = 5
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Description = "Venues producing wine, offering tastings, food pairings, and live music",
+                            Icon = "🍷",
+                            Name = "Winery",
+                            SortOrder = 6
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Description = "Venues brewing their own beer, often with food and live music",
+                            Icon = "🍻",
+                            Name = "Brewery",
+                            SortOrder = 7
+                        },
+                        new
+                        {
+                            Id = 9,
+                            Description = "Sophisticated venues with cocktails, small plates, and live music",
+                            Icon = "🛋️",
+                            Name = "Lounge",
+                            SortOrder = 8
+                        },
+                        new
+                        {
+                            Id = 10,
+                            Description = "Intimate dining venues with quality food, wine, and occasional live music",
+                            Icon = "🥂",
+                            Name = "Bistro",
+                            SortOrder = 9
                         });
                 });
 
-            modelBuilder.Entity("Application.Domain.Entities.Venue", b =>
+            modelBuilder.Entity("Application.Domain.Entities.VenueEntity", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -693,20 +806,20 @@ namespace Application.Services.DatabaseMigrations.Migrations
                         .HasColumnName("website");
 
                     b.HasKey("Id")
-                        .HasName("pk_venue");
+                        .HasName("pk_venues");
 
                     b.HasIndex("CategoryId")
-                        .HasDatabaseName("ix_venue_category_id");
+                        .HasDatabaseName("ix_venues_category_id");
 
                     b.HasIndex("Location")
-                        .HasDatabaseName("ix_venue_location");
+                        .HasDatabaseName("ix_venues_location");
 
                     NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("Location"), "GIST");
 
                     b.HasIndex("Name")
-                        .HasDatabaseName("ix_venue_name");
+                        .HasDatabaseName("ix_venues_name");
 
-                    b.ToTable("venue", (string)null);
+                    b.ToTable("venues", (string)null);
 
                     b.HasData(
                         new
@@ -762,193 +875,80 @@ namespace Application.Services.DatabaseMigrations.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Application.Domain.Entities.VenueCategory", b =>
+            modelBuilder.Entity("Application.Domain.Entities.BusinessHoursEntity", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)")
-                        .HasColumnName("description");
-
-                    b.Property<string>("Icon")
-                        .HasMaxLength(10)
-                        .HasColumnType("character varying(10)")
-                        .HasColumnName("icon");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("name");
-
-                    b.Property<int>("SortOrder")
-                        .HasColumnType("integer")
-                        .HasColumnName("sort_order");
-
-                    b.HasKey("Id")
-                        .HasName("pk_venue_category");
-
-                    b.HasIndex("Name")
-                        .IsUnique()
-                        .HasDatabaseName("ix_venue_category_name");
-
-                    b.ToTable("venue_category", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Description = "Dining establishments offering food and beverages",
-                            Icon = "🍽️",
-                            Name = "Restaurant",
-                            SortOrder = 1
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Description = "Venues focused on drinks and nightlife",
-                            Icon = "🍸",
-                            Name = "Bar",
-                            SortOrder = 2
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Description = "Casual spots for coffee and light meals",
-                            Icon = "☕",
-                            Name = "Cafe",
-                            SortOrder = 3
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Description = "Venues for dancing and late-night entertainment",
-                            Icon = "🪩",
-                            Name = "Nightclub",
-                            SortOrder = 4
-                        },
-                        new
-                        {
-                            Id = 5,
-                            Description = "Casual venues with food, drinks, and often live music",
-                            Icon = "🍺",
-                            Name = "Pub",
-                            SortOrder = 5
-                        },
-                        new
-                        {
-                            Id = 6,
-                            Description = "Venues producing wine, offering tastings, food pairings, and live music",
-                            Icon = "🍷",
-                            Name = "Winery",
-                            SortOrder = 6
-                        },
-                        new
-                        {
-                            Id = 7,
-                            Description = "Venues brewing their own beer, often with food and live music",
-                            Icon = "🍻",
-                            Name = "Brewery",
-                            SortOrder = 7
-                        },
-                        new
-                        {
-                            Id = 9,
-                            Description = "Sophisticated venues with cocktails, small plates, and live music",
-                            Icon = "🛋️",
-                            Name = "Lounge",
-                            SortOrder = 8
-                        },
-                        new
-                        {
-                            Id = 10,
-                            Description = "Intimate dining venues with quality food, wine, and occasional live music",
-                            Icon = "🥂",
-                            Name = "Bistro",
-                            SortOrder = 9
-                        });
-                });
-
-            modelBuilder.Entity("Application.Domain.Entities.BusinessHours", b =>
-                {
-                    b.HasOne("Application.Domain.Entities.DayOfWeek", "DayOfWeek")
+                    b.HasOne("Application.Domain.Entities.DayOfWeekEntity", "DayOfWeek")
                         .WithMany("BusinessHours")
                         .HasForeignKey("DayOfWeekId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
-                        .HasConstraintName("fk_business_hours_day_of_week_day_of_week_id");
+                        .HasConstraintName("fk_business_hours_days_of_week_day_of_week_id");
 
-                    b.HasOne("Application.Domain.Entities.Venue", "Venue")
+                    b.HasOne("Application.Domain.Entities.VenueEntity", "Venue")
                         .WithMany("BusinessHours")
                         .HasForeignKey("VenueId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_business_hours_venue_venue_id");
+                        .HasConstraintName("fk_business_hours_venues_venue_id");
 
                     b.Navigation("DayOfWeek");
 
                     b.Navigation("Venue");
                 });
 
-            modelBuilder.Entity("Application.Domain.Entities.Special", b =>
+            modelBuilder.Entity("Application.Domain.Entities.SpecialEntity", b =>
                 {
-                    b.HasOne("Application.Domain.Entities.SpecialCategory", "Category")
+                    b.HasOne("Application.Domain.Entities.SpecialCategoryEntity", "Category")
                         .WithMany("Specials")
                         .HasForeignKey("SpecialCategoryId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
-                        .HasConstraintName("fk_special_special_category_special_category_id");
+                        .HasConstraintName("fk_specials_special_categories_special_category_id");
 
-                    b.HasOne("Application.Domain.Entities.Venue", "Venue")
+                    b.HasOne("Application.Domain.Entities.VenueEntity", "Venue")
                         .WithMany("Specials")
                         .HasForeignKey("VenueId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_special_venue_venue_id");
+                        .HasConstraintName("fk_specials_venues_venue_id");
 
                     b.Navigation("Category");
 
                     b.Navigation("Venue");
                 });
 
-            modelBuilder.Entity("Application.Domain.Entities.Venue", b =>
+            modelBuilder.Entity("Application.Domain.Entities.VenueEntity", b =>
                 {
-                    b.HasOne("Application.Domain.Entities.VenueCategory", "Category")
+                    b.HasOne("Application.Domain.Entities.VenueCategoryEntity", "Category")
                         .WithMany("Venues")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
-                        .HasConstraintName("fk_venue_venue_category_category_id");
+                        .HasConstraintName("fk_venues_venue_categories_category_id");
 
                     b.Navigation("Category");
                 });
 
-            modelBuilder.Entity("Application.Domain.Entities.DayOfWeek", b =>
+            modelBuilder.Entity("Application.Domain.Entities.DayOfWeekEntity", b =>
                 {
                     b.Navigation("BusinessHours");
                 });
 
-            modelBuilder.Entity("Application.Domain.Entities.SpecialCategory", b =>
+            modelBuilder.Entity("Application.Domain.Entities.SpecialCategoryEntity", b =>
                 {
                     b.Navigation("Specials");
                 });
 
-            modelBuilder.Entity("Application.Domain.Entities.Venue", b =>
-                {
-                    b.Navigation("BusinessHours");
-
-                    b.Navigation("Specials");
-                });
-
-            modelBuilder.Entity("Application.Domain.Entities.VenueCategory", b =>
+            modelBuilder.Entity("Application.Domain.Entities.VenueCategoryEntity", b =>
                 {
                     b.Navigation("Venues");
+                });
+
+            modelBuilder.Entity("Application.Domain.Entities.VenueEntity", b =>
+                {
+                    b.Navigation("BusinessHours");
+
+                    b.Navigation("Specials");
                 });
 #pragma warning restore 612, 618
         }

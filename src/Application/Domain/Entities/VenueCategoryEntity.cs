@@ -3,8 +3,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Application.Domain.Entities;
 
-[Table("venue_category")]
-public class VenueCategory
+[Table("venue_categories")]
+public class VenueCategoryEntity
 {
     [Column("id")]
     public int Id { get; set; }
@@ -25,5 +25,5 @@ public class VenueCategory
     [Column("sort_order")]
     public int SortOrder { get; set; }
 
-    public List<Venue> Venues { get; set; } = new List<Venue>();
+    public List<VenueEntity> Venues { get; set; } = new List<VenueEntity>();
 }

@@ -6,9 +6,9 @@ using Application.Domain.Entities;
 
 namespace Application.Infrastructure.Data.Configurations;
 
-public class VenueConfiguration : IEntityTypeConfiguration<Venue>
+public class VenueEntityConfiguration : IEntityTypeConfiguration<VenueEntity>
 {
-    public void Configure(EntityTypeBuilder<Venue> builder)
+    public void Configure(EntityTypeBuilder<VenueEntity> builder)
     {
         builder.HasIndex(v => v.Name);
         builder.HasIndex(v => v.Location)
@@ -33,7 +33,7 @@ public class VenueConfiguration : IEntityTypeConfiguration<Venue>
         #region Data Seed
         builder.HasData(
             // Bullfrog Brewery
-            new Venue
+            new VenueEntity
             {
                 Id = 1,
                 CategoryId = 7, // Brewery
@@ -54,7 +54,7 @@ public class VenueConfiguration : IEntityTypeConfiguration<Venue>
                 IsActive = true
             },
             // The Brickyard Restaurant & Ale House
-            new Venue
+            new VenueEntity
             {
                 Id = 2,
                 CategoryId = 1, // Restaurant
@@ -75,7 +75,7 @@ public class VenueConfiguration : IEntityTypeConfiguration<Venue>
                 IsActive = true
             },
             // The Crooked Goose
-            new Venue
+            new VenueEntity
             {
                 Id = 3,
                 CategoryId = 2, // Bar

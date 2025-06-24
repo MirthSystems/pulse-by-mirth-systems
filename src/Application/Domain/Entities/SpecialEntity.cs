@@ -10,8 +10,8 @@ using NodaTime;
 
 namespace Application.Domain.Entities;
 
-[Table("special")]
-public class Special
+[Table("specials")]
+public class SpecialEntity
 {
     [Column("id")]
     public long Id { get; set; }
@@ -53,6 +53,6 @@ public class Special
     [Column("is_active")]
     public bool IsActive { get; set; } = true;
 
-    public Venue Venue { get; set; } = null!;
-    public SpecialCategory Category { get; set; } = null!;
+    public VenueEntity Venue { get; set; } = null!;
+    public SpecialCategoryEntity Category { get; set; } = null!;
 }

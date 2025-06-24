@@ -5,6 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using Application.Common.Interfaces;
+using Application.Infrastructure.Services;
+
+using Azure;
+
 using Common.Options;
 
 using global::Application.Domain.Entities;
@@ -81,11 +86,15 @@ public static class ServiceCollectionExtensions
         // services.AddScoped<IFileStorageService, LocalFileStorageService>();
         // services.AddScoped<INotificationService, SignalRNotificationService>();
 
-        // Azure Maps services (if key provided)
-        if (!string.IsNullOrWhiteSpace(config.AzureMapsKey))
+        if (string.IsNullOrWhiteSpace(config.AzureMapsKey))
         {
-            // TODO: Register Azure Maps services
-            // services.AddScoped<IGeocodingService, AzureMapsGeocodingService>();
+            throw new ArgumentException("Azure Maps key must be provided in the configuration.", nameof(config.AzureMapsKey));
+        }
+
+        var azureMapsKeyCredential = new AzureKeyCredential(config.AzureMapsKey);
+        if (azureMapsKeyCredential != null)
+        {
+            services.AddScoped<IAzureMapsService>(serviceProvider => new AzureMapsService(azureMapsKeyCredential));
         }
     }
 
