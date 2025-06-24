@@ -6,11 +6,11 @@ namespace Application.Infrastructure.Data.Context;
 public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
 {    
     public DbSet<VenueEntity> Venues => Set<VenueEntity>();
-    public DbSet<VenueCategoryEntity> VenueCategories => Set<VenueCategoryEntity>();
-    public DbSet<BusinessHoursEntity> BusinessHours => Set<BusinessHoursEntity>();
+    public DbSet<VenueCategoryEntity> VenueCategories => Set<VenueCategoryEntity>();    public DbSet<BusinessHoursEntity> BusinessHours => Set<BusinessHoursEntity>();
     public DbSet<DayOfWeekEntity> DaysOfWeek => Set<DayOfWeekEntity>();
-    public DbSet<SpecialEntity> Specials => Set<SpecialEntity>();
-    public DbSet<SpecialCategoryEntity> SpecialCategories => Set<SpecialCategoryEntity>();
+    public DbSet<SpecialsMenuEntity> SpecialsMenus => Set<SpecialsMenuEntity>();
+    public DbSet<SpecialItemEntity> SpecialItems => Set<SpecialItemEntity>();
+    public DbSet<SpecialItemCategoryEntity> SpecialItemCategories => Set<SpecialItemCategoryEntity>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

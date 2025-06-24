@@ -15,7 +15,7 @@ public class VenueCategoryEntityConfiguration : IEntityTypeConfiguration<VenueCa
         builder.HasKey(vc => vc.Id);
 
         builder.HasMany(vc => vc.Venues)
-               .WithOne(v => v.Category)
+               .WithOne(v => v.VenueCategory)
                .HasForeignKey(v => v.CategoryId)
                .OnDelete(DeleteBehavior.Restrict);
 

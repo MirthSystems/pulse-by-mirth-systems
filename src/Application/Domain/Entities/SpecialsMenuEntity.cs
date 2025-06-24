@@ -1,26 +1,20 @@
-﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using NodaTime;
 
 namespace Application.Domain.Entities;
 
-[Table("specials")]
-public class SpecialEntity
+[Table("specials_menus")]
+public class SpecialsMenuEntity
 {
     [Column("id")]
     public long Id { get; set; }
 
     [Column("venue_id")]
     public long VenueId { get; set; }
-
-    [Column("special_category_id")]
-    public int SpecialCategoryId { get; set; }
 
     [Column("title")]
     [Required]
@@ -51,8 +45,12 @@ public class SpecialEntity
     public string? CronSchedule { get; set; }     // "0 17 * * 1-5" for weekdays at 5 PM
 
     [Column("is_active")]
-    public bool IsActive { get; set; } = true;
+    [DefaultValue(true)]
+    public bool IsActive { get; set; }
+
+    [Column("created_at")]
+    public Instant CreatedAt { get; set; }
 
     public VenueEntity Venue { get; set; } = null!;
-    public SpecialCategoryEntity Category { get; set; } = null!;
+    public List<SpecialItemEntity> SpecialItems { get; set; } = new List<SpecialItemEntity>();
 }

@@ -16,7 +16,7 @@ public class VenueEntityConfiguration : IEntityTypeConfiguration<VenueEntity>
 
         builder.HasKey(v => v.Id);
 
-        builder.HasOne(v => v.Category)
+        builder.HasOne(v => v.VenueCategory)
                .WithMany(vc => vc.Venues)
                .HasForeignKey(v => v.CategoryId)
                .OnDelete(DeleteBehavior.Restrict)
@@ -25,7 +25,7 @@ public class VenueEntityConfiguration : IEntityTypeConfiguration<VenueEntity>
                .WithOne(bh => bh.Venue)
                .HasForeignKey(bh => bh.VenueId)
                .OnDelete(DeleteBehavior.Cascade);
-        builder.HasMany(v => v.Specials)
+        builder.HasMany(v => v.SpecialsMenus)
                .WithOne(s => s.Venue)
                .HasForeignKey(s => s.VenueId)
                .OnDelete(DeleteBehavior.Cascade);

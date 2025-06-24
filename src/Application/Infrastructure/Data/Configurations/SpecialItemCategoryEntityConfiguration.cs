@@ -5,9 +5,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Application.Infrastructure.Data.Configurations;
 
-public class SpecialCategoryEntityConfiguration : IEntityTypeConfiguration<SpecialCategoryEntity>
+public class SpecialItemCategoryEntityConfiguration : IEntityTypeConfiguration<SpecialItemCategoryEntity>
 {
-    public void Configure(EntityTypeBuilder<SpecialCategoryEntity> builder)
+    public void Configure(EntityTypeBuilder<SpecialItemCategoryEntity> builder)
     {
         builder.HasIndex(sc => sc.Name)
                .IsUnique();
@@ -16,7 +16,7 @@ public class SpecialCategoryEntityConfiguration : IEntityTypeConfiguration<Speci
 
         #region Data Seed
         builder.HasData(
-            new SpecialCategoryEntity
+            new SpecialItemCategoryEntity
             {
                 Id = 1,
                 Name = "Food",
@@ -24,7 +24,7 @@ public class SpecialCategoryEntityConfiguration : IEntityTypeConfiguration<Speci
                 Icon = "🍔",
                 SortOrder = 1,
             },
-            new SpecialCategoryEntity
+            new SpecialItemCategoryEntity
             {
                 Id = 2,
                 Name = "Drink",
@@ -32,7 +32,7 @@ public class SpecialCategoryEntityConfiguration : IEntityTypeConfiguration<Speci
                 Icon = "🍺",
                 SortOrder = 2,
             },
-            new SpecialCategoryEntity
+            new SpecialItemCategoryEntity
             {
                 Id = 3,
                 Name = "Entertainment",

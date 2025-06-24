@@ -15,7 +15,7 @@ public class VenueEntity
     [Column("id")]
     public long Id { get; set; }
 
-    [Column("category_id")]
+    [Column("venue_category_id")]
     public int CategoryId { get; set; }
 
     [Column("name")]
@@ -83,7 +83,7 @@ public class VenueEntity
     [DefaultValue(true)]
     public bool IsActive { get; set; }
 
-    public VenueCategoryEntity Category { get; set; } = null!;
+    public VenueCategoryEntity VenueCategory { get; set; } = null!;
     public List<BusinessHoursEntity> BusinessHours { get; set; } = new List<BusinessHoursEntity>();
-    public List<SpecialEntity> Specials { get; set; } = new List<SpecialEntity>();
+    public List<SpecialsMenuEntity> SpecialsMenus { get; set; } = new List<SpecialsMenuEntity>();
 }
