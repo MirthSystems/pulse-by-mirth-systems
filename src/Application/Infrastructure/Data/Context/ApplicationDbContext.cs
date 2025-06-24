@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using Application.Domain.Entities;
-using DayOfWeekEntity = Application.Domain.Entities.DayOfWeekEntity;
 
 namespace Application.Infrastructure.Data.Context;
 
