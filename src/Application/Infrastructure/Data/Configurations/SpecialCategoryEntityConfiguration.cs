@@ -22,7 +22,7 @@ public class SpecialCategoryEntityConfiguration : IEntityTypeConfiguration<Speci
                 Name = "Food",
                 Description = "Food specials, appetizers, and meal deals",
                 Icon = "🍔",
-                SortOrder = 1,
+                SortOrder = 0,
             },
             new SpecialCategoryEntity
             {
@@ -30,7 +30,7 @@ public class SpecialCategoryEntityConfiguration : IEntityTypeConfiguration<Speci
                 Name = "Drink",
                 Description = "Drink specials, happy hours, and beverage promotions",
                 Icon = "🍺",
-                SortOrder = 2,
+                SortOrder = 1,
             },
             new SpecialCategoryEntity
             {
@@ -38,7 +38,7 @@ public class SpecialCategoryEntityConfiguration : IEntityTypeConfiguration<Speci
                 Name = "Entertainment",
                 Description = "Live music, DJs, trivia, karaoke, and other events",
                 Icon = "🎵",
-                SortOrder = 3,
+                SortOrder = 2,
             }
         );
         #endregion

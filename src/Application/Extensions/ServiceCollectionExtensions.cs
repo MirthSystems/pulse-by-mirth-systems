@@ -86,16 +86,16 @@ public static class ServiceCollectionExtensions
         // services.AddScoped<IFileStorageService, LocalFileStorageService>();
         // services.AddScoped<INotificationService, SignalRNotificationService>();
 
-        if (string.IsNullOrWhiteSpace(config.AzureMapsKey))
-        {
-            throw new ArgumentException("Azure Maps key must be provided in the configuration.", nameof(config.AzureMapsKey));
-        }
+        //if (string.IsNullOrWhiteSpace(config.AzureMapsKey))
+        //{
+        //    throw new ArgumentException("Azure Maps key must be provided in the configuration.", nameof(config.AzureMapsKey));
+        //}
 
-        var azureMapsKeyCredential = new AzureKeyCredential(config.AzureMapsKey);
-        if (azureMapsKeyCredential != null)
-        {
-            services.AddScoped<IAzureMapsService>(serviceProvider => new AzureMapsService(azureMapsKeyCredential));
-        }
+        //var azureMapsKeyCredential = new AzureKeyCredential(config.AzureMapsKey);
+        //if (azureMapsKeyCredential != null)
+        //{
+        //    services.AddScoped<IAzureMapsService>(serviceProvider => new AzureMapsService(azureMapsKeyCredential));
+        //}
     }
 
     private static void RegisterRepositories(IServiceCollection services)

@@ -8,10 +8,7 @@ namespace Application.Domain.Entities;
 public class DayOfWeekEntity
 {
     [Column("id")]
-    public byte Id { get; set; }
-
-    [Column("enum")]
-    public DayOfWeekEnum Enum { get; set; }
+    public Days Id { get; set; }
 
     [Column("name")]
     [Required]

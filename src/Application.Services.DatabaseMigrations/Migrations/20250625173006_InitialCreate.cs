@@ -16,7 +16,7 @@ namespace Application.Services.DatabaseMigrations.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterDatabase()
-                .Annotation("Npgsql:Enum:day_of_week_enum", "sunday,monday,tuesday,wednesday,thursday,friday,saturday")
+                .Annotation("Npgsql:Enum:days", "sunday,monday,tuesday,wednesday,thursday,friday,saturday,weekday,weekend")
                 .Annotation("Npgsql:PostgresExtension:address_standardizer", ",,")
                 .Annotation("Npgsql:PostgresExtension:address_standardizer_data_us", ",,")
                 .Annotation("Npgsql:PostgresExtension:fuzzystrmatch", ",,")
@@ -31,8 +31,7 @@ namespace Application.Services.DatabaseMigrations.Migrations
                 name: "days_of_week",
                 columns: table => new
                 {
-                    id = table.Column<byte>(type: "smallint", nullable: false),
-                    @enum = table.Column<int>(name: "enum", type: "integer", nullable: false),
+                    id = table.Column<int>(type: "integer", nullable: false),
                     name = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
                     short_name = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: false),
                     iso_number = table.Column<int>(type: "integer", nullable: false),
@@ -116,7 +115,7 @@ namespace Application.Services.DatabaseMigrations.Migrations
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     venue_id = table.Column<long>(type: "bigint", nullable: false),
-                    day_of_week_id = table.Column<byte>(type: "smallint", nullable: false),
+                    day_of_week_id = table.Column<int>(type: "integer", nullable: false),
                     open_time = table.Column<LocalTime>(type: "time", nullable: true),
                     close_time = table.Column<LocalTime>(type: "time", nullable: true),
                     is_closed = table.Column<bool>(type: "boolean", nullable: false)
@@ -175,16 +174,16 @@ namespace Application.Services.DatabaseMigrations.Migrations
 
             migrationBuilder.InsertData(
                 table: "days_of_week",
-                columns: new[] { "id", "enum", "is_weekday", "iso_number", "name", "short_name", "sort_order" },
+                columns: new[] { "id", "is_weekday", "iso_number", "name", "short_name", "sort_order" },
                 values: new object[,]
                 {
-                    { (byte)1, 0, false, 7, "Sunday", "SUN", 1 },
-                    { (byte)2, 1, true, 1, "Monday", "MON", 2 },
-                    { (byte)3, 2, true, 2, "Tuesday", "TUE", 3 },
-                    { (byte)4, 3, true, 3, "Wednesday", "WED", 4 },
-                    { (byte)5, 4, true, 4, "Thursday", "THU", 5 },
-                    { (byte)6, 5, true, 5, "Friday", "FRI", 6 },
-                    { (byte)7, 6, false, 6, "Saturday", "SAT", 7 }
+                    { 1, false, 7, "Sunday", "SUN", 0 },
+                    { 2, true, 1, "Monday", "MON", 1 },
+                    { 3, true, 2, "Tuesday", "TUE", 2 },
+                    { 4, true, 3, "Wednesday", "WED", 3 },
+                    { 5, true, 4, "Thursday", "THU", 4 },
+                    { 6, true, 5, "Friday", "FRI", 5 },
+                    { 7, false, 6, "Saturday", "SAT", 6 }
                 });
 
             migrationBuilder.InsertData(
@@ -192,9 +191,9 @@ namespace Application.Services.DatabaseMigrations.Migrations
                 columns: new[] { "id", "description", "icon", "name", "sort_order" },
                 values: new object[,]
                 {
-                    { 1, "Food specials, appetizers, and meal deals", "🍔", "Food", 1 },
-                    { 2, "Drink specials, happy hours, and beverage promotions", "🍺", "Drink", 2 },
-                    { 3, "Live music, DJs, trivia, karaoke, and other events", "🎵", "Entertainment", 3 }
+                    { 1, "Food specials, appetizers, and meal deals", "🍔", "Food", 0 },
+                    { 2, "Drink specials, happy hours, and beverage promotions", "🍺", "Drink", 1 },
+                    { 3, "Live music, DJs, trivia, karaoke, and other events", "🎵", "Entertainment", 2 }
                 });
 
             migrationBuilder.InsertData(
@@ -202,15 +201,15 @@ namespace Application.Services.DatabaseMigrations.Migrations
                 columns: new[] { "id", "description", "icon", "name", "sort_order" },
                 values: new object[,]
                 {
-                    { 1, "Dining establishments offering food and beverages", "🍽️", "Restaurant", 1 },
-                    { 2, "Venues focused on drinks and nightlife", "🍸", "Bar", 2 },
-                    { 3, "Casual spots for coffee and light meals", "☕", "Cafe", 3 },
-                    { 4, "Venues for dancing and late-night entertainment", "🪩", "Nightclub", 4 },
-                    { 5, "Casual venues with food, drinks, and often live music", "🍺", "Pub", 5 },
-                    { 6, "Venues producing wine, offering tastings, food pairings, and live music", "🍷", "Winery", 6 },
-                    { 7, "Venues brewing their own beer, often with food and live music", "🍻", "Brewery", 7 },
-                    { 9, "Sophisticated venues with cocktails, small plates, and live music", "🛋️", "Lounge", 8 },
-                    { 10, "Intimate dining venues with quality food, wine, and occasional live music", "🥂", "Bistro", 9 }
+                    { 1, "Dining establishments offering food and beverages", "🍽️", "Restaurant", 0 },
+                    { 2, "Venues focused on drinks and nightlife", "🍸", "Bar", 1 },
+                    { 3, "Casual spots for coffee and light meals", "☕", "Cafe", 2 },
+                    { 4, "Venues for dancing and late-night entertainment", "🪩", "Nightclub", 3 },
+                    { 5, "Casual venues with food, drinks, and often live music", "🍺", "Pub", 4 },
+                    { 6, "Venues producing wine, offering tastings, food pairings, and live music", "🍷", "Winery", 5 },
+                    { 7, "Venues brewing their own beer, often with food and live music", "🍻", "Brewery", 6 },
+                    { 9, "Sophisticated venues with cocktails, small plates, and live music", "🛋️", "Lounge", 7 },
+                    { 10, "Intimate dining venues with quality food, wine, and occasional live music", "🥂", "Bistro", 8 }
                 });
 
             migrationBuilder.InsertData(
@@ -228,27 +227,27 @@ namespace Application.Services.DatabaseMigrations.Migrations
                 columns: new[] { "id", "close_time", "day_of_week_id", "is_closed", "open_time", "venue_id" },
                 values: new object[,]
                 {
-                    { 1L, new NodaTime.LocalTime(15, 0), (byte)1, false, new NodaTime.LocalTime(10, 0), 1L },
-                    { 2L, new NodaTime.LocalTime(22, 0), (byte)2, false, new NodaTime.LocalTime(11, 30), 1L },
-                    { 3L, new NodaTime.LocalTime(22, 0), (byte)3, false, new NodaTime.LocalTime(11, 30), 1L },
-                    { 4L, new NodaTime.LocalTime(22, 0), (byte)4, false, new NodaTime.LocalTime(11, 30), 1L },
-                    { 5L, new NodaTime.LocalTime(22, 0), (byte)5, false, new NodaTime.LocalTime(11, 30), 1L },
-                    { 6L, new NodaTime.LocalTime(0, 0), (byte)6, false, new NodaTime.LocalTime(11, 30), 1L },
-                    { 7L, new NodaTime.LocalTime(0, 0), (byte)7, false, new NodaTime.LocalTime(11, 30), 1L },
-                    { 8L, new NodaTime.LocalTime(23, 0), (byte)1, false, new NodaTime.LocalTime(11, 0), 2L },
-                    { 9L, new NodaTime.LocalTime(0, 0), (byte)2, false, new NodaTime.LocalTime(11, 0), 2L },
-                    { 10L, new NodaTime.LocalTime(0, 0), (byte)3, false, new NodaTime.LocalTime(11, 0), 2L },
-                    { 11L, new NodaTime.LocalTime(0, 0), (byte)4, false, new NodaTime.LocalTime(11, 0), 2L },
-                    { 12L, new NodaTime.LocalTime(0, 0), (byte)5, false, new NodaTime.LocalTime(11, 0), 2L },
-                    { 13L, new NodaTime.LocalTime(2, 0), (byte)6, false, new NodaTime.LocalTime(11, 0), 2L },
-                    { 14L, new NodaTime.LocalTime(2, 0), (byte)7, false, new NodaTime.LocalTime(11, 0), 2L },
-                    { 15L, new NodaTime.LocalTime(14, 0), (byte)1, false, new NodaTime.LocalTime(10, 0), 3L },
-                    { 16L, null, (byte)2, true, null, 3L },
-                    { 17L, new NodaTime.LocalTime(21, 0), (byte)3, false, new NodaTime.LocalTime(11, 0), 3L },
-                    { 18L, new NodaTime.LocalTime(21, 0), (byte)4, false, new NodaTime.LocalTime(11, 0), 3L },
-                    { 19L, new NodaTime.LocalTime(21, 0), (byte)5, false, new NodaTime.LocalTime(11, 0), 3L },
-                    { 20L, new NodaTime.LocalTime(22, 0), (byte)6, false, new NodaTime.LocalTime(11, 0), 3L },
-                    { 21L, new NodaTime.LocalTime(22, 0), (byte)7, false, new NodaTime.LocalTime(11, 0), 3L }
+                    { 1L, new NodaTime.LocalTime(15, 0), 1, false, new NodaTime.LocalTime(10, 0), 1L },
+                    { 2L, new NodaTime.LocalTime(22, 0), 2, false, new NodaTime.LocalTime(11, 30), 1L },
+                    { 3L, new NodaTime.LocalTime(22, 0), 3, false, new NodaTime.LocalTime(11, 30), 1L },
+                    { 4L, new NodaTime.LocalTime(22, 0), 4, false, new NodaTime.LocalTime(11, 30), 1L },
+                    { 5L, new NodaTime.LocalTime(22, 0), 5, false, new NodaTime.LocalTime(11, 30), 1L },
+                    { 6L, new NodaTime.LocalTime(0, 0), 6, false, new NodaTime.LocalTime(11, 30), 1L },
+                    { 7L, new NodaTime.LocalTime(0, 0), 7, false, new NodaTime.LocalTime(11, 30), 1L },
+                    { 8L, new NodaTime.LocalTime(23, 0), 1, false, new NodaTime.LocalTime(11, 0), 2L },
+                    { 9L, new NodaTime.LocalTime(0, 0), 2, false, new NodaTime.LocalTime(11, 0), 2L },
+                    { 10L, new NodaTime.LocalTime(0, 0), 3, false, new NodaTime.LocalTime(11, 0), 2L },
+                    { 11L, new NodaTime.LocalTime(0, 0), 4, false, new NodaTime.LocalTime(11, 0), 2L },
+                    { 12L, new NodaTime.LocalTime(0, 0), 5, false, new NodaTime.LocalTime(11, 0), 2L },
+                    { 13L, new NodaTime.LocalTime(2, 0), 6, false, new NodaTime.LocalTime(11, 0), 2L },
+                    { 14L, new NodaTime.LocalTime(2, 0), 7, false, new NodaTime.LocalTime(11, 0), 2L },
+                    { 15L, new NodaTime.LocalTime(14, 0), 1, false, new NodaTime.LocalTime(10, 0), 3L },
+                    { 16L, null, 2, true, null, 3L },
+                    { 17L, new NodaTime.LocalTime(21, 0), 3, false, new NodaTime.LocalTime(11, 0), 3L },
+                    { 18L, new NodaTime.LocalTime(21, 0), 4, false, new NodaTime.LocalTime(11, 0), 3L },
+                    { 19L, new NodaTime.LocalTime(21, 0), 5, false, new NodaTime.LocalTime(11, 0), 3L },
+                    { 20L, new NodaTime.LocalTime(22, 0), 6, false, new NodaTime.LocalTime(11, 0), 3L },
+                    { 21L, new NodaTime.LocalTime(22, 0), 7, false, new NodaTime.LocalTime(11, 0), 3L }
                 });
 
             migrationBuilder.InsertData(
@@ -274,12 +273,6 @@ namespace Application.Services.DatabaseMigrations.Migrations
                 name: "ix_business_hours_venue_id_day_of_week_id",
                 table: "business_hours",
                 columns: new[] { "venue_id", "day_of_week_id" },
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "ix_days_of_week_enum",
-                table: "days_of_week",
-                column: "enum",
                 unique: true);
 
             migrationBuilder.CreateIndex(

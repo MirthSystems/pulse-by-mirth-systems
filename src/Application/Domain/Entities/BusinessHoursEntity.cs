@@ -2,6 +2,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
+using Application.Domain.Enums;
+
 using NodaTime;
 
 namespace Application.Domain.Entities;
@@ -18,7 +20,7 @@ public class BusinessHoursEntity
 
     [Column("day_of_week_id")]
     [Required]
-    public byte DayOfWeekId { get; set; }
+    public Days DayOfWeekId { get; set; }
 
     [Column("open_time")]
     public LocalTime? OpenTime { get; set; }

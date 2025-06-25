@@ -17,7 +17,7 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
     {
         base.OnModelCreating(builder);
 
-        builder.HasPostgresEnum<DayOfWeekEnum>();
+        builder.HasPostgresEnum<Days>();
 
         builder.HasPostgresExtension("address_standardizer");
         builder.HasPostgresExtension("address_standardizer_data_us");

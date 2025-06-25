@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using NodaTime;
 using Application.Domain.Entities;
+using Application.Domain.Enums;
 
 namespace Application.Infrastructure.Data.Configurations;
 
@@ -34,7 +35,7 @@ public class BusinessHoursEntityConfiguration : IEntityTypeConfiguration<Busines
             {
                 Id = 1,
                 VenueId = 1,
-                DayOfWeekId = 1, // Sunday
+                DayOfWeekId = Days.Sunday, // Sunday
                 OpenTime = new LocalTime(10, 0),
                 CloseTime = new LocalTime(15, 0),
                 IsClosed = false
@@ -43,7 +44,7 @@ public class BusinessHoursEntityConfiguration : IEntityTypeConfiguration<Busines
             {
                 Id = 2,
                 VenueId = 1,
-                DayOfWeekId = 2, // Monday
+                DayOfWeekId = Days.Monday, // Monday
                 OpenTime = new LocalTime(11, 30),
                 CloseTime = new LocalTime(22, 0),
                 IsClosed = false
@@ -52,7 +53,7 @@ public class BusinessHoursEntityConfiguration : IEntityTypeConfiguration<Busines
             {
                 Id = 3,
                 VenueId = 1,
-                DayOfWeekId = 3, // Tuesday
+                DayOfWeekId = Days.Tuesday, // Tuesday
                 OpenTime = new LocalTime(11, 30),
                 CloseTime = new LocalTime(22, 0),
                 IsClosed = false
@@ -61,7 +62,7 @@ public class BusinessHoursEntityConfiguration : IEntityTypeConfiguration<Busines
             {
                 Id = 4,
                 VenueId = 1,
-                DayOfWeekId = 4, // Wednesday
+                DayOfWeekId = Days.Wednesday, // Wednesday
                 OpenTime = new LocalTime(11, 30),
                 CloseTime = new LocalTime(22, 0),
                 IsClosed = false
@@ -70,7 +71,7 @@ public class BusinessHoursEntityConfiguration : IEntityTypeConfiguration<Busines
             {
                 Id = 5,
                 VenueId = 1,
-                DayOfWeekId = 5, // Thursday
+                DayOfWeekId = Days.Thursday, // Thursday
                 OpenTime = new LocalTime(11, 30),
                 CloseTime = new LocalTime(22, 0),
                 IsClosed = false
@@ -79,7 +80,7 @@ public class BusinessHoursEntityConfiguration : IEntityTypeConfiguration<Busines
             {
                 Id = 6,
                 VenueId = 1,
-                DayOfWeekId = 6, // Friday
+                DayOfWeekId = Days.Friday, // Friday
                 OpenTime = new LocalTime(11, 30),
                 CloseTime = new LocalTime(0, 0),
                 IsClosed = false
@@ -88,7 +89,7 @@ public class BusinessHoursEntityConfiguration : IEntityTypeConfiguration<Busines
             {
                 Id = 7,
                 VenueId = 1,
-                DayOfWeekId = 7, // Saturday
+                DayOfWeekId = Days.Saturday, // Saturday
                 OpenTime = new LocalTime(11, 30),
                 CloseTime = new LocalTime(0, 0),
                 IsClosed = false
@@ -100,7 +101,7 @@ public class BusinessHoursEntityConfiguration : IEntityTypeConfiguration<Busines
             {
                 Id = 8,
                 VenueId = 2,
-                DayOfWeekId = 1, // Sunday
+                DayOfWeekId = Days.Sunday, // Sunday
                 OpenTime = new LocalTime(11, 0),
                 CloseTime = new LocalTime(23, 0),
                 IsClosed = false
@@ -109,7 +110,7 @@ public class BusinessHoursEntityConfiguration : IEntityTypeConfiguration<Busines
             {
                 Id = 9,
                 VenueId = 2,
-                DayOfWeekId = 2, // Monday
+                DayOfWeekId = Days.Monday, // Monday
                 OpenTime = new LocalTime(11, 0),
                 CloseTime = new LocalTime(0, 0),
                 IsClosed = false
@@ -118,7 +119,7 @@ public class BusinessHoursEntityConfiguration : IEntityTypeConfiguration<Busines
             {
                 Id = 10,
                 VenueId = 2,
-                DayOfWeekId = 3, // Tuesday
+                DayOfWeekId = Days.Tuesday, // Tuesday
                 OpenTime = new LocalTime(11, 0),
                 CloseTime = new LocalTime(0, 0),
                 IsClosed = false
@@ -127,7 +128,7 @@ public class BusinessHoursEntityConfiguration : IEntityTypeConfiguration<Busines
             {
                 Id = 11,
                 VenueId = 2,
-                DayOfWeekId = 4, // Wednesday
+                DayOfWeekId = Days.Wednesday, // Wednesday
                 OpenTime = new LocalTime(11, 0),
                 CloseTime = new LocalTime(0, 0),
                 IsClosed = false
@@ -136,7 +137,7 @@ public class BusinessHoursEntityConfiguration : IEntityTypeConfiguration<Busines
             {
                 Id = 12,
                 VenueId = 2,
-                DayOfWeekId = 5, // Thursday
+                DayOfWeekId = Days.Thursday, // Thursday
                 OpenTime = new LocalTime(11, 0),
                 CloseTime = new LocalTime(0, 0),
                 IsClosed = false
@@ -145,7 +146,7 @@ public class BusinessHoursEntityConfiguration : IEntityTypeConfiguration<Busines
             {
                 Id = 13,
                 VenueId = 2,
-                DayOfWeekId = 6, // Friday
+                DayOfWeekId = Days.Friday, // Friday
                 OpenTime = new LocalTime(11, 0),
                 CloseTime = new LocalTime(2, 0),
                 IsClosed = false
@@ -154,7 +155,7 @@ public class BusinessHoursEntityConfiguration : IEntityTypeConfiguration<Busines
             {
                 Id = 14,
                 VenueId = 2,
-                DayOfWeekId = 7, // Saturday
+                DayOfWeekId = Days.Saturday, // Saturday
                 OpenTime = new LocalTime(11, 0),
                 CloseTime = new LocalTime(2, 0),
                 IsClosed = false
@@ -166,7 +167,7 @@ public class BusinessHoursEntityConfiguration : IEntityTypeConfiguration<Busines
             {
                 Id = 15,
                 VenueId = 3,
-                DayOfWeekId = 1, // Sunday
+                DayOfWeekId = Days.Sunday, // Sunday
                 OpenTime = new LocalTime(10, 0),
                 CloseTime = new LocalTime(14, 0),
                 IsClosed = false
@@ -175,7 +176,7 @@ public class BusinessHoursEntityConfiguration : IEntityTypeConfiguration<Busines
             {
                 Id = 16,
                 VenueId = 3,
-                DayOfWeekId = 2, // Monday - Closed
+                DayOfWeekId = Days.Monday, // Monday - Closed
                 OpenTime = null,
                 CloseTime = null,
                 IsClosed = true
@@ -184,7 +185,7 @@ public class BusinessHoursEntityConfiguration : IEntityTypeConfiguration<Busines
             {
                 Id = 17,
                 VenueId = 3,
-                DayOfWeekId = 3, // Tuesday
+                DayOfWeekId = Days.Tuesday, // Tuesday
                 OpenTime = new LocalTime(11, 0),
                 CloseTime = new LocalTime(21, 0),
                 IsClosed = false
@@ -193,7 +194,7 @@ public class BusinessHoursEntityConfiguration : IEntityTypeConfiguration<Busines
             {
                 Id = 18,
                 VenueId = 3,
-                DayOfWeekId = 4, // Wednesday
+                DayOfWeekId = Days.Wednesday, // Wednesday
                 OpenTime = new LocalTime(11, 0),
                 CloseTime = new LocalTime(21, 0),
                 IsClosed = false
@@ -202,7 +203,7 @@ public class BusinessHoursEntityConfiguration : IEntityTypeConfiguration<Busines
             {
                 Id = 19,
                 VenueId = 3,
-                DayOfWeekId = 5, // Thursday
+                DayOfWeekId = Days.Thursday, // Thursday
                 OpenTime = new LocalTime(11, 0),
                 CloseTime = new LocalTime(21, 0),
                 IsClosed = false
@@ -211,7 +212,7 @@ public class BusinessHoursEntityConfiguration : IEntityTypeConfiguration<Busines
             {
                 Id = 20,
                 VenueId = 3,
-                DayOfWeekId = 6, // Friday
+                DayOfWeekId = Days.Friday, // Friday
                 OpenTime = new LocalTime(11, 0),
                 CloseTime = new LocalTime(22, 0),
                 IsClosed = false
@@ -220,7 +221,7 @@ public class BusinessHoursEntityConfiguration : IEntityTypeConfiguration<Busines
             {
                 Id = 21,
                 VenueId = 3,
-                DayOfWeekId = 7, // Saturday
+                DayOfWeekId = Days.Saturday, // Saturday
                 OpenTime = new LocalTime(11, 0),
                 CloseTime = new LocalTime(22, 0),
                 IsClosed = false

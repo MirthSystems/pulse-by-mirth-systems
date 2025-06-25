@@ -27,7 +27,7 @@ public class VenueCategoryEntityConfiguration : IEntityTypeConfiguration<VenueCa
                 Name = "Restaurant", 
                 Description = "Dining establishments offering food and beverages", 
                 Icon = "🍽️",
-                SortOrder = 1,
+                SortOrder = 0,
             },
             new VenueCategoryEntity 
             { 
@@ -35,7 +35,7 @@ public class VenueCategoryEntityConfiguration : IEntityTypeConfiguration<VenueCa
                 Name = "Bar", 
                 Description = "Venues focused on drinks and nightlife", 
                 Icon = "🍸",
-                SortOrder = 2,
+                SortOrder = 1,
             },
             new VenueCategoryEntity 
             { 
@@ -43,7 +43,7 @@ public class VenueCategoryEntityConfiguration : IEntityTypeConfiguration<VenueCa
                 Name = "Cafe", 
                 Description = "Casual spots for coffee and light meals", 
                 Icon = "☕",
-                SortOrder = 3,
+                SortOrder = 2,
             },
             new VenueCategoryEntity 
             { 
@@ -51,7 +51,7 @@ public class VenueCategoryEntityConfiguration : IEntityTypeConfiguration<VenueCa
                 Name = "Nightclub", 
                 Description = "Venues for dancing and late-night entertainment", 
                 Icon = "🪩",
-                SortOrder = 4,
+                SortOrder = 3,
             },
             new VenueCategoryEntity 
             { 
@@ -59,7 +59,7 @@ public class VenueCategoryEntityConfiguration : IEntityTypeConfiguration<VenueCa
                 Name = "Pub", 
                 Description = "Casual venues with food, drinks, and often live music", 
                 Icon = "🍺",
-                SortOrder = 5,
+                SortOrder = 4,
             },
             new VenueCategoryEntity 
             { 
@@ -67,7 +67,7 @@ public class VenueCategoryEntityConfiguration : IEntityTypeConfiguration<VenueCa
                 Name = "Winery", 
                 Description = "Venues producing wine, offering tastings, food pairings, and live music", 
                 Icon = "🍷",
-                SortOrder = 6,
+                SortOrder = 5,
             },
             new VenueCategoryEntity 
             { 
@@ -75,7 +75,7 @@ public class VenueCategoryEntityConfiguration : IEntityTypeConfiguration<VenueCa
                 Name = "Brewery", 
                 Description = "Venues brewing their own beer, often with food and live music", 
                 Icon = "🍻",
-                SortOrder = 7,
+                SortOrder = 6,
             },
             new VenueCategoryEntity 
             { 
@@ -83,7 +83,7 @@ public class VenueCategoryEntityConfiguration : IEntityTypeConfiguration<VenueCa
                 Name = "Lounge", 
                 Description = "Sophisticated venues with cocktails, small plates, and live music", 
                 Icon = "🛋️",
-                SortOrder = 8,
+                SortOrder = 7,
             },
             new VenueCategoryEntity 
             { 
@@ -91,7 +91,7 @@ public class VenueCategoryEntityConfiguration : IEntityTypeConfiguration<VenueCa
                 Name = "Bistro", 
                 Description = "Intimate dining venues with quality food, wine, and occasional live music", 
                 Icon = "🥂",
-                SortOrder = 9,
+                SortOrder = 8,
             }
         );
         #endregion
