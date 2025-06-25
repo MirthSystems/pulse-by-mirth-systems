@@ -21,6 +21,7 @@ namespace Application.Services.DatabaseMigrations.Migrations
                 .HasAnnotation("ProductVersion", "9.0.6")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "day_of_week_enum", new[] { "sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday" });
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "address_standardizer");
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "address_standardizer_data_us");
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "fuzzystrmatch");
@@ -45,8 +46,8 @@ namespace Application.Services.DatabaseMigrations.Migrations
                         .HasColumnType("time")
                         .HasColumnName("close_time");
 
-                    b.Property<int>("DayOfWeekId")
-                        .HasColumnType("integer")
+                    b.Property<byte>("DayOfWeekId")
+                        .HasColumnType("smallint")
                         .HasColumnName("day_of_week_id");
 
                     b.Property<bool>("IsClosed")
@@ -78,7 +79,7 @@ namespace Application.Services.DatabaseMigrations.Migrations
                         {
                             Id = 1L,
                             CloseTime = new NodaTime.LocalTime(15, 0),
-                            DayOfWeekId = 1,
+                            DayOfWeekId = (byte)1,
                             IsClosed = false,
                             OpenTime = new NodaTime.LocalTime(10, 0),
                             VenueId = 1L
@@ -87,7 +88,7 @@ namespace Application.Services.DatabaseMigrations.Migrations
                         {
                             Id = 2L,
                             CloseTime = new NodaTime.LocalTime(22, 0),
-                            DayOfWeekId = 2,
+                            DayOfWeekId = (byte)2,
                             IsClosed = false,
                             OpenTime = new NodaTime.LocalTime(11, 30),
                             VenueId = 1L
@@ -96,7 +97,7 @@ namespace Application.Services.DatabaseMigrations.Migrations
                         {
                             Id = 3L,
                             CloseTime = new NodaTime.LocalTime(22, 0),
-                            DayOfWeekId = 3,
+                            DayOfWeekId = (byte)3,
                             IsClosed = false,
                             OpenTime = new NodaTime.LocalTime(11, 30),
                             VenueId = 1L
@@ -105,7 +106,7 @@ namespace Application.Services.DatabaseMigrations.Migrations
                         {
                             Id = 4L,
                             CloseTime = new NodaTime.LocalTime(22, 0),
-                            DayOfWeekId = 4,
+                            DayOfWeekId = (byte)4,
                             IsClosed = false,
                             OpenTime = new NodaTime.LocalTime(11, 30),
                             VenueId = 1L
@@ -114,7 +115,7 @@ namespace Application.Services.DatabaseMigrations.Migrations
                         {
                             Id = 5L,
                             CloseTime = new NodaTime.LocalTime(22, 0),
-                            DayOfWeekId = 5,
+                            DayOfWeekId = (byte)5,
                             IsClosed = false,
                             OpenTime = new NodaTime.LocalTime(11, 30),
                             VenueId = 1L
@@ -123,7 +124,7 @@ namespace Application.Services.DatabaseMigrations.Migrations
                         {
                             Id = 6L,
                             CloseTime = new NodaTime.LocalTime(0, 0),
-                            DayOfWeekId = 6,
+                            DayOfWeekId = (byte)6,
                             IsClosed = false,
                             OpenTime = new NodaTime.LocalTime(11, 30),
                             VenueId = 1L
@@ -132,7 +133,7 @@ namespace Application.Services.DatabaseMigrations.Migrations
                         {
                             Id = 7L,
                             CloseTime = new NodaTime.LocalTime(0, 0),
-                            DayOfWeekId = 7,
+                            DayOfWeekId = (byte)7,
                             IsClosed = false,
                             OpenTime = new NodaTime.LocalTime(11, 30),
                             VenueId = 1L
@@ -141,7 +142,7 @@ namespace Application.Services.DatabaseMigrations.Migrations
                         {
                             Id = 8L,
                             CloseTime = new NodaTime.LocalTime(23, 0),
-                            DayOfWeekId = 1,
+                            DayOfWeekId = (byte)1,
                             IsClosed = false,
                             OpenTime = new NodaTime.LocalTime(11, 0),
                             VenueId = 2L
@@ -150,7 +151,7 @@ namespace Application.Services.DatabaseMigrations.Migrations
                         {
                             Id = 9L,
                             CloseTime = new NodaTime.LocalTime(0, 0),
-                            DayOfWeekId = 2,
+                            DayOfWeekId = (byte)2,
                             IsClosed = false,
                             OpenTime = new NodaTime.LocalTime(11, 0),
                             VenueId = 2L
@@ -159,7 +160,7 @@ namespace Application.Services.DatabaseMigrations.Migrations
                         {
                             Id = 10L,
                             CloseTime = new NodaTime.LocalTime(0, 0),
-                            DayOfWeekId = 3,
+                            DayOfWeekId = (byte)3,
                             IsClosed = false,
                             OpenTime = new NodaTime.LocalTime(11, 0),
                             VenueId = 2L
@@ -168,7 +169,7 @@ namespace Application.Services.DatabaseMigrations.Migrations
                         {
                             Id = 11L,
                             CloseTime = new NodaTime.LocalTime(0, 0),
-                            DayOfWeekId = 4,
+                            DayOfWeekId = (byte)4,
                             IsClosed = false,
                             OpenTime = new NodaTime.LocalTime(11, 0),
                             VenueId = 2L
@@ -177,7 +178,7 @@ namespace Application.Services.DatabaseMigrations.Migrations
                         {
                             Id = 12L,
                             CloseTime = new NodaTime.LocalTime(0, 0),
-                            DayOfWeekId = 5,
+                            DayOfWeekId = (byte)5,
                             IsClosed = false,
                             OpenTime = new NodaTime.LocalTime(11, 0),
                             VenueId = 2L
@@ -186,7 +187,7 @@ namespace Application.Services.DatabaseMigrations.Migrations
                         {
                             Id = 13L,
                             CloseTime = new NodaTime.LocalTime(2, 0),
-                            DayOfWeekId = 6,
+                            DayOfWeekId = (byte)6,
                             IsClosed = false,
                             OpenTime = new NodaTime.LocalTime(11, 0),
                             VenueId = 2L
@@ -195,7 +196,7 @@ namespace Application.Services.DatabaseMigrations.Migrations
                         {
                             Id = 14L,
                             CloseTime = new NodaTime.LocalTime(2, 0),
-                            DayOfWeekId = 7,
+                            DayOfWeekId = (byte)7,
                             IsClosed = false,
                             OpenTime = new NodaTime.LocalTime(11, 0),
                             VenueId = 2L
@@ -204,7 +205,7 @@ namespace Application.Services.DatabaseMigrations.Migrations
                         {
                             Id = 15L,
                             CloseTime = new NodaTime.LocalTime(14, 0),
-                            DayOfWeekId = 1,
+                            DayOfWeekId = (byte)1,
                             IsClosed = false,
                             OpenTime = new NodaTime.LocalTime(10, 0),
                             VenueId = 3L
@@ -212,7 +213,7 @@ namespace Application.Services.DatabaseMigrations.Migrations
                         new
                         {
                             Id = 16L,
-                            DayOfWeekId = 2,
+                            DayOfWeekId = (byte)2,
                             IsClosed = true,
                             VenueId = 3L
                         },
@@ -220,7 +221,7 @@ namespace Application.Services.DatabaseMigrations.Migrations
                         {
                             Id = 17L,
                             CloseTime = new NodaTime.LocalTime(21, 0),
-                            DayOfWeekId = 3,
+                            DayOfWeekId = (byte)3,
                             IsClosed = false,
                             OpenTime = new NodaTime.LocalTime(11, 0),
                             VenueId = 3L
@@ -229,7 +230,7 @@ namespace Application.Services.DatabaseMigrations.Migrations
                         {
                             Id = 18L,
                             CloseTime = new NodaTime.LocalTime(21, 0),
-                            DayOfWeekId = 4,
+                            DayOfWeekId = (byte)4,
                             IsClosed = false,
                             OpenTime = new NodaTime.LocalTime(11, 0),
                             VenueId = 3L
@@ -238,7 +239,7 @@ namespace Application.Services.DatabaseMigrations.Migrations
                         {
                             Id = 19L,
                             CloseTime = new NodaTime.LocalTime(21, 0),
-                            DayOfWeekId = 5,
+                            DayOfWeekId = (byte)5,
                             IsClosed = false,
                             OpenTime = new NodaTime.LocalTime(11, 0),
                             VenueId = 3L
@@ -247,7 +248,7 @@ namespace Application.Services.DatabaseMigrations.Migrations
                         {
                             Id = 20L,
                             CloseTime = new NodaTime.LocalTime(22, 0),
-                            DayOfWeekId = 6,
+                            DayOfWeekId = (byte)6,
                             IsClosed = false,
                             OpenTime = new NodaTime.LocalTime(11, 0),
                             VenueId = 3L
@@ -256,7 +257,7 @@ namespace Application.Services.DatabaseMigrations.Migrations
                         {
                             Id = 21L,
                             CloseTime = new NodaTime.LocalTime(22, 0),
-                            DayOfWeekId = 7,
+                            DayOfWeekId = (byte)7,
                             IsClosed = false,
                             OpenTime = new NodaTime.LocalTime(11, 0),
                             VenueId = 3L
@@ -265,12 +266,13 @@ namespace Application.Services.DatabaseMigrations.Migrations
 
             modelBuilder.Entity("Application.Domain.Entities.DayOfWeekEntity", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                    b.Property<byte>("Id")
+                        .HasColumnType("smallint")
                         .HasColumnName("id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    b.Property<int>("Enum")
+                        .HasColumnType("integer")
+                        .HasColumnName("enum");
 
                     b.Property<bool>("IsWeekday")
                         .HasColumnType("boolean")
@@ -299,6 +301,10 @@ namespace Application.Services.DatabaseMigrations.Migrations
                     b.HasKey("Id")
                         .HasName("pk_days_of_week");
 
+                    b.HasIndex("Enum")
+                        .IsUnique()
+                        .HasDatabaseName("ix_days_of_week_enum");
+
                     b.HasIndex("IsoNumber")
                         .IsUnique()
                         .HasDatabaseName("ix_days_of_week_iso_number");
@@ -308,16 +314,18 @@ namespace Application.Services.DatabaseMigrations.Migrations
                     b.HasData(
                         new
                         {
-                            Id = 1,
+                            Id = (byte)1,
+                            Enum = 0,
                             IsWeekday = false,
-                            IsoNumber = 0,
+                            IsoNumber = 7,
                             Name = "Sunday",
                             ShortName = "SUN",
                             SortOrder = 1
                         },
                         new
                         {
-                            Id = 2,
+                            Id = (byte)2,
+                            Enum = 1,
                             IsWeekday = true,
                             IsoNumber = 1,
                             Name = "Monday",
@@ -326,7 +334,8 @@ namespace Application.Services.DatabaseMigrations.Migrations
                         },
                         new
                         {
-                            Id = 3,
+                            Id = (byte)3,
+                            Enum = 2,
                             IsWeekday = true,
                             IsoNumber = 2,
                             Name = "Tuesday",
@@ -335,7 +344,8 @@ namespace Application.Services.DatabaseMigrations.Migrations
                         },
                         new
                         {
-                            Id = 4,
+                            Id = (byte)4,
+                            Enum = 3,
                             IsWeekday = true,
                             IsoNumber = 3,
                             Name = "Wednesday",
@@ -344,7 +354,8 @@ namespace Application.Services.DatabaseMigrations.Migrations
                         },
                         new
                         {
-                            Id = 5,
+                            Id = (byte)5,
+                            Enum = 4,
                             IsWeekday = true,
                             IsoNumber = 4,
                             Name = "Thursday",
@@ -353,7 +364,8 @@ namespace Application.Services.DatabaseMigrations.Migrations
                         },
                         new
                         {
-                            Id = 6,
+                            Id = (byte)6,
+                            Enum = 5,
                             IsWeekday = true,
                             IsoNumber = 5,
                             Name = "Friday",
@@ -362,7 +374,8 @@ namespace Application.Services.DatabaseMigrations.Migrations
                         },
                         new
                         {
-                            Id = 7,
+                            Id = (byte)7,
+                            Enum = 6,
                             IsWeekday = false,
                             IsoNumber = 6,
                             Name = "Saturday",

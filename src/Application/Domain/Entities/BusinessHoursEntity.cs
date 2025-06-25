@@ -18,7 +18,7 @@ public class BusinessHoursEntity
 
     [Column("day_of_week_id")]
     [Required]
-    public int DayOfWeekId { get; set; }
+    public byte DayOfWeekId { get; set; }
 
     [Column("open_time")]
     public LocalTime? OpenTime { get; set; }

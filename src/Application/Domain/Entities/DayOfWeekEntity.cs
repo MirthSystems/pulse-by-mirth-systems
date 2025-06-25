@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Application.Domain.Enums;
 
 namespace Application.Domain.Entities;
 
@@ -7,7 +8,10 @@ namespace Application.Domain.Entities;
 public class DayOfWeekEntity
 {
     [Column("id")]
-    public int Id { get; set; }
+    public byte Id { get; set; }
+
+    [Column("enum")]
+    public DayOfWeekEnum Enum { get; set; }
 
     [Column("name")]
     [Required]

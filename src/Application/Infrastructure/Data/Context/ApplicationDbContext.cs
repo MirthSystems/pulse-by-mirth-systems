@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Application.Domain.Entities;
+using Application.Domain.Enums;
 
 namespace Application.Infrastructure.Data.Context;
 
@@ -15,6 +16,8 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+
+        builder.HasPostgresEnum<DayOfWeekEnum>();
 
         builder.HasPostgresExtension("address_standardizer");
         builder.HasPostgresExtension("address_standardizer_data_us");
