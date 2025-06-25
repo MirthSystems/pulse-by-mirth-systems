@@ -22,6 +22,7 @@ namespace Application.Services.DatabaseMigrations.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "days", new[] { "sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "weekday", "weekend" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "months", new[] { "january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december" });
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "address_standardizer");
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "address_standardizer_data_us");
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "fuzzystrmatch");
@@ -366,6 +367,140 @@ namespace Application.Services.DatabaseMigrations.Migrations
                             Name = "Saturday",
                             ShortName = "SAT",
                             SortOrder = 6
+                        });
+                });
+
+            modelBuilder.Entity("Application.Domain.Entities.MonthOfYearEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    b.Property<int>("IsoNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("iso_number");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("ShortName")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)")
+                        .HasColumnName("short_name");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer")
+                        .HasColumnName("sort_order");
+
+                    b.HasKey("Id")
+                        .HasName("pk_months_of_year");
+
+                    b.HasIndex("IsoNumber")
+                        .IsUnique()
+                        .HasDatabaseName("ix_months_of_year_iso_number");
+
+                    b.ToTable("months_of_year", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            IsoNumber = 1,
+                            Name = "January",
+                            ShortName = "JAN",
+                            SortOrder = 0
+                        },
+                        new
+                        {
+                            Id = 2,
+                            IsoNumber = 2,
+                            Name = "February",
+                            ShortName = "FEB",
+                            SortOrder = 1
+                        },
+                        new
+                        {
+                            Id = 3,
+                            IsoNumber = 3,
+                            Name = "March",
+                            ShortName = "MAR",
+                            SortOrder = 2
+                        },
+                        new
+                        {
+                            Id = 4,
+                            IsoNumber = 4,
+                            Name = "April",
+                            ShortName = "APR",
+                            SortOrder = 3
+                        },
+                        new
+                        {
+                            Id = 5,
+                            IsoNumber = 5,
+                            Name = "May",
+                            ShortName = "MAY",
+                            SortOrder = 4
+                        },
+                        new
+                        {
+                            Id = 6,
+                            IsoNumber = 6,
+                            Name = "June",
+                            ShortName = "JUN",
+                            SortOrder = 5
+                        },
+                        new
+                        {
+                            Id = 7,
+                            IsoNumber = 7,
+                            Name = "July",
+                            ShortName = "JUL",
+                            SortOrder = 6
+                        },
+                        new
+                        {
+                            Id = 8,
+                            IsoNumber = 8,
+                            Name = "August",
+                            ShortName = "AUG",
+                            SortOrder = 7
+                        },
+                        new
+                        {
+                            Id = 9,
+                            IsoNumber = 9,
+                            Name = "September",
+                            ShortName = "SEP",
+                            SortOrder = 8
+                        },
+                        new
+                        {
+                            Id = 10,
+                            IsoNumber = 10,
+                            Name = "October",
+                            ShortName = "OCT",
+                            SortOrder = 9
+                        },
+                        new
+                        {
+                            Id = 11,
+                            IsoNumber = 11,
+                            Name = "November",
+                            ShortName = "NOV",
+                            SortOrder = 10
+                        },
+                        new
+                        {
+                            Id = 12,
+                            IsoNumber = 12,
+                            Name = "December",
+                            ShortName = "DEC",
+                            SortOrder = 11
                         });
                 });
 

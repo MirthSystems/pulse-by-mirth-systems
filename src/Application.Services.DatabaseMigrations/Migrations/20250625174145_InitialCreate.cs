@@ -17,6 +17,7 @@ namespace Application.Services.DatabaseMigrations.Migrations
         {
             migrationBuilder.AlterDatabase()
                 .Annotation("Npgsql:Enum:days", "sunday,monday,tuesday,wednesday,thursday,friday,saturday,weekday,weekend")
+                .Annotation("Npgsql:Enum:months", "january,february,march,april,may,june,july,august,september,october,november,december")
                 .Annotation("Npgsql:PostgresExtension:address_standardizer", ",,")
                 .Annotation("Npgsql:PostgresExtension:address_standardizer_data_us", ",,")
                 .Annotation("Npgsql:PostgresExtension:fuzzystrmatch", ",,")
@@ -41,6 +42,21 @@ namespace Application.Services.DatabaseMigrations.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("pk_days_of_week", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "months_of_year",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "integer", nullable: false),
+                    name = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
+                    short_name = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: false),
+                    iso_number = table.Column<int>(type: "integer", nullable: false),
+                    sort_order = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_months_of_year", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -187,6 +203,25 @@ namespace Application.Services.DatabaseMigrations.Migrations
                 });
 
             migrationBuilder.InsertData(
+                table: "months_of_year",
+                columns: new[] { "id", "iso_number", "name", "short_name", "sort_order" },
+                values: new object[,]
+                {
+                    { 1, 1, "January", "JAN", 0 },
+                    { 2, 2, "February", "FEB", 1 },
+                    { 3, 3, "March", "MAR", 2 },
+                    { 4, 4, "April", "APR", 3 },
+                    { 5, 5, "May", "MAY", 4 },
+                    { 6, 6, "June", "JUN", 5 },
+                    { 7, 7, "July", "JUL", 6 },
+                    { 8, 8, "August", "AUG", 7 },
+                    { 9, 9, "September", "SEP", 8 },
+                    { 10, 10, "October", "OCT", 9 },
+                    { 11, 11, "November", "NOV", 10 },
+                    { 12, 12, "December", "DEC", 11 }
+                });
+
+            migrationBuilder.InsertData(
                 table: "special_categories",
                 columns: new[] { "id", "description", "icon", "name", "sort_order" },
                 values: new object[,]
@@ -282,6 +317,12 @@ namespace Application.Services.DatabaseMigrations.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "ix_months_of_year_iso_number",
+                table: "months_of_year",
+                column: "iso_number",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "ix_special_categories_name",
                 table: "special_categories",
                 column: "name",
@@ -325,6 +366,9 @@ namespace Application.Services.DatabaseMigrations.Migrations
         {
             migrationBuilder.DropTable(
                 name: "business_hours");
+
+            migrationBuilder.DropTable(
+                name: "months_of_year");
 
             migrationBuilder.DropTable(
                 name: "specials");
