@@ -1,4 +1,4 @@
-﻿namespace Application.Extensions;
+namespace Application.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Application.Common.Interfaces;
+using Application.Common.Interfaces.Services;
 using Application.Infrastructure.Services;
 
 using Azure;
@@ -71,6 +72,9 @@ public static class ServiceCollectionExtensions
     private static void RegisterApplicationServices(IServiceCollection services)
     {
         // Register application services
+        services.AddScoped<Application.Common.Interfaces.Services.IVenueService, Application.Infrastructure.Services.VenueService>();
+        services.AddScoped<Application.Common.Interfaces.Services.ISpecialService, Application.Infrastructure.Services.SpecialService>();
+        
         // TODO: Add more services as they are implemented
         // services.AddScoped<INotificationService, NotificationService>();
         // services.AddScoped<IPostService, PostService>();
@@ -101,6 +105,10 @@ public static class ServiceCollectionExtensions
     private static void RegisterRepositories(IServiceCollection services)
     {
         // Register specific repositories with their interfaces
+        services.AddScoped<Application.Common.Interfaces.Repositories.IVenueRepository, Application.Infrastructure.Data.Repositories.VenueRepository>();
+        services.AddScoped<Application.Common.Interfaces.Repositories.ISpecialRepository, Application.Infrastructure.Data.Repositories.SpecialRepository>();
+        services.AddScoped<Application.Common.Interfaces.Repositories.IVenueCategoryRepository, Application.Infrastructure.Data.Repositories.VenueCategoryRepository>();
+        services.AddScoped<Application.Common.Interfaces.Repositories.ISpecialCategoryRepository, Application.Infrastructure.Data.Repositories.SpecialCategoryRepository>();
 
         // Note: BaseRepository<,> is abstract and should not be registered directly.
         // Only concrete implementations should be registered with the DI container.

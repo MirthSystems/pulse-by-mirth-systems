@@ -1,4 +1,4 @@
-﻿namespace Application.Common.Options;
+namespace Application.Common.Options;
 
 public class ApplicationOptions
 {
