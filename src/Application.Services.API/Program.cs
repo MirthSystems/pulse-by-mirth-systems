@@ -1,5 +1,7 @@
 using Application.Extensions;
 using Application.Infrastructure.Data.Context;
+using Microsoft.EntityFrameworkCore;
+using Npgsql.EntityFrameworkCore.PostgreSQL;
 
 using Microsoft.OpenApi.Models;
 
@@ -12,7 +14,15 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
         builder.AddServiceDefaults();
         builder.AddRedisDistributedCache("cache");
-        builder.AddNpgsqlDbContext<ApplicationDbContext>("application-db");
+        builder.AddNpgsqlDbContext<ApplicationDbContext>("application-db", configureDbContextOptions: options =>
+        {
+            options.UseNpgsql(npgsqlOptions =>
+            {
+                npgsqlOptions.UseNodaTime();
+                npgsqlOptions.UseNetTopologySuite();
+            })
+            .UseSnakeCaseNamingConvention();
+        });
 
         builder.Services.AddProblemDetails();
 

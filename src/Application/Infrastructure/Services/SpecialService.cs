@@ -4,6 +4,7 @@ using Application.Common.Models;
 using Application.Common.Models.Search;
 using Application.Common.Models.Special;
 using Application.Domain.Entities;
+using Application.Domain.Helpers;
 using NetTopologySuite.Geometries;
 using NodaTime;
 using NodaTime.Text;
@@ -165,8 +166,15 @@ public class SpecialService : ISpecialService
     {
         try
         {
-            var specials = await _specialRepository.GetActiveSpecialsAsync(cancellationToken);
-            var specialDtos = specials.Select(MapToSpecialSummary);
+            var allActiveSpecials = await _specialRepository.GetActiveSpecialsAsync(cancellationToken);
+            var currentDateTime = _clock.GetCurrentInstant().InZone(DateTimeZone.Utc).LocalDateTime;
+            
+            // Filter by CRON schedule to get truly active specials
+            var currentlyActiveSpecials = allActiveSpecials
+                .Where(special => CronScheduleEvaluator.IsSpecialCurrentlyActive(special, currentDateTime))
+                .ToList();
+            
+            var specialDtos = currentlyActiveSpecials.Select(MapToSpecialSummary);
             return ApiResponse<IEnumerable<SpecialSummary>>.SuccessResult(specialDtos);
         }
         catch (Exception ex)
@@ -193,8 +201,15 @@ public class SpecialService : ISpecialService
     {
         try
         {
-            var specials = await _specialRepository.GetActiveSpecialsByVenueAsync(venueId, cancellationToken);
-            var specialDtos = specials.Select(MapToSpecialSummary);
+            var allActiveSpecials = await _specialRepository.GetActiveSpecialsByVenueAsync(venueId, cancellationToken);
+            var currentDateTime = _clock.GetCurrentInstant().InZone(DateTimeZone.Utc).LocalDateTime;
+            
+            // Filter by CRON schedule to get truly active specials
+            var currentlyActiveSpecials = allActiveSpecials
+                .Where(special => CronScheduleEvaluator.IsSpecialCurrentlyActive(special, currentDateTime))
+                .ToList();
+            
+            var specialDtos = currentlyActiveSpecials.Select(MapToSpecialSummary);
             return ApiResponse<IEnumerable<SpecialSummary>>.SuccessResult(specialDtos);
         }
         catch (Exception ex)

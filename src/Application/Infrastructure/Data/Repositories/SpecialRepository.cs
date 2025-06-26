@@ -16,6 +16,17 @@ public class SpecialRepository : BaseRepository<SpecialEntity, long>, ISpecialRe
     {
     }
 
+    public override async Task<IEnumerable<SpecialEntity>> GetAllAsync(CancellationToken cancellationToken = default)
+    {
+        return await Query
+            .Include(s => s.Venue)
+                .ThenInclude(v => v.Category)
+            .Include(s => s.Category)
+            .OrderBy(s => s.Venue.Name)
+            .ThenBy(s => s.Title)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<IEnumerable<SpecialEntity>> GetActiveSpecialsAsync(
         CancellationToken cancellationToken = default)
     {

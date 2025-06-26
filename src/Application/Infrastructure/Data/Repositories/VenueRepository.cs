@@ -15,6 +15,15 @@ public class VenueRepository : BaseRepository<VenueEntity, long>, IVenueReposito
     {
     }
 
+    public override async Task<IEnumerable<VenueEntity>> GetAllAsync(CancellationToken cancellationToken = default)
+    {
+        return await Query
+            .Include(v => v.Category)
+            .Include(v => v.Specials.Where(s => s.IsActive))
+            .OrderBy(v => v.Name)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<IEnumerable<VenueEntity>> GetVenuesNearLocationAsync(
         Point location, 
         double radiusInMeters, 
@@ -23,6 +32,7 @@ public class VenueRepository : BaseRepository<VenueEntity, long>, IVenueReposito
         return await Query
             .Where(v => v.IsActive && v.Location != null && v.Location.IsWithinDistance(location, radiusInMeters))
             .Include(v => v.Category)
+            .Include(v => v.Specials.Where(s => s.IsActive))
             .OrderBy(v => v.Location!.Distance(location))
             .ToListAsync(cancellationToken);
     }
@@ -44,6 +54,7 @@ public class VenueRepository : BaseRepository<VenueEntity, long>, IVenueReposito
         return await Query
             .Where(v => v.CategoryId == categoryId && v.IsActive)
             .Include(v => v.Category)
+            .Include(v => v.Specials.Where(s => s.IsActive))
             .OrderBy(v => v.Name)
             .ToListAsync(cancellationToken);
     }
@@ -54,6 +65,7 @@ public class VenueRepository : BaseRepository<VenueEntity, long>, IVenueReposito
         return await Query
             .Where(v => v.IsActive)
             .Include(v => v.Category)
+            .Include(v => v.Specials.Where(s => s.IsActive))
             .OrderBy(v => v.Name)
             .ToListAsync(cancellationToken);
     }
@@ -106,6 +118,7 @@ public class VenueRepository : BaseRepository<VenueEntity, long>, IVenueReposito
                        (v.Name.ToLower().Contains(normalizedSearchTerm) ||
                         (v.Description != null && v.Description.ToLower().Contains(normalizedSearchTerm))))
             .Include(v => v.Category)
+            .Include(v => v.Specials.Where(s => s.IsActive))
             .OrderBy(v => v.Name)
             .ToListAsync(cancellationToken);
     }
@@ -156,6 +169,7 @@ public class VenueRepository : BaseRepository<VenueEntity, long>, IVenueReposito
 
         return await query
             .Include(v => v.Category)
+            .Include(v => v.Specials.Where(s => s.IsActive))
             .ToListAsync(cancellationToken);
     }
 }
