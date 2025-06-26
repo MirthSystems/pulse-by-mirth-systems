@@ -1,5 +1,5 @@
 using Application.Common.Models.Location;
-using Application.Common.Models.Search;
+using Application.Common.Models;
 
 namespace Application.Common.Models.Venue;
 

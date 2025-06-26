@@ -1,6 +1,7 @@
 using Application.Common.Interfaces.Repositories;
 using Application.Common.Interfaces.Services;
 using Application.Common.Models.Location;
+using Application.Common.Models;
 using Application.Common.Models.Search;
 using Application.Common.Models.Venue;
 using Application.Domain.Entities;

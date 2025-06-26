@@ -1,3 +1,4 @@
+using Application.Common.Models;
 using Application.Common.Models.Search;
 using Application.Common.Models.Special;
 

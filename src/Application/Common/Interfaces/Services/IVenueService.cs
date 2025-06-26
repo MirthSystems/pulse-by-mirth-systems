@@ -1,4 +1,5 @@
 using Application.Common.Models.Location;
+using Application.Common.Models;
 using Application.Common.Models.Search;
 using Application.Common.Models.Venue;
 

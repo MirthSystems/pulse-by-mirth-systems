@@ -1,5 +1,6 @@
 using Application.Common.Interfaces.Repositories;
 using Application.Common.Interfaces.Services;
+using Application.Common.Models;
 using Application.Common.Models.Search;
 using Application.Common.Models.Special;
 using Application.Domain.Entities;

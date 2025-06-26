@@ -1,6 +1,7 @@
 using Application.Common.Interfaces.Services;
-using Application.Common.Models.Search;
+using Application.Common.Models;
 using Application.Common.Models.Special;
+using Application.Common.Models.Search;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Application.Services.API.Controllers;

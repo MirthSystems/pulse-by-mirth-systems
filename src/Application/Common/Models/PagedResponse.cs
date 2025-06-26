@@ -1,4 +1,4 @@
-namespace Application.Common.Models.Search;
+namespace Application.Common.Models;
 
 /// <summary>
 /// Paginated response wrapper
