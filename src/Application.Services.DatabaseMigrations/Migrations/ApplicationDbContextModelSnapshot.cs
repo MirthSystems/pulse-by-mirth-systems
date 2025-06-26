@@ -21,7 +21,6 @@ namespace Application.Services.DatabaseMigrations.Migrations
                 .HasAnnotation("ProductVersion", "9.0.6")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "day_of_week_enum", new[] { "sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday" });
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "address_standardizer");
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "address_standardizer_data_us");
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "fuzzystrmatch");
@@ -270,10 +269,6 @@ namespace Application.Services.DatabaseMigrations.Migrations
                         .HasColumnType("smallint")
                         .HasColumnName("id");
 
-                    b.Property<int>("Enum")
-                        .HasColumnType("integer")
-                        .HasColumnName("enum");
-
                     b.Property<bool>("IsWeekday")
                         .HasColumnType("boolean")
                         .HasColumnName("is_weekday");
@@ -301,10 +296,6 @@ namespace Application.Services.DatabaseMigrations.Migrations
                     b.HasKey("Id")
                         .HasName("pk_days_of_week");
 
-                    b.HasIndex("Enum")
-                        .IsUnique()
-                        .HasDatabaseName("ix_days_of_week_enum");
-
                     b.HasIndex("IsoNumber")
                         .IsUnique()
                         .HasDatabaseName("ix_days_of_week_iso_number");
@@ -315,7 +306,6 @@ namespace Application.Services.DatabaseMigrations.Migrations
                         new
                         {
                             Id = (byte)1,
-                            Enum = 0,
                             IsWeekday = false,
                             IsoNumber = 7,
                             Name = "Sunday",
@@ -325,7 +315,6 @@ namespace Application.Services.DatabaseMigrations.Migrations
                         new
                         {
                             Id = (byte)2,
-                            Enum = 1,
                             IsWeekday = true,
                             IsoNumber = 1,
                             Name = "Monday",
@@ -335,7 +324,6 @@ namespace Application.Services.DatabaseMigrations.Migrations
                         new
                         {
                             Id = (byte)3,
-                            Enum = 2,
                             IsWeekday = true,
                             IsoNumber = 2,
                             Name = "Tuesday",
@@ -345,7 +333,6 @@ namespace Application.Services.DatabaseMigrations.Migrations
                         new
                         {
                             Id = (byte)4,
-                            Enum = 3,
                             IsWeekday = true,
                             IsoNumber = 3,
                             Name = "Wednesday",
@@ -355,7 +342,6 @@ namespace Application.Services.DatabaseMigrations.Migrations
                         new
                         {
                             Id = (byte)5,
-                            Enum = 4,
                             IsWeekday = true,
                             IsoNumber = 4,
                             Name = "Thursday",
@@ -365,7 +351,6 @@ namespace Application.Services.DatabaseMigrations.Migrations
                         new
                         {
                             Id = (byte)6,
-                            Enum = 5,
                             IsWeekday = true,
                             IsoNumber = 5,
                             Name = "Friday",
@@ -375,7 +360,6 @@ namespace Application.Services.DatabaseMigrations.Migrations
                         new
                         {
                             Id = (byte)7,
-                            Enum = 6,
                             IsWeekday = false,
                             IsoNumber = 6,
                             Name = "Saturday",

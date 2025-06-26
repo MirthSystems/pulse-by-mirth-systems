@@ -16,7 +16,6 @@ namespace Application.Services.DatabaseMigrations.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterDatabase()
-                .Annotation("Npgsql:Enum:day_of_week_enum", "sunday,monday,tuesday,wednesday,thursday,friday,saturday")
                 .Annotation("Npgsql:PostgresExtension:address_standardizer", ",,")
                 .Annotation("Npgsql:PostgresExtension:address_standardizer_data_us", ",,")
                 .Annotation("Npgsql:PostgresExtension:fuzzystrmatch", ",,")
@@ -32,7 +31,6 @@ namespace Application.Services.DatabaseMigrations.Migrations
                 columns: table => new
                 {
                     id = table.Column<byte>(type: "smallint", nullable: false),
-                    @enum = table.Column<int>(name: "enum", type: "integer", nullable: false),
                     name = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
                     short_name = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: false),
                     iso_number = table.Column<int>(type: "integer", nullable: false),
@@ -175,16 +173,16 @@ namespace Application.Services.DatabaseMigrations.Migrations
 
             migrationBuilder.InsertData(
                 table: "days_of_week",
-                columns: new[] { "id", "enum", "is_weekday", "iso_number", "name", "short_name", "sort_order" },
+                columns: new[] { "id", "is_weekday", "iso_number", "name", "short_name", "sort_order" },
                 values: new object[,]
                 {
-                    { (byte)1, 0, false, 7, "Sunday", "SUN", 1 },
-                    { (byte)2, 1, true, 1, "Monday", "MON", 2 },
-                    { (byte)3, 2, true, 2, "Tuesday", "TUE", 3 },
-                    { (byte)4, 3, true, 3, "Wednesday", "WED", 4 },
-                    { (byte)5, 4, true, 4, "Thursday", "THU", 5 },
-                    { (byte)6, 5, true, 5, "Friday", "FRI", 6 },
-                    { (byte)7, 6, false, 6, "Saturday", "SAT", 7 }
+                    { (byte)1, false, 7, "Sunday", "SUN", 1 },
+                    { (byte)2, true, 1, "Monday", "MON", 2 },
+                    { (byte)3, true, 2, "Tuesday", "TUE", 3 },
+                    { (byte)4, true, 3, "Wednesday", "WED", 4 },
+                    { (byte)5, true, 4, "Thursday", "THU", 5 },
+                    { (byte)6, true, 5, "Friday", "FRI", 6 },
+                    { (byte)7, false, 6, "Saturday", "SAT", 7 }
                 });
 
             migrationBuilder.InsertData(
@@ -274,12 +272,6 @@ namespace Application.Services.DatabaseMigrations.Migrations
                 name: "ix_business_hours_venue_id_day_of_week_id",
                 table: "business_hours",
                 columns: new[] { "venue_id", "day_of_week_id" },
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "ix_days_of_week_enum",
-                table: "days_of_week",
-                column: "enum",
                 unique: true);
 
             migrationBuilder.CreateIndex(
