@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Application.Domain.Entities;
-using Application.Domain.Enums;
 
 namespace Application.Infrastructure.Data.Configurations;
 
@@ -12,9 +11,6 @@ public class DayOfWeekEntityConfiguration : IEntityTypeConfiguration<DayOfWeekEn
 {
     public void Configure(EntityTypeBuilder<DayOfWeekEntity> builder)
     {
-        builder.HasIndex(d => d.Enum)
-               .IsUnique();
-
         builder.HasIndex(d => d.IsoNumber)
                .IsUnique();
 
@@ -25,7 +21,6 @@ public class DayOfWeekEntityConfiguration : IEntityTypeConfiguration<DayOfWeekEn
             new DayOfWeekEntity
             {
                 Id = 1,
-                Enum = DayOfWeekEnum.Sunday,
                 Name = "Sunday",
                 ShortName = "SUN",
                 IsoNumber = 7,
@@ -35,7 +30,6 @@ public class DayOfWeekEntityConfiguration : IEntityTypeConfiguration<DayOfWeekEn
             new DayOfWeekEntity
             {
                 Id = 2,
-                Enum = DayOfWeekEnum.Monday,
                 Name = "Monday",
                 ShortName = "MON",
                 IsoNumber = 1,
@@ -45,7 +39,6 @@ public class DayOfWeekEntityConfiguration : IEntityTypeConfiguration<DayOfWeekEn
             new DayOfWeekEntity
             {
                 Id = 3,
-                Enum = DayOfWeekEnum.Tuesday,
                 Name = "Tuesday",
                 ShortName = "TUE",
                 IsoNumber = 2,
@@ -55,7 +48,6 @@ public class DayOfWeekEntityConfiguration : IEntityTypeConfiguration<DayOfWeekEn
             new DayOfWeekEntity
             {
                 Id = 4,
-                Enum = DayOfWeekEnum.Wednesday,
                 Name = "Wednesday",
                 ShortName = "WED",
                 IsoNumber = 3,
@@ -65,7 +57,6 @@ public class DayOfWeekEntityConfiguration : IEntityTypeConfiguration<DayOfWeekEn
             new DayOfWeekEntity
             {
                 Id = 5,
-                Enum = DayOfWeekEnum.Thursday,
                 Name = "Thursday",
                 ShortName = "THU",
                 IsoNumber = 4,
@@ -75,7 +66,6 @@ public class DayOfWeekEntityConfiguration : IEntityTypeConfiguration<DayOfWeekEn
             new DayOfWeekEntity
             {
                 Id = 6,
-                Enum = DayOfWeekEnum.Friday,
                 Name = "Friday",
                 ShortName = "FRI",
                 IsoNumber = 5,
@@ -85,7 +75,6 @@ public class DayOfWeekEntityConfiguration : IEntityTypeConfiguration<DayOfWeekEn
             new DayOfWeekEntity
             {
                 Id = 7,
-                Enum = DayOfWeekEnum.Saturday,
                 Name = "Saturday",
                 ShortName = "SAT",
                 IsoNumber = 6,
