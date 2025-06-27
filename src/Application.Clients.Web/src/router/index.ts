@@ -22,11 +22,6 @@ const router = createRouter({
       props: true,
     },
     {
-      path: '/specials',
-      name: 'Specials',
-      component: () => import('../views/SpecialsView.vue'),
-    },
-    {
       path: '/specials/:id',
       name: 'SpecialDetail',
       component: () => import('../views/SpecialDetailView.vue'),
@@ -64,7 +59,7 @@ const router = createRouter({
     },
     {
       path: '/backoffice/venues/:id',
-      name: 'VenueDetail',
+      name: 'BackofficeVenueDetail',
       component: () => import('../views/BackofficeVenueDetailView.vue'),
       beforeEnter: requireAuth,
       props: true,
@@ -86,7 +81,7 @@ const router = createRouter({
     },
     {
       path: '/backoffice/venues/:venueId/specials/:specialId',
-      name: 'SpecialDetail',
+      name: 'BackofficeSpecialDetail',
       component: () => import('../views/BackofficeSpecialEditView.vue'),
       beforeEnter: requireAuth,
       props: true,

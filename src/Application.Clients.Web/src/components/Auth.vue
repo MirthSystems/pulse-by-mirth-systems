@@ -27,7 +27,7 @@ import { storeToRefs } from 'pinia'
 import { useAuth0 } from '@auth0/auth0-vue'
 import { UserIcon } from '@heroicons/vue/24/outline'
 import { useAuthStore } from '../stores/auth'
-import UserProfileDropdown from './UserProfileDropdown.vue'
+import UserProfileDropdown from '../components/UserProfileDropdown.vue'
 
 const { 
   loginWithRedirect, 
