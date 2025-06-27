@@ -76,7 +76,7 @@ const router = createRouter({
     {
       path: '/backoffice/venues/:venueId/specials/new',
       name: 'CreateSpecial',
-      component: () => import('../views/BackofficeSpecialDetailView.vue'),
+      component: () => import('../views/BackofficeSpecialCreateView.vue'),
       beforeEnter: requireAuth,
       props: true,
       meta: {
@@ -87,7 +87,7 @@ const router = createRouter({
     {
       path: '/backoffice/venues/:venueId/specials/:specialId',
       name: 'SpecialDetail',
-      component: () => import('../views/BackofficeSpecialDetailView.vue'),
+      component: () => import('../views/BackofficeSpecialEditView.vue'),
       beforeEnter: requireAuth,
       props: true,
       meta: {
