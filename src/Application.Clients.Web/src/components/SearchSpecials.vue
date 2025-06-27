@@ -14,20 +14,17 @@
               type="text"
               placeholder="Enter location..."
               required
-              class="input-control block w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg bg-white placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 shadow-sm transition-colors"
+              class="input-control block w-full pl-10 pr-12 py-3 border border-gray-300 rounded-r-lg bg-white placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 shadow-sm transition-colors"
             />
             <button
               type="button"
               @click="getCurrentLocation"
               :disabled="isGettingLocation"
-              class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-blue-600 focus:text-blue-600 transition-colors"
+              class="absolute inset-y-0 right-0 w-12 flex items-center justify-center text-gray-400 hover:text-blue-600 focus:text-blue-600 transition-colors"
               title="Use current location"
             >
-              <div v-if="isGettingLocation" class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-              <svg v-else class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-              </svg>
+              <div v-if="isGettingLocation" class="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+              <MapIcon v-else class="h-5 w-5" />
             </button>
           </div>
 
@@ -164,6 +161,7 @@ import { useSpecialStore } from '../stores/special'
 import { 
   MagnifyingGlassIcon, 
   MapPinIcon, 
+  MapIcon,
   AdjustmentsHorizontalIcon,
   ChevronDownIcon 
 } from '@heroicons/vue/24/outline'
