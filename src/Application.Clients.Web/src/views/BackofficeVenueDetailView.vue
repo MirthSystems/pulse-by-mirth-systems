@@ -234,6 +234,14 @@
               </div>
             </div>
 
+            <!-- Business Hours -->
+            <div class="space-y-6">
+              <BusinessHoursEditor
+                v-model="form.businessHours"
+                :disabled="!isEditing && !isNewVenue"
+              />
+            </div>
+
             <!-- Error Summary -->
             <div v-if="submitError" class="mt-6 p-4 bg-red-50 border border-red-200 rounded-md">
               <div class="flex">
@@ -380,11 +388,12 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import apiService from '@/services/api'
 import type { 
-  VenueSummary, 
+  Venue,
   VenueCategory, 
   SpecialSummary,
   CreateVenueRequest, 
-  UpdateVenueRequest 
+  UpdateVenueRequest,
+  BusinessHoursRequest
 } from '@/types/api'
 import {
   ChevronLeftIcon,
@@ -393,7 +402,8 @@ import {
   StarIcon,
   ExclamationTriangleIcon
 } from '@heroicons/vue/24/outline'
-import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
+import ConfirmDialog from '../components/common/ConfirmDialog.vue'
+import BusinessHoursEditor from '../components/common/BusinessHoursEditor.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -406,7 +416,7 @@ interface Props {
 const props = defineProps<Props>()
 
 // State
-const venue = ref<VenueSummary | null>(null)
+const venue = ref<Venue | null>(null)
 const categories = ref<VenueCategory[]>([])
 const specials = ref<SpecialSummary[]>([])
 const loading = ref(true)
@@ -428,7 +438,8 @@ const form = ref<CreateVenueRequest>({
   phoneNumber: '',
   email: '',
   website: '',
-  isActive: true
+  isActive: true,
+  businessHours: []
 })
 
 const errors = ref<Record<string, string>>({})
@@ -471,7 +482,13 @@ const loadVenue = async () => {
         phoneNumber: venue.value.phoneNumber || '',
         email: venue.value.email || '',
         website: venue.value.website || '',
-        isActive: venue.value.isActive
+        isActive: venue.value.isActive,
+        businessHours: venue.value.businessHours?.map(bh => ({
+          dayOfWeekId: bh.dayOfWeekId,
+          openTime: bh.isClosed ? undefined : bh.openTime,
+          closeTime: bh.isClosed ? undefined : bh.closeTime,
+          isClosed: bh.isClosed
+        })) || []
       }
     }
   } catch (error) {
@@ -537,7 +554,13 @@ const cancelEditing = () => {
       phoneNumber: venue.value.phoneNumber || '',
       email: venue.value.email || '',
       website: venue.value.website || '',
-      isActive: venue.value.isActive
+      isActive: venue.value.isActive,
+      businessHours: venue.value.businessHours?.map(bh => ({
+        dayOfWeekId: bh.dayOfWeekId,
+        openTime: bh.isClosed ? undefined : bh.openTime,
+        closeTime: bh.isClosed ? undefined : bh.closeTime,
+        isClosed: bh.isClosed
+      })) || []
     }
   }
   errors.value = {}
@@ -637,12 +660,15 @@ const deleteSpecial = async () => {
 }
 
 // Watch for route changes
-watch(() => route.params.id, () => {
-  loadVenue()
-  if (!isNewVenue.value) {
-    loadSpecials()
+watch(() => route.params.id, async (newId, oldId) => {
+  // Only react if the ID actually changed and avoid initial trigger
+  if (newId !== oldId) {
+    await loadVenue()
+    if (!isNewVenue.value) {
+      await loadSpecials()
+    }
   }
-}, { immediate: true })
+})
 
 onMounted(async () => {
   await Promise.all([

@@ -131,12 +131,6 @@
               <h3 class="text-lg leading-6 font-medium text-gray-900">
                 Recent Venues
               </h3>
-              <router-link 
-                to="/backoffice/venues"
-                class="text-sm text-blue-600 hover:text-blue-500"
-              >
-                Manage venues
-              </router-link>
             </div>
             
             <div v-if="isLoading" class="space-y-3">
@@ -208,12 +202,6 @@
               <h3 class="text-lg leading-6 font-medium text-gray-900">
                 Active Specials
               </h3>
-              <router-link 
-                to="/backoffice/venues"
-                class="text-sm text-blue-600 hover:text-blue-500"
-              >
-                Manage specials
-              </router-link>
             </div>
             
             <div v-if="isLoading" class="space-y-3">
@@ -272,60 +260,6 @@
           </div>
         </div>
       </div>
-
-      <!-- Recent Activity -->
-      <div class="mt-8 bg-white shadow rounded-lg">
-        <div class="px-4 py-5 sm:p-6">
-          <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">
-            Recent Activity
-          </h3>
-          
-          <div v-if="recentActivity.length === 0" class="text-center py-6">
-            <ClockIcon class="mx-auto h-12 w-12 text-gray-400" />
-            <h3 class="mt-2 text-sm font-medium text-gray-900">No recent activity</h3>
-            <p class="mt-1 text-sm text-gray-500">
-              Activity will appear here as you manage your venues and specials.
-            </p>
-          </div>
-          
-          <div v-else class="flow-root">
-            <ul class="-mb-8">
-              <li 
-                v-for="(activity, index) in recentActivity" 
-                :key="activity.id"
-                class="relative pb-8"
-              >
-                <div v-if="index !== recentActivity.length - 1" class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200"></div>
-                <div class="relative flex space-x-3">
-                  <div>
-                    <span 
-                      :class="[
-                        'h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white',
-                        activity.type === 'venue' ? 'bg-blue-500' : 'bg-green-500'
-                      ]"
-                    >
-                      <component 
-                        :is="activity.type === 'venue' ? BuildingStorefrontIcon : StarIcon" 
-                        class="h-4 w-4 text-white"
-                      />
-                    </span>
-                  </div>
-                  <div class="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
-                    <div>
-                      <p class="text-sm text-gray-500">
-                        {{ activity.description }}
-                      </p>
-                    </div>
-                    <div class="text-right text-sm whitespace-nowrap text-gray-500">
-                      {{ activity.timestamp }}
-                    </div>
-                  </div>
-                </div>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 </template>
@@ -338,7 +272,6 @@ import {
   StarIcon, 
   UserGroupIcon,
   EyeIcon,
-  ClockIcon,
   BeakerIcon,
   CheckCircleIcon,
   XCircleIcon
@@ -405,27 +338,6 @@ const stats = ref([
 
 const recentVenues = ref<VenueSummary[]>([])
 const activeSpecials = ref<SpecialSummary[]>([])
-
-const recentActivity = ref([
-  { 
-    id: 1, 
-    type: 'special', 
-    description: 'Created new special "Happy Hour 50% Off" at The Corner Bistro',
-    timestamp: '2 hours ago'
-  },
-  { 
-    id: 2, 
-    type: 'venue', 
-    description: 'Updated venue information for Sunset Lounge',
-    timestamp: '1 day ago'
-  },
-  { 
-    id: 3, 
-    type: 'special', 
-    description: 'Deactivated special "Summer Sale" at Pizza Palace',
-    timestamp: '2 days ago'
-  },
-])
 
 const openVenueDialog = () => {
   router.push('/backoffice/venues')

@@ -197,6 +197,13 @@ export interface VenueWithCategorizedSpecials {
 }
 
 // Management types for create/update operations
+export interface BusinessHoursRequest {
+  dayOfWeekId: number;
+  openTime?: string;
+  closeTime?: string;
+  isClosed: boolean;
+}
+
 export interface CreateVenueRequest {
   categoryId: number;
   name: string;
@@ -214,6 +221,7 @@ export interface CreateVenueRequest {
   latitude?: number;
   longitude?: number;
   isActive: boolean;
+  businessHours?: BusinessHoursRequest[];
 }
 
 export interface UpdateVenueRequest {
@@ -233,6 +241,7 @@ export interface UpdateVenueRequest {
   latitude?: number;
   longitude?: number;
   isActive: boolean;
+  businessHours?: BusinessHoursRequest[];
 }
 
 export interface CreateSpecialRequest {
