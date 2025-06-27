@@ -195,3 +195,70 @@ export interface VenueWithCategorizedSpecials {
   entertainment: SpecialSummary[];
   totalSpecials: number;
 }
+
+// Management types for create/update operations
+export interface CreateVenueRequest {
+  categoryId: number;
+  name: string;
+  description?: string;
+  phoneNumber?: string;
+  website?: string;
+  email?: string;
+  profileImage?: string;
+  streetAddress: string;
+  secondaryAddress?: string;
+  locality: string;
+  region: string;
+  postalCode: string;
+  country: string;
+  latitude?: number;
+  longitude?: number;
+  isActive: boolean;
+}
+
+export interface UpdateVenueRequest {
+  categoryId: number;
+  name: string;
+  description?: string;
+  phoneNumber?: string;
+  website?: string;
+  email?: string;
+  profileImage?: string;
+  streetAddress: string;
+  secondaryAddress?: string;
+  locality: string;
+  region: string;
+  postalCode: string;
+  country: string;
+  latitude?: number;
+  longitude?: number;
+  isActive: boolean;
+}
+
+export interface CreateSpecialRequest {
+  venueId: number;
+  specialCategoryId: number;
+  title: string;
+  description: string;
+  startDate: string;
+  startTime: string;
+  endTime?: string;
+  endDate?: string;
+  isRecurring: boolean;
+  cronSchedule?: string;
+  isActive: boolean;
+}
+
+export interface UpdateSpecialRequest {
+  venueId: number;
+  specialCategoryId: number;
+  title: string;
+  description: string;
+  startDate: string;
+  startTime: string;
+  endTime?: string;
+  endDate?: string;
+  isRecurring: boolean;
+  cronSchedule?: string;
+  isActive: boolean;
+}

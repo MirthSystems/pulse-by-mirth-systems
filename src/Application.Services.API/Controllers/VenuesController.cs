@@ -3,6 +3,7 @@ using Application.Common.Models.Location;
 using Application.Common.Models;
 using Application.Common.Models.Venue;
 using Application.Common.Models.Search;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Application.Services.API.Controllers;
@@ -55,6 +56,7 @@ public class VenuesController : ControllerBase
     /// Create a new venue
     /// </summary>
     [HttpPost]
+    [Authorize]
     public async Task<ActionResult<ApiResponse<Venue>>> CreateVenue([FromBody] CreateVenue createVenue, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Creating new venue: {VenueName}", createVenue.Name);
@@ -81,6 +83,7 @@ public class VenuesController : ControllerBase
     /// Update an existing venue
     /// </summary>
     [HttpPut("{id}")]
+    [Authorize]
     public async Task<ActionResult<ApiResponse<Venue?>>> UpdateVenue(long id, [FromBody] UpdateVenue updateVenue, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Updating venue with ID: {VenueId}", id);
@@ -108,6 +111,7 @@ public class VenuesController : ControllerBase
     /// Delete a venue
     /// </summary>
     [HttpDelete("{id}")]
+    [Authorize]
     public async Task<ActionResult<ApiResponse<bool>>> DeleteVenue(long id, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Deleting venue with ID: {VenueId}", id);

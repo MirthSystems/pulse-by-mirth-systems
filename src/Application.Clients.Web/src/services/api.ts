@@ -15,27 +15,56 @@ import type {
   ReverseGeocodeResult,
   TimeZoneInfo,
   EnhancedVenueSearchResult,
-  VenueWithCategorizedSpecials
+  VenueWithCategorizedSpecials,
+  CreateVenueRequest,
+  UpdateVenueRequest,
+  CreateSpecialRequest,
+  UpdateSpecialRequest
 } from '@/types/api'
 
-// In development, use relative URLs with Vite proxy
-// In production, use the environment variable
-const API_BASE_URL = import.meta.env.DEV 
-  ? '/api' 
-  : (import.meta.env.VITE_API_BASE_URL || 'https://localhost:7309/api')
+// API Base URL configuration
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://localhost:7309'
 
 class ApiService {
+  private accessToken: string | null = null
+
+  setAccessToken(token: string | null) {
+    this.accessToken = token
+  }
+
+  private async getAuthHeaders(): Promise<Headers> {
+    const headers = new Headers({
+      'Content-Type': 'application/json',
+    })
+
+    if (this.accessToken) {
+      headers.set('Authorization', `Bearer ${this.accessToken}`)
+    }
+
+    return headers
+  }
+
   private async request<T>(url: string, options?: RequestInit): Promise<ApiResponse<T>> {
-    const response = await fetch(`${API_BASE_URL}${url}`, {
+    const headers = await this.getAuthHeaders()
+    
+    // Merge custom headers with auth headers
+    if (options?.headers) {
+      const customHeaders = new Headers(options.headers)
+      customHeaders.forEach((value, key) => {
+        headers.set(key, value)
+      })
+    }
+
+    const response = await fetch(`${API_BASE_URL}/api${url}`, {
       ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        ...options?.headers,
-      },
+      headers,
     })
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
+      const errorData = await response.json().catch(() => ({ 
+        message: `HTTP ${response.status}: ${response.statusText}` 
+      }))
+      throw new Error(errorData.message || `HTTP ${response.status}`)
     }
 
     return response.json()
@@ -113,6 +142,27 @@ class ApiService {
     )
   }
 
+  // Venue Management API methods
+  async createVenue(venue: CreateVenueRequest): Promise<ApiResponse<Venue>> {
+    return this.request<Venue>('/venues', {
+      method: 'POST',
+      body: JSON.stringify(venue),
+    })
+  }
+
+  async updateVenue(id: number, venue: UpdateVenueRequest): Promise<ApiResponse<Venue>> {
+    return this.request<Venue>(`/venues/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(venue),
+    })
+  }
+
+  async deleteVenue(id: number): Promise<ApiResponse<boolean>> {
+    return this.request<boolean>(`/venues/${id}`, {
+      method: 'DELETE',
+    })
+  }
+
   // Special API methods
   async getSpecials(): Promise<ApiResponse<SpecialSummary[]>> {
     return this.request<SpecialSummary[]>('/specials')
@@ -151,6 +201,27 @@ class ApiService {
     return this.request<PagedResponse<VenueWithCategorizedSpecials>>('/specials/search/venues', {
       method: 'POST',
       body: JSON.stringify(search),
+    })
+  }
+
+  // Special Management API methods
+  async createSpecial(special: CreateSpecialRequest): Promise<ApiResponse<Special>> {
+    return this.request<Special>('/specials', {
+      method: 'POST',
+      body: JSON.stringify(special),
+    })
+  }
+
+  async updateSpecial(id: number, special: UpdateSpecialRequest): Promise<ApiResponse<Special>> {
+    return this.request<Special>(`/specials/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(special),
+    })
+  }
+
+  async deleteSpecial(id: number): Promise<ApiResponse<boolean>> {
+    return this.request<boolean>(`/specials/${id}`, {
+      method: 'DELETE',
     })
   }
 

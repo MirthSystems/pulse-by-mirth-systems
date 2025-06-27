@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
+import { requireAuth } from '../guards/auth'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -40,6 +41,64 @@ const router = createRouter({
       path: '/about',
       name: 'About',
       component: () => import('../views/AboutView.vue'),
+    },
+    {
+      path: '/backoffice',
+      name: 'Backoffice',
+      component: () => import('../views/BackofficeView.vue'),
+      beforeEnter: requireAuth,
+      meta: {
+        requiresAuth: true,
+        title: 'Backoffice'
+      }
+    },
+    {
+      path: '/backoffice/venues',
+      name: 'VenueManagement',
+      component: () => import('../views/VenueManagementView.vue'),
+      beforeEnter: requireAuth,
+      meta: {
+        requiresAuth: true,
+        title: 'Venue Management'
+      }
+    },
+    {
+      path: '/backoffice/venues/:id',
+      name: 'VenueDetail',
+      component: () => import('../views/BackofficeVenueDetailView.vue'),
+      beforeEnter: requireAuth,
+      props: true,
+      meta: {
+        requiresAuth: true,
+        title: 'Venue Detail'
+      }
+    },
+    {
+      path: '/backoffice/venues/:venueId/specials/new',
+      name: 'CreateSpecial',
+      component: () => import('../views/BackofficeSpecialDetailView.vue'),
+      beforeEnter: requireAuth,
+      props: true,
+      meta: {
+        requiresAuth: true,
+        title: 'Create Special'
+      }
+    },
+    {
+      path: '/backoffice/venues/:venueId/specials/:specialId',
+      name: 'SpecialDetail',
+      component: () => import('../views/BackofficeSpecialDetailView.vue'),
+      beforeEnter: requireAuth,
+      props: true,
+      meta: {
+        requiresAuth: true,
+        title: 'Special Detail'
+      }
+    },
+    {
+      path: '/callback',
+      name: 'Callback',
+      component: () => import('../views/CallbackView.vue'),
     },
   ],
 })

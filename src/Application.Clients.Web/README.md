@@ -1,6 +1,6 @@
-# .
+# Pulse Vue.js Frontend
 
-This template should help get you started developing with Vue 3 in Vite.
+A modern Vue.js application for discovering amazing specials and venues, built with Auth0 authentication and a beautiful, responsive design.
 
 ## Recommended IDE Setup
 

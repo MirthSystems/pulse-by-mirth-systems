@@ -2,8 +2,10 @@ using Application.Extensions;
 using Application.Infrastructure.Data.Context;
 using Microsoft.EntityFrameworkCore;
 using Npgsql.EntityFrameworkCore.PostgreSQL;
-
-using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
+using NSwag;
 
 namespace Application.Services.API;
 
@@ -31,43 +33,55 @@ public class Program
             builder.Configuration.Bind("Application", options);
         });
 
-        builder.Services.AddControllers();
-        // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-        builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen(options =>
-        {
-            options.SwaggerDoc("v1", new OpenApiInfo
+        // Configure Auth0 JWT Authentication
+        builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
             {
-                Title = "Application API Server",
-                Description = "Learn how to protect your .NET applications with Auth0",
-                Contact = new OpenApiContact
+                options.Authority = $"https://{builder.Configuration["Auth0:Domain"]}";
+                options.Audience = builder.Configuration["Auth0:Audience"];
+                options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    Name = ".NET Identity with Auth0",
-                    Url = new Uri("https://a0.to/dotnet-templates/webapi")
-                },
-                Version = "v1.0.0"
+                    NameClaimType = ClaimTypes.NameIdentifier
+                };
             });
 
-            var securitySchema = new OpenApiSecurityScheme
+        // Configure CORS
+        builder.Services.AddCors(options =>
+        {
+            options.AddPolicy("AllowVueApp", policy =>
             {
-                Description = "Using the Authorization header with the Bearer scheme.",
-                Name = "Authorization",
-                In = ParameterLocation.Header,
-                Type = SecuritySchemeType.Http,
+                policy.WithOrigins(
+                        "http://localhost:5367", 
+                        "https://localhost:5367",
+                        "http://localhost:5173", 
+                        "https://localhost:5173"
+                      )
+                      .AllowAnyHeader()
+                      .AllowAnyMethod()
+                      .AllowCredentials();
+            });
+        });
+
+        builder.Services.AddControllers();
+        
+        // Add NSwag services with comprehensive configuration
+        builder.Services.AddOpenApiDocument(configure =>
+        {
+            configure.Title = "Pulse Application API";
+            configure.Description = "Comprehensive API for Pulse venue and specials management with Auth0 authentication";
+            configure.Version = "v1.0.0";
+            
+            // Add Auth0 JWT security scheme
+            configure.AddSecurity("Bearer", Enumerable.Empty<string>(), new NSwag.OpenApiSecurityScheme
+            {
+                Type = NSwag.OpenApiSecuritySchemeType.Http,
                 Scheme = "bearer",
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            };
+                BearerFormat = "JWT",
+                Description = "Enter your Auth0 JWT token. You can obtain this from the Auth0 login flow."
+            });
 
-            options.AddSecurityDefinition("Bearer", securitySchema);
-
-            options.AddSecurityRequirement(new OpenApiSecurityRequirement
-                  {
-                  { securitySchema, new[] { "Bearer" } }
-                  });
+            // Set up operation processors for automatic security requirements
+            configure.OperationProcessors.Add(new NSwag.Generation.Processors.Security.AspNetCoreOperationSecurityScopeProcessor("Bearer"));
         });
 
         var app = builder.Build();
@@ -77,14 +91,32 @@ public class Program
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
         {
-            app.UseSwagger();
-            app.UseSwaggerUI();
+            // NSwag OpenAPI documentation
+            app.UseOpenApi(configure =>
+            {
+                configure.Path = "/api/openapi/{documentName}/openapi.json";
+            });
+            
+            // NSwag Swagger UI (comprehensive documentation UI)
+            app.UseSwaggerUi(configure =>
+            {
+                configure.Path = "/api/docs";
+                configure.DocumentPath = "/api/openapi/{documentName}/openapi.json";
+            });
+            
+            // NSwag ReDoc UI (alternative documentation UI)
+            app.UseReDoc(configure =>
+            {
+                configure.Path = "/api/redoc";
+                configure.DocumentPath = "/api/openapi/{documentName}/openapi.json";
+            });
         }
 
         app.UseHttpsRedirection();
 
+        app.UseCors("AllowVueApp");
+        app.UseAuthentication();
         app.UseAuthorization();
-
 
         app.MapControllers();
 

@@ -2,6 +2,7 @@ using Application.Common.Interfaces.Services;
 using Application.Common.Models;
 using Application.Common.Models.Special;
 using Application.Common.Models.Search;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Application.Services.API.Controllers;
@@ -54,6 +55,7 @@ public class SpecialsController : ControllerBase
     /// Create a new special
     /// </summary>
     [HttpPost]
+    [Authorize]
     public async Task<ActionResult<ApiResponse<Special>>> CreateSpecial([FromBody] CreateSpecial createSpecial, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Creating new special: {SpecialTitle}", createSpecial.Title);
@@ -80,6 +82,7 @@ public class SpecialsController : ControllerBase
     /// Update an existing special
     /// </summary>
     [HttpPut("{id}")]
+    [Authorize]
     public async Task<ActionResult<ApiResponse<Special?>>> UpdateSpecial(long id, [FromBody] UpdateSpecial updateSpecial, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Updating special with ID: {SpecialId}", id);
@@ -107,6 +110,7 @@ public class SpecialsController : ControllerBase
     /// Delete a special
     /// </summary>
     [HttpDelete("{id}")]
+    [Authorize]
     public async Task<ActionResult<ApiResponse<bool>>> DeleteSpecial(long id, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Deleting special with ID: {SpecialId}", id);
