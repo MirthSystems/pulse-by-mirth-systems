@@ -11,11 +11,9 @@ public class Program
     {
         var builder = Host.CreateApplicationBuilder(args);
         builder.AddServiceDefaults();
-        builder.Services.AddHostedService<Worker>();
-
-        builder.Services.AddDbContextPool<ApplicationDbContext>(options =>
+        builder.AddNpgsqlDbContext<ApplicationDbContext>("application-db", configureDbContextOptions: options =>
         {
-            options.UseNpgsql(builder.Configuration.GetConnectionString("application-db"), npgsqlOptions =>
+            options.UseNpgsql(npgsqlOptions =>
             {
                 npgsqlOptions.MigrationsAssembly(typeof(Program).Assembly.FullName);
                 npgsqlOptions.UseNodaTime();
@@ -28,7 +26,7 @@ public class Program
             options.EnableDetailedErrors();
             #endif
         });
-        builder.EnrichNpgsqlDbContext<ApplicationDbContext>();
+        builder.Services.AddHostedService<Worker>();
 
         var host = builder.Build();
         host.Run();

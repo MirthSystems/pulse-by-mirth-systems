@@ -47,17 +47,33 @@ public class Program
         // Configure CORS
         builder.Services.AddCors(options =>
         {
-            options.AddPolicy("AllowVueApp", policy =>
+            options.AddPolicy("AllowedOrigins", policy =>
             {
-                policy.WithOrigins(
-                        "http://localhost:5367", 
-                        "https://localhost:5367",
-                        "http://localhost:5173", 
-                        "https://localhost:5173"
-                      )
-                      .AllowAnyHeader()
-                      .AllowAnyMethod()
-                      .AllowCredentials();
+                var corsSection = builder.Configuration.GetSection("CORS");
+                var allowedOrigins = corsSection.GetSection("AllowedOrigins")
+                    .Get<string[]>() ?? new string[0];
+                var allowedMethods = corsSection.GetSection("AllowedMethods")
+                    .Get<string[]>() ?? new[] { "GET", "POST", "PUT", "DELETE", "OPTIONS" };
+                var allowedHeaders = corsSection.GetSection("AllowedHeaders")
+                    .Get<string[]>() ?? new[] { "*" };
+                var allowCredentials = corsSection.GetValue<bool>("AllowCredentials", true);
+
+                if (allowedOrigins.Length > 0)
+                {
+                    policy.WithOrigins(allowedOrigins);
+                }
+                else
+                {
+                    policy.AllowAnyOrigin();
+                }
+
+                policy.WithMethods(allowedMethods)
+                      .WithHeaders(allowedHeaders);
+
+                if (allowCredentials && allowedOrigins.Length > 0)
+                {
+                    policy.AllowCredentials();
+                }
             });
         });
 
@@ -113,7 +129,7 @@ public class Program
 
         app.UseHttpsRedirection();
 
-        app.UseCors("AllowVueApp");
+        app.UseCors("AllowedOrigins");
         app.UseAuthentication();
         app.UseAuthorization();
 
