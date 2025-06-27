@@ -15,7 +15,6 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
         builder.AddServiceDefaults();
-        builder.AddRedisDistributedCache("cache");
         builder.AddNpgsqlDbContext<ApplicationDbContext>("application-db", configureDbContextOptions: options =>
         {
             options.UseNpgsql(npgsqlOptions =>
