@@ -2,16 +2,32 @@ using Aspire.Hosting;
 
 using Azure.Provisioning.PostgreSql;
 
+using Microsoft.Extensions.Hosting;
+
 var builder = DistributedApplication.CreateBuilder(args);
 
-var db = builder.AddPostgres("postgres")
-    .WithDataVolume(
-        name: "postgres-data",
-        isReadOnly: false
-    )
-    .WithImage("postgis/postgis")
-    .WithPgAdmin()
-    .AddDatabase("application-db");
+var postgres = builder.AddAzurePostgresFlexibleServer("postgres")
+                      .RunAsContainer(container =>
+                      {
+                          container.WithImage("postgis/postgis");
+                          if (builder.Environment.IsDevelopment())
+                          {
+                              container.WithDataBindMount(
+                                    source: @"..\..\data\postgresql",
+                                    isReadOnly: false
+                                );
+                              container.WithPgWeb();
+                          }
+                          else
+                          {
+                              container.WithDataVolume(
+                                    name: "postgres-data",
+                                    isReadOnly: false
+                                );
+                          }
+                      });
+
+var db = postgres.AddDatabase("application-db");
 
 var databaseMigrations = 
     builder.AddProject<Projects.Application_Services_DatabaseMigrations>("database-migrations")
