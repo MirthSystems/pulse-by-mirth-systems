@@ -108,8 +108,7 @@ const handleLogout = () => {
 
 const handleProfileSettings = () => {
   closeDropdown()
-  // Navigate to profile settings or open modal
-  console.log('Profile settings clicked')
+  router.push('/profile')
 }
 
 // Close dropdown when clicking outside

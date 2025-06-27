@@ -328,22 +328,12 @@
       </div>
     </div>
 
-    <!-- Delete Confirmation Dialog -->
-    <ConfirmDialog
-      v-if="showDeleteDialog"
-      title="Delete Venue"
-      :message="`Are you sure you want to delete '${venueToDelete?.name}'? This action cannot be undone and will also delete all associated specials.`"
-      confirm-text="Delete"
-      confirm-class="bg-red-600 hover:bg-red-700"
-      @confirm="deleteVenue"
-      @cancel="showDeleteDialog = false"
-    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useVenueStore } from '@/stores/venue'
 import apiService from '@/services/api'
 import type { VenueSummary, VenueCategory } from '@/types/api'
@@ -358,9 +348,9 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon
 } from '@heroicons/vue/24/outline'
-import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 
 const router = useRouter()
+const route = useRoute()
 const venueStore = useVenueStore()
 
 // State
@@ -370,10 +360,6 @@ const loading = ref(true)
 const searchTerm = ref('')
 const selectedCategory = ref<number | ''>('')
 const selectedStatus = ref<'active' | 'inactive' | ''>('')
-
-// Dialog state
-const showDeleteDialog = ref(false)
-const venueToDelete = ref<VenueSummary | null>(null)
 
 // Pagination
 const currentPage = ref(1)
@@ -461,23 +447,22 @@ const createVenue = () => {
 }
 
 const confirmDelete = (venue: VenueSummary) => {
-  venueToDelete.value = venue
-  showDeleteDialog.value = true
+  router.push({
+    path: '/confirm',
+    query: {
+      type: 'venue',
+      id: venue.id.toString(),
+      name: venue.name,
+      returnTo: '/backoffice'
+    }
+  })
 }
 
 const deleteVenue = async () => {
-  if (!venueToDelete.value) return
-
-  try {
-    const response = await apiService.deleteVenue(venueToDelete.value.id)
-    if (response.success) {
-      await loadData() // Refresh the list
-    }
-  } catch (error) {
-    console.error('Error deleting venue:', error)
-  } finally {
-    showDeleteDialog.value = false
-    venueToDelete.value = null
+  // This function is now handled by ConfirmView
+  // Reload venues if we're returning from a successful delete
+  if (route.query.success) {
+    await loadData()
   }
 }
 

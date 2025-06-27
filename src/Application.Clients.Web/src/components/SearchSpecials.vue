@@ -2,20 +2,7 @@
   <div class="search-specials">
     <div class="max-w-3xl mx-auto">
       <form @submit.prevent="handleSearch" class="space-y-4">
-        <!-- Main Search Input -->
-        <div class="relative">
-          <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-            <MagnifyingGlassIcon class="h-6 w-6 text-gray-400" />
-          </div>
-          <input
-            v-model="searchQuery"
-            type="text"
-            placeholder="Search for specials, venues, or cuisines..."
-            class="block w-full pl-12 pr-4 py-4 border-0 rounded-xl leading-5 bg-white/90 backdrop-blur-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white/50 focus:bg-white text-lg shadow-lg"
-          />
-        </div>
-
-        <!-- Location and Quick Filters Row -->
+        <!-- Location and Radius Row -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
           <!-- Location Input -->
           <div class="relative">
@@ -23,22 +10,23 @@
               <MapPinIcon class="h-5 w-5 text-gray-400" />
             </div>
             <input
-              v-model="location"
+              v-model="locationName"
               type="text"
-              placeholder="Location"
+              placeholder="Enter location..."
               class="block w-full pl-10 pr-3 py-3 border-0 rounded-lg leading-5 bg-white/80 backdrop-blur-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white/50 focus:bg-white shadow-md"
             />
           </div>
 
-          <!-- Category Filter -->
+          <!-- Radius Dropdown -->
           <select
-            v-model="selectedCategory"
+            v-model="radius"
             class="block w-full py-3 px-3 border-0 rounded-lg leading-5 bg-white/80 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-white/50 focus:bg-white shadow-md"
           >
-            <option value="">All Categories</option>
-            <option value="food">Food & Dining</option>
-            <option value="drinks">Drinks & Bars</option>
-            <option value="entertainment">Entertainment</option>
+            <option :value="1000">1 km</option>
+            <option :value="2000">2 km</option>
+            <option :value="5000">5 km</option>
+            <option :value="10000">10 km</option>
+            <option :value="25000">25 km</option>
           </select>
 
           <!-- Search Button -->
@@ -52,66 +40,124 @@
             {{ isSearching ? 'Searching...' : 'Search' }}
           </button>
         </div>
-      </form>
 
-      <!-- Quick Filters -->
-      <div class="mt-6 flex flex-wrap justify-center gap-2">
-        <span class="text-sm text-blue-100 mr-2">Popular:</span>
-        <button
-          v-for="tag in popularTags"
-          :key="tag"
-          @click="handleQuickSearch(tag)"
-          class="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-white/20 text-white hover:bg-white/30 transition-all backdrop-blur-sm border border-white/20"
-        >
-          {{ tag }}
-        </button>
-      </div>
+        <!-- Optional Filter Expansion -->
+        <div class="text-center">
+          <button
+            type="button"
+            @click="showFilters = !showFilters"
+            class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-white/20 hover:bg-white/30 rounded-lg transition-all backdrop-blur-sm border border-white/20"
+          >
+            <AdjustmentsHorizontalIcon class="mr-2 h-4 w-4" />
+            {{ showFilters ? 'Hide' : 'Show' }} Filters
+            <ChevronDownIcon 
+              class="ml-2 h-4 w-4 transition-transform"
+              :class="{ 'rotate-180': showFilters }"
+            />
+          </button>
+        </div>
+
+        <!-- Expanded Filters -->
+        <div v-if="showFilters" class="bg-white/10 backdrop-blur-sm rounded-lg p-4 space-y-3">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Search Term Filter -->
+            <div>
+              <label class="block text-sm font-medium text-white mb-2">Search Term (Optional)</label>
+              <input
+                v-model="searchTerm"
+                type="text"
+                placeholder="Keywords, venue, cuisine..."
+                class="block w-full py-2 px-3 border-0 rounded-lg bg-white/90 focus:outline-none focus:ring-2 focus:ring-white/50"
+              />
+            </div>
+
+            <!-- Category Filter -->
+            <div>
+              <label class="block text-sm font-medium text-white mb-2">Category</label>
+              <select
+                v-model="categoryId"
+                class="block w-full py-2 px-3 border-0 rounded-lg bg-white/90 focus:outline-none focus:ring-2 focus:ring-white/50"
+              >
+                <option :value="undefined">All Categories</option>
+                <option 
+                  v-for="category in categories" 
+                  :key="category.id" 
+                  :value="category.id"
+                >
+                  {{ category.name }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Sort By -->
+            <div>
+              <label class="block text-sm font-medium text-white mb-2">Sort By</label>
+              <select
+                v-model="sortBy"
+                class="block w-full py-2 px-3 border-0 rounded-lg bg-white/90 focus:outline-none focus:ring-2 focus:ring-white/50"
+              >
+                <option value="relevance">Relevance</option>
+                <option value="distance">Distance</option>
+                <option value="newest">Newest</option>
+                <option value="ending-soon">Ending Soon</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </form>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { MagnifyingGlassIcon, MapPinIcon } from '@heroicons/vue/24/outline'
+import { useSpecialStore } from '../stores/special'
+import { 
+  MagnifyingGlassIcon, 
+  MapPinIcon, 
+  AdjustmentsHorizontalIcon,
+  ChevronDownIcon 
+} from '@heroicons/vue/24/outline'
 
 const router = useRouter()
+const specialStore = useSpecialStore()
 
-const searchQuery = ref('')
-const location = ref('')
-const selectedCategory = ref('')
+// Search parameters
+const searchTerm = ref('')
+const locationName = ref('')
+const radius = ref(5000)
+const categoryId = ref<number | undefined>(undefined)
+const sortBy = ref('relevance')
+const showFilters = ref(false)
 const isSearching = ref(false)
 
-const popularTags = [
-  'Happy Hour',
-  'Pizza',
-  'Brunch',
-  'Live Music',
-  'Date Night',
-  'Craft Beer'
-]
+// Categories from store
+const categories = ref<any[]>([])
+
+// Load categories on mount
+onMounted(async () => {
+  await specialStore.fetchSpecialCategories()
+  categories.value = specialStore.categories
+})
 
 const handleSearch = async () => {
   isSearching.value = true
   
-  // Simulate search delay
-  await new Promise(resolve => setTimeout(resolve, 500))
-  
-  // Navigate to search results with query parameters
-  router.push({
-    name: 'Search',
-    query: {
-      q: searchQuery.value || undefined,
-      location: location.value || undefined,
-      category: selectedCategory.value || undefined
-    }
-  })
-  
-  isSearching.value = false
-}
-
-const handleQuickSearch = (tag: string) => {
-  searchQuery.value = tag
-  handleSearch()
+  try {
+    // Navigate to search page with parameters
+    router.push({
+      name: 'Search',
+      query: {
+        q: searchTerm.value.trim() || undefined,
+        location: locationName.value || undefined,
+        radius: radius.value.toString(),
+        category: categoryId.value?.toString() || undefined,
+        sortBy: sortBy.value
+      }
+    })
+  } finally {
+    isSearching.value = false
+  }
 }
 </script>

@@ -369,17 +369,6 @@
         </div>
       </div>
     </div>
-
-    <!-- Delete Special Confirmation Dialog -->
-    <ConfirmDialog
-      v-if="showDeleteSpecialDialog"
-      title="Delete Special"
-      :message="`Are you sure you want to delete '${specialToDelete?.title}'? This action cannot be undone.`"
-      confirm-text="Delete"
-      confirm-class="bg-red-600 hover:bg-red-700"
-      @confirm="deleteSpecial"
-      @cancel="showDeleteSpecialDialog = false"
-    />
   </div>
 </template>
 
@@ -402,7 +391,6 @@ import {
   StarIcon,
   ExclamationTriangleIcon
 } from '@heroicons/vue/24/outline'
-import ConfirmDialog from '../components/common/ConfirmDialog.vue'
 import BusinessHoursEditor from '../components/common/BusinessHoursEditor.vue'
 
 const route = useRoute()
@@ -443,10 +431,6 @@ const form = ref<CreateVenueRequest>({
 })
 
 const errors = ref<Record<string, string>>({})
-
-// Special dialog state
-const showDeleteSpecialDialog = ref(false)
-const specialToDelete = ref<SpecialSummary | null>(null)
 
 // Computed
 const venueId = computed(() => {
@@ -639,23 +623,22 @@ const saveVenue = async () => {
 
 // Special management methods
 const confirmDeleteSpecial = (special: SpecialSummary) => {
-  specialToDelete.value = special
-  showDeleteSpecialDialog.value = true
+  router.push({
+    path: '/confirm',
+    query: {
+      type: 'special',
+      id: special.id.toString(),
+      name: special.title,
+      returnTo: route.path
+    }
+  })
 }
 
 const deleteSpecial = async () => {
-  if (!specialToDelete.value) return
-
-  try {
-    const response = await apiService.deleteSpecial(specialToDelete.value.id)
-    if (response.success) {
-      await loadSpecials() // Refresh the list
-    }
-  } catch (error) {
-    console.error('Error deleting special:', error)
-  } finally {
-    showDeleteSpecialDialog.value = false
-    specialToDelete.value = null
+  // This function is now handled by ConfirmView
+  // Reload specials if we're returning from a successful delete
+  if (route.query.success) {
+    await loadSpecials()
   }
 }
 

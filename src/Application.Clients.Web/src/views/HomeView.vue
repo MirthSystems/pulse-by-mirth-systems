@@ -67,44 +67,6 @@
         </div>
       </div>
     </section>
-
-    <!-- Popular Specials Section -->
-    <section class="py-16 bg-gray-50">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-12">
-          <h2 class="text-3xl font-bold text-gray-900 mb-4">
-            Popular Specials
-          </h2>
-          <p class="text-lg text-gray-600">
-            Check out what's trending in your area
-          </p>
-        </div>
-        
-        <!-- This will be populated with actual specials data -->
-        <PopularSpecials />
-      </div>
-    </section>
-
-    <!-- Call to Action Section -->
-    <section class="bg-blue-600 text-white py-16">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 class="text-3xl font-bold mb-4">
-          Ready to Start Saving?
-        </h2>
-        <p class="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-          Join thousands of users who are already discovering amazing deals in their neighborhood.
-        </p>
-        <div class="space-x-4">
-          <router-link
-            to="/search"
-            class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-blue-600 bg-white hover:bg-gray-50 transition-colors"
-          >
-            <MagnifyingGlassIcon class="mr-2 h-5 w-5" />
-            Start Searching
-          </router-link>
-        </div>
-      </div>
-    </section>
   </div>
 </template>
 

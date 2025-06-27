@@ -159,6 +159,56 @@ export const useSpecialStore = defineStore('special', () => {
     }
   }
 
+  async function searchSpecialsEnhanced(params: {
+    searchTerm?: string
+    latitude?: number
+    longitude?: number
+    radiusInMeters?: number
+    categoryId?: number
+    date?: string
+    time?: string
+  }) {
+    loading.value = true
+    try {
+      const searchParams = {
+        searchTerm: params.searchTerm,
+        latitude: params.latitude,
+        longitude: params.longitude,
+        radiusInMeters: params.radiusInMeters,
+        date: params.date,
+        time: params.time,
+        pageNumber: 1,
+        pageSize: 50
+      }
+      // Use the venues search endpoint which returns enhanced results
+      const response = await apiService.searchVenuesWithSpecials(searchParams)
+      if (response.success && response.data.items) {
+        // Extract all specials from all venues
+        const allSpecials: any[] = []
+        response.data.items.forEach(venueData => {
+          // Add specials from each category
+          allSpecials.push(...venueData.food)
+          allSpecials.push(...venueData.drink)
+          allSpecials.push(...venueData.entertainment)
+        })
+        
+        // Filter by category if specified
+        if (params.categoryId) {
+          searchResults.value = allSpecials.filter(special => 
+            special.specialCategoryId === params.categoryId
+          )
+        } else {
+          searchResults.value = allSpecials
+        }
+      }
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'An error occurred'
+      console.error('Enhanced search error:', err)
+    } finally {
+      loading.value = false
+    }
+  }
+
   function clearSelectedSpecial() {
     selectedSpecial.value = null
   }
@@ -189,6 +239,7 @@ export const useSpecialStore = defineStore('special', () => {
     fetchSpecialsByCategory,
     fetchSpecialsByVenue,
     searchSpecials,
+    searchSpecialsEnhanced,
     clearSelectedSpecial,
     clearError
   }

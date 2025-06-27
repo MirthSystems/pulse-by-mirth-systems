@@ -96,6 +96,26 @@ const router = createRouter({
       }
     },
     {
+      path: '/profile',
+      name: 'Profile',
+      component: () => import('../views/ProfileView.vue'),
+      beforeEnter: requireAuth,
+      meta: {
+        requiresAuth: true,
+        title: 'Profile Settings'
+      }
+    },
+    {
+      path: '/confirm',
+      name: 'Confirm',
+      component: () => import('../views/ConfirmView.vue'),
+      beforeEnter: requireAuth,
+      meta: {
+        requiresAuth: true,
+        title: 'Confirm Action'
+      }
+    },
+    {
       path: '/callback',
       name: 'Callback',
       component: () => import('../views/CallbackView.vue'),

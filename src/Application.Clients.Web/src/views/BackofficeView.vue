@@ -1,5 +1,5 @@
 <template>
-  <div class="backoffice-page">
+  <div class="min-h-screen flex flex-col bg-gray-50">
     <!-- Page Header -->
     <div class="bg-white shadow">
       <div class="px-4 sm:px-6 lg:px-8 py-6">
@@ -36,14 +36,6 @@
           </div>
           <div class="flex space-x-3">
             <button
-              @click="testApiCall"
-              :disabled="apiLoading"
-              class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50"
-            >
-              <BeakerIcon class="-ml-1 mr-2 h-4 w-4" />
-              {{ apiLoading ? 'Testing...' : 'Test API' }}
-            </button>
-            <button
               @click="openVenueDialog"
               class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
@@ -55,43 +47,8 @@
       </div>
     </div>
 
-    <!-- API Test Results -->
-    <div v-if="apiResult" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-      <div class="bg-green-50 border border-green-200 rounded-md p-4">
-        <div class="flex">
-          <CheckCircleIcon class="h-5 w-5 text-green-400" />
-          <div class="ml-3">
-            <h3 class="text-sm font-medium text-green-800">
-              API Test Successful!
-            </h3>
-            <div class="mt-2 text-sm text-green-700">
-              <p>Successfully connected to the API with authentication.</p>
-              <p class="mt-1"><strong>Response:</strong> {{ apiResult }}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- API Error -->
-    <div v-if="apiError" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-      <div class="bg-red-50 border border-red-200 rounded-md p-4">
-        <div class="flex">
-          <XCircleIcon class="h-5 w-5 text-red-400" />
-          <div class="ml-3">
-            <h3 class="text-sm font-medium text-red-800">
-              API Test Failed
-            </h3>
-            <div class="mt-2 text-sm text-red-700">
-              <p>{{ apiError }}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <!-- Dashboard Content -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
       <!-- Stats Cards -->
       <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <div 
@@ -261,6 +218,15 @@
         </div>
       </div>
     </div>
+
+    <!-- Backoffice Footer -->
+    <footer class="bg-white border-t border-gray-200 mt-auto">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="text-center text-gray-600">
+          <p>&copy; 2025 Pulse Backoffice. Manage your venues and specials with ease.</p>
+        </div>
+      </div>
+    </footer>
   </div>
 </template>
 
@@ -271,57 +237,13 @@ import {
   BuildingStorefrontIcon, 
   StarIcon, 
   UserGroupIcon,
-  EyeIcon,
-  BeakerIcon,
-  CheckCircleIcon,
-  XCircleIcon
+  EyeIcon
 } from '@heroicons/vue/24/outline'
 import apiService from '../services/api'
-import { useApiAuth } from '../composables/useApiAuth'
 import type { VenueSummary, SpecialSummary } from '../types/api'
 
 const router = useRouter()
 const isLoading = ref(true)
-const apiLoading = ref(false)
-const apiResult = ref<string | null>(null)
-const apiError = ref<string | null>(null)
-
-// Initialize API authentication
-const { updateApiToken } = useApiAuth()
-
-// API test function
-const testApiCall = async () => {
-  apiLoading.value = true
-  apiError.value = null
-  apiResult.value = null
-  
-  try {
-    console.log('Testing API call with authentication...')
-    
-    // First try to update the API token
-    try {
-      await updateApiToken()
-      console.log('API token updated successfully')
-    } catch (tokenError) {
-      console.warn('Failed to update API token:', tokenError)
-      // Continue with the API call anyway - might work if token is already set
-    }
-    
-    const response = await apiService.getVenues()
-    console.log('API Response:', response)
-    
-    if (response.success && response.data) {
-      apiResult.value = `Successfully got ${response.data.length} venues from API`
-    } else {
-      apiResult.value = `API call completed but returned: ${response.message || 'Unknown response'}`
-    }
-  } catch (error) {
-    console.error('API Error:', error)
-    apiError.value = error instanceof Error ? error.message : 'Unknown error occurred'
-  } finally {
-    apiLoading.value = false
-  }
-}
 
 // Navigation function
 const goToVenueManagement = (venueId?: number) => {
