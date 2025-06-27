@@ -1,9 +1,0 @@
-#!/bin/bash
-TOKEN="eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InZmX05zX2drQ0xhWkU5R3lNNFQ5ZyJ9.eyJpc3MiOiJodHRwczovL21pcnRoc3lzdGVtcy51cy5hdXRoMC5jb20vIiwic3ViIjoiYXV0aDB8NjgyZTFmMmUyMTIxMzgwYmJlYjU2ZGNmIiwiYXVkIjpbImh0dHBzOi8vcHVsc2UubWlydGhzeXN0ZW1zLmNvbSIsImh0dHBzOi8vbWlydGhzeXN0ZW1zLnVzLmF1dGgwLmNvbS91c2VyaW5mbyJdLCJpYXQiOjE3NTEwNDE4NDQsImV4cCI6MTc1MTEyODI0NCwic2NvcGUiOiJvcGVuaWQgcHJvZmlsZSBlbWFpbCIsImF6cCI6Im5sOFdVNnpJQk5PbGF6UzQ1NVBIQTZZamoyWEZQWk9iIiwicGVybWlzc2lvbnMiOlsicmVhZDphZG1pbi1tZXNzYWdlcyJdfQ.N6LxlA9xXI9LoAhdt80L87gtOOA9jJRCFVoW6mody4bi95isMmO8t2cYr2sQr4U0tOBAJHqBaQn16IyQlxXhB3XHSGIlxFe76xbRoKfRcYQgEH4btUJkHhqVEaFE7SICdMDLxyFsGiyKHrfcw_i8WPc5RJxmDUPKEWB3frW7EEt5HYhLB5RKZZeNzVaJiovCSvCKy7HRjDjnYn6nBwkSqlvuoA"
-
-curl -X POST "https://localhost:7309/api/specials" \
-  -H "accept: application/json" \
-  -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d @samples/requests/create-special-body.json \
-  -k
