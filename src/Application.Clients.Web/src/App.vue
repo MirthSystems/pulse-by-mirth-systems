@@ -1,41 +1,78 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
+import { ref } from 'vue'
+import { RouterView } from 'vue-router'
+import { 
+  Bars3Icon,
+  XMarkIcon
+} from '@heroicons/vue/24/outline'
+import Auth from './components/Auth.vue'
+import { useApiAuth } from './composables/useApiAuth'
+
+const mobileMenuOpen = ref(false)
+
+// Initialize API authentication
+useApiAuth()
 </script>
 
 <template>
-  <header
-    class="flex flex-col md:flex-row items-center max-h-screen leading-[1.5] pr-0 md:pr-[calc(var(--section-gap)_/_2)]"
-  >
-    <img
-      alt="Vue logo"
-      class="block mx-auto md:mr-8 mb-8 md:mb-0 w-[125px] h-[125px]"
-      src="@/assets/logo.svg"
-      width="125"
-      height="125"
-    />
-
-    <div class="flex flex-col md:flex-row md:items-start flex-wrap w-full">
-      <HelloWorld msg="You did it!" />
-
-      <nav
-        class="w-full text-xs md:text-base text-center md:text-left mt-8 md:mt-4 ml-0 md:ml-[-1rem] py-0 md:py-4"
-      >
-        <RouterLink
-          to="/"
-          class="inline-block px-4 border-l border-[var(--color-border)] first:border-0 text-[var(--color-text)] hover:bg-transparent"
-          active-class="text-[var(--color-text)]"
-          >Home</RouterLink
-        >
-        <RouterLink
-          to="/about"
-          class="inline-block px-4 border-l border-[var(--color-border)] first:border-0 text-[var(--color-text)] hover:bg-transparent"
-          active-class="text-[var(--color-text)]"
-          >About</RouterLink
-        >
-      </nav>
-    </div>
-  </header>
-
-  <RouterView />
+  <div id="app" class="min-h-screen bg-gray-50">
+    <!-- Navigation Header -->
+    <nav class="bg-white shadow-sm border-b border-gray-200">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16">
+          <!-- Logo -->
+          <div class="flex items-center">
+            <router-link to="/" class="flex items-center space-x-3">
+              <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                <span class="text-white font-bold text-lg">P</span>
+              </div>
+              <span class="text-xl font-bold text-gray-900">Pulse</span>
+            </router-link>
+          </div>
+          
+          <!-- Desktop Auth Component -->
+          <div class="hidden md:flex items-center">
+            <Auth />
+          </div>
+          
+          <!-- Mobile menu button -->
+          <div class="md:hidden flex items-center space-x-2">
+            <Auth />
+            <button
+              @click="mobileMenuOpen = !mobileMenuOpen"
+              class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100"
+            >
+              <Bars3Icon v-if="!mobileMenuOpen" class="h-6 w-6" />
+              <XMarkIcon v-else class="h-6 w-6" />
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Mobile menu -->
+      <div v-if="mobileMenuOpen" class="md:hidden border-t border-gray-200">
+        <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white">
+          <!-- Mobile menu items will be populated by Auth component when authenticated -->
+        </div>
+      </div>
+    </nav>
+    
+    <!-- Main Content -->
+    <main>
+      <router-view />
+    </main>
+    
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 mt-16">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="text-center text-gray-600">
+          <p>&copy; 2025 Pulse. Built with ❤️ for discovering amazing venues and specials.</p>
+        </div>
+      </div>
+    </footer>
+  </div>
 </template>
+
+<style scoped>
+/* Remove old navigation styles as we're moving to a simpler layout */
+</style>

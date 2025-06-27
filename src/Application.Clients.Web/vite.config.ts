@@ -15,4 +15,19 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     },
   },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'https://localhost:7309',
+        changeOrigin: true,
+        secure: false,
+        configure: (proxy, options) => {
+          // Fallback to different ports if the main one fails
+          proxy.on('error', (err, req, res) => {
+            console.log('Proxy error, trying fallback...')
+          })
+        }
+      }
+    }
+  }
 })

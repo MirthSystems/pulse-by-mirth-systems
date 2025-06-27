@@ -1,0 +1,17 @@
+{
+  "venueId": 1,
+  "specialCategoryId": 1,
+  "title": "Happy Hour Special",
+  "description": "50% off all coffee drinks from 3-5 PM",
+  "startDate": "2025-06-27",
+  "endDate": "2025-12-31",
+  "startTime": "15:00",
+  "endTime": "17:00",
+  "isAllDay": false,
+  "isRecurring": true,
+  "recurringPattern": "daily",
+  "recurringDays": [1, 2, 3, 4, 5],
+  "isActive": true,
+  "maxRedemptions": 100,
+  "currentRedemptions": 0
+}
