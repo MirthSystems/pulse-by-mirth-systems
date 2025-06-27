@@ -4,9 +4,9 @@
       <form @submit.prevent="handleSearch" class="space-y-4">
         <!-- Location and Radius Row -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <!-- Location Input -->
+          <!-- Location Input with Current Location -->
           <div class="relative">
-            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <MapPinIcon class="h-5 w-5 text-gray-400" />
             </div>
             <input
@@ -14,14 +14,27 @@
               type="text"
               placeholder="Enter location..."
               required
-              class="block w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 shadow-sm transition-colors"
+              class="input-control block w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg bg-white placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 shadow-sm transition-colors"
             />
+            <button
+              type="button"
+              @click="getCurrentLocation"
+              :disabled="isGettingLocation"
+              class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-blue-600 focus:text-blue-600 transition-colors"
+              title="Use current location"
+            >
+              <div v-if="isGettingLocation" class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+              <svg v-else class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+              </svg>
+            </button>
           </div>
 
           <!-- Radius Dropdown -->
           <select
             v-model="radius"
-            class="block w-full py-3 px-4 border border-gray-300 rounded-lg leading-5 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 shadow-sm transition-colors"
+            class="input-control block w-full py-3 px-4 border border-gray-300 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 shadow-sm transition-colors"
           >
             <option :value="1000">1 km</option>
             <option :value="2000">2 km</option>
@@ -34,7 +47,7 @@
           <button
             type="submit"
             :disabled="isSearching || !locationName.trim()"
-            class="inline-flex items-center justify-center px-6 py-3 border border-blue-600 text-base font-semibold rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md"
+            class="btn-primary inline-flex items-center justify-center px-6 py-3 border border-blue-600 text-base font-semibold rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md"
           >
             <MagnifyingGlassIcon v-if="!isSearching" class="mr-2 h-5 w-5" />
             <div v-else class="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
@@ -169,9 +182,59 @@ const sortBy = ref('distance')
 const sortOrder = ref('asc')
 const showFilters = ref(false)
 const isSearching = ref(false)
+const isGettingLocation = ref(false)
 
 // Categories from store
 const categories = ref<any[]>([])
+
+// Geolocation functionality
+const getCurrentLocation = async () => {
+  if (!navigator.geolocation) {
+    alert('Geolocation is not supported by this browser.')
+    return
+  }
+
+  isGettingLocation.value = true
+
+  try {
+    const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(resolve, reject, {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 300000 // 5 minutes
+      })
+    })
+
+    const { latitude, longitude } = position.coords
+
+    // Use reverse geocoding to get a readable address
+    // For now, we'll use a simple lat,lng format
+    // In a real app, you might want to use a geocoding service
+    locationName.value = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`
+    
+  } catch (error) {
+    console.error('Error getting location:', error)
+    let message = 'Unable to get your location.'
+    
+    if (error instanceof GeolocationPositionError) {
+      switch (error.code) {
+        case error.PERMISSION_DENIED:
+          message = 'Location access denied. Please allow location access and try again.'
+          break
+        case error.POSITION_UNAVAILABLE:
+          message = 'Location information is unavailable.'
+          break
+        case error.TIMEOUT:
+          message = 'Location request timed out. Please try again.'
+          break
+      }
+    }
+    
+    alert(message)
+  } finally {
+    isGettingLocation.value = false
+  }
+}
 
 // Load categories on mount
 onMounted(async () => {
@@ -208,3 +271,51 @@ const handleSearch = async () => {
   }
 }
 </script>
+
+<style scoped>
+.input-control {
+  height: 3.25rem; /* 52px - consistent height for all form controls */
+  min-height: 3.25rem;
+}
+
+.btn-primary {
+  height: 3.25rem; /* 52px - same height as input controls */
+  min-height: 3.25rem;
+}
+
+/* Improve contrast for better accessibility */
+.btn-primary:hover:not(:disabled) {
+  background-color: #1d4ed8; /* blue-700 */
+  border-color: #1d4ed8;
+}
+
+.btn-primary:focus:not(:disabled) {
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+}
+
+/* Better disabled state contrast */
+.btn-primary:disabled {
+  background-color: #9ca3af; /* gray-400 */
+  border-color: #9ca3af;
+  color: #ffffff;
+  opacity: 0.7;
+}
+
+/* Improve filter toggle button accessibility */
+.search-specials button[type="button"]:not(.btn-primary) {
+  border: 1px solid #d1d5db; /* gray-300 */
+  background-color: #ffffff;
+  color: #374151; /* gray-700 */
+}
+
+.search-specials button[type="button"]:not(.btn-primary):hover {
+  background-color: #f9fafb; /* gray-50 */
+  border-color: #9ca3af; /* gray-400 */
+}
+
+.search-specials button[type="button"]:not(.btn-primary):focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5); /* blue-500 with opacity */
+  border-color: #2563eb; /* blue-600 */
+}
+</style>

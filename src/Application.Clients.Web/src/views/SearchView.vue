@@ -12,11 +12,25 @@ const specialStore = useSpecialStore()
 const isSearching = ref(false)
 
 // Computed
-const hasResults = computed(() => specialStore.venuesWithSpecials.length > 0)
-const venueResults = computed(() => specialStore.venuesWithSpecials)
+const hasResults = computed(() => {
+  const venues = specialStore.venuesWithSpecials
+  return Array.isArray(venues) && venues.length > 0
+})
+
+const venueResults = computed(() => {
+  const venues = specialStore.venuesWithSpecials
+  return Array.isArray(venues) ? venues : []
+})
+
 const totalResults = computed(() => {
-  return venueResults.value.reduce((total, venue) => {
-    return total + venue.food.length + venue.drink.length + venue.entertainment.length
+  const venues = venueResults.value
+  if (!Array.isArray(venues) || venues.length === 0) return 0
+  
+  return venues.reduce((total, venue) => {
+    const foodCount = Array.isArray(venue.food) ? venue.food.length : 0
+    const drinkCount = Array.isArray(venue.drink) ? venue.drink.length : 0
+    const entertainmentCount = Array.isArray(venue.entertainment) ? venue.entertainment.length : 0
+    return total + foodCount + drinkCount + entertainmentCount
   }, 0)
 })
 
@@ -131,11 +145,11 @@ watch(() => route.query, (newQuery) => {
         
         <!-- Venues with Categorized Specials -->
         <div class="space-y-8">
-          <div 
-            v-for="venue in venueResults" 
-            :key="venue.venue.id"
-            class="bg-white rounded-lg shadow-lg overflow-hidden"
-          >
+          <template v-for="venue in venueResults" :key="venue.venue?.id || `venue-${Math.random()}`">
+            <div 
+              v-if="venue?.venue"
+              class="bg-white rounded-lg shadow-lg overflow-hidden"
+            >
             <!-- Venue Header -->
             <div class="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-6">
               <div class="flex items-center justify-between">
@@ -148,7 +162,7 @@ watch(() => route.query, (newQuery) => {
                 </div>
                 <div class="text-right">
                   <span class="inline-block bg-white/20 px-3 py-1 rounded-full text-sm font-semibold">
-                    {{ venue.food.length + venue.drink.length + venue.entertainment.length }} Specials
+                    {{ (venue.food?.length || 0) + (venue.drink?.length || 0) + (venue.entertainment?.length || 0) }} Specials
                   </span>
                 </div>
               </div>
@@ -157,7 +171,7 @@ watch(() => route.query, (newQuery) => {
             <!-- Categories and Specials -->
             <div class="p-6 space-y-6">
               <!-- Food Specials -->
-              <div v-if="venue.food.length > 0" class="border-l-4 border-green-500 pl-4">
+              <div v-if="venue.food?.length > 0" class="border-l-4 border-green-500 pl-4">
                 <div class="flex items-center mb-4">
                   <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3">
                     <span class="text-lg">🍽️</span>
@@ -178,7 +192,7 @@ watch(() => route.query, (newQuery) => {
               </div>
 
               <!-- Drink Specials -->
-              <div v-if="venue.drink.length > 0" class="border-l-4 border-blue-500 pl-4">
+              <div v-if="venue.drink?.length > 0" class="border-l-4 border-blue-500 pl-4">
                 <div class="flex items-center mb-4">
                   <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
                     <span class="text-lg">🍹</span>
@@ -199,7 +213,7 @@ watch(() => route.query, (newQuery) => {
               </div>
 
               <!-- Entertainment Specials -->
-              <div v-if="venue.entertainment.length > 0" class="border-l-4 border-purple-500 pl-4">
+              <div v-if="venue.entertainment?.length > 0" class="border-l-4 border-purple-500 pl-4">
                 <div class="flex items-center mb-4">
                   <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
                     <span class="text-lg">🎵</span>
@@ -219,7 +233,8 @@ watch(() => route.query, (newQuery) => {
                 </div>
               </div>
             </div>
-          </div>
+            </div>
+          </template>
         </div>
       </div>
     </div>
