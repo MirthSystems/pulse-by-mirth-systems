@@ -96,7 +96,7 @@ public class VenueService : IVenueService
     {
         try
         {
-            var existingVenue = await _venueRepository.GetByIdAsync(id, cancellationToken);
+            var existingVenue = await _venueRepository.GetVenueWithDetailsAsync(id, cancellationToken);
             if (existingVenue == null)
             {
                 return ApiResponse<Venue?>.ErrorResult($"Venue with ID {id} not found.");
@@ -109,7 +109,7 @@ public class VenueService : IVenueService
                 return ApiResponse<Venue?>.ErrorResult($"Venue category with ID {updateVenue.CategoryId} not found.");
             }
 
-            UpdateVenueEntity(existingVenue, updateVenue);
+            UpdateVenueEntityAsync(existingVenue, updateVenue);
             await _venueRepository.UpdateAsync(existingVenue, cancellationToken);
             await _venueRepository.SaveChangesAsync(cancellationToken);
 
@@ -402,7 +402,7 @@ public class VenueService : IVenueService
             location = new Point(createVenue.Longitude.Value, createVenue.Latitude.Value) { SRID = 4326 };
         }
 
-        return new VenueEntity
+        var venue = new VenueEntity
         {
             CategoryId = createVenue.CategoryId,
             Name = createVenue.Name,
@@ -420,6 +420,20 @@ public class VenueService : IVenueService
             Location = location,
             IsActive = createVenue.IsActive
         };
+
+        // Add business hours if provided
+        if (createVenue.BusinessHours != null && createVenue.BusinessHours.Any())
+        {
+            venue.BusinessHours = createVenue.BusinessHours.Select(bh => new BusinessHoursEntity
+            {
+                DayOfWeekId = bh.DayOfWeekId,
+                OpenTime = ParseTime(bh.OpenTime),
+                CloseTime = ParseTime(bh.CloseTime),
+                IsClosed = bh.IsClosed
+            }).ToList();
+        }
+
+        return venue;
     }
 
     private static void UpdateVenueEntity(VenueEntity venue, UpdateVenue updateVenue)
@@ -446,6 +460,78 @@ public class VenueService : IVenueService
         else
         {
             venue.Location = null;
+        }
+
+        // Update business hours if provided
+        if (updateVenue.BusinessHours != null)
+        {
+            // Clear existing business hours
+            venue.BusinessHours.Clear();
+            
+            // Add new business hours
+            if (updateVenue.BusinessHours.Any())
+            {
+                venue.BusinessHours.AddRange(updateVenue.BusinessHours.Select(bh => new BusinessHoursEntity
+                {
+                    VenueId = venue.Id,
+                    DayOfWeekId = bh.DayOfWeekId,
+                    OpenTime = ParseTime(bh.OpenTime),
+                    CloseTime = ParseTime(bh.CloseTime),
+                    IsClosed = bh.IsClosed
+                }));
+            }
+        }
+    }
+
+    private void UpdateVenueEntityAsync(VenueEntity venue, UpdateVenue updateVenue)
+    {
+        venue.CategoryId = updateVenue.CategoryId;
+        venue.Name = updateVenue.Name;
+        venue.Description = updateVenue.Description;
+        venue.PhoneNumber = updateVenue.PhoneNumber;
+        venue.Website = updateVenue.Website;
+        venue.Email = updateVenue.Email;
+        venue.ProfileImage = updateVenue.ProfileImage;
+        venue.StreetAddress = updateVenue.StreetAddress;
+        venue.SecondaryAddress = updateVenue.SecondaryAddress;
+        venue.Locality = updateVenue.Locality;
+        venue.Region = updateVenue.Region;
+        venue.PostalCode = updateVenue.PostalCode;
+        venue.Country = updateVenue.Country;
+        venue.IsActive = updateVenue.IsActive;
+
+        if (updateVenue.Latitude.HasValue && updateVenue.Longitude.HasValue)
+        {
+            venue.Location = new Point(updateVenue.Longitude.Value, updateVenue.Latitude.Value) { SRID = 4326 };
+        }
+        else
+        {
+            venue.Location = null;
+        }
+
+        // Handle business hours updates properly
+        if (updateVenue.BusinessHours != null)
+        {
+            // Remove all existing business hours
+            venue.BusinessHours.Clear();
+            
+            // Add new business hours
+            if (updateVenue.BusinessHours.Any())
+            {
+                var newBusinessHours = updateVenue.BusinessHours.Select(bh => new BusinessHoursEntity
+                {
+                    VenueId = venue.Id,
+                    DayOfWeekId = bh.DayOfWeekId,
+                    OpenTime = ParseTime(bh.OpenTime),
+                    CloseTime = ParseTime(bh.CloseTime),
+                    IsClosed = bh.IsClosed
+                }).ToList();
+
+                foreach (var businessHour in newBusinessHours)
+                {
+                    venue.BusinessHours.Add(businessHour);
+                }
+            }
         }
     }
 
@@ -674,6 +760,23 @@ public class VenueService : IVenueService
             CategoryIcon = dto.CategoryIcon,
             DistanceInMeters = dto.DistanceInMeters
         };
+    }
+
+    #endregion
+
+    #region Helper Methods
+
+    private static LocalTime? ParseTime(string? timeString)
+    {
+        if (string.IsNullOrWhiteSpace(timeString))
+            return null;
+
+        if (TimeOnly.TryParse(timeString, out var timeOnly))
+        {
+            return new LocalTime(timeOnly.Hour, timeOnly.Minute);
+        }
+
+        return null;
     }
 
     #endregion

@@ -288,7 +288,7 @@
             <p class="mt-1 text-sm text-gray-500">Get started by creating your first special.</p>
           </div>
           
-          <div v-else class="overflow-hidden">
+          <div v-else class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
               <thead class="bg-gray-50">
                 <tr>
