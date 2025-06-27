@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import type { SpecialSummary, SpecialCategory, Special } from '@/types/api'
+import type { SpecialSummary, SpecialCategory, Special, VenueWithCategorizedSpecials } from '@/types/api'
 import { apiService } from '@/services/api'
 
 export const useSpecialStore = defineStore('special', () => {
@@ -12,6 +12,7 @@ export const useSpecialStore = defineStore('special', () => {
   const loading = ref(false)
   const error = ref<string | null>(null)
   const searchResults = ref<SpecialSummary[]>([])
+  const venuesWithSpecials = ref<VenueWithCategorizedSpecials[]>([])
 
   // Getters
   const specialsByCategory = computed(() => {
@@ -139,6 +140,28 @@ export const useSpecialStore = defineStore('special', () => {
     }
   }
 
+  async function searchVenuesWithSpecials(search: any) {
+    try {
+      loading.value = true
+      error.value = null
+      
+      const response = await apiService.searchVenuesWithSpecials(search)
+      
+      if (response.success && response.data) {
+        // Store the venues with categorized specials
+        venuesWithSpecials.value = response.data.items || []
+      } else {
+        venuesWithSpecials.value = []
+      }
+    } catch (err) {
+      console.error('Failed to search venues with specials:', err)
+      error.value = err instanceof Error ? err.message : 'Failed to search venues with specials'
+      venuesWithSpecials.value = []
+    } finally {
+      loading.value = false
+    }
+  }
+
   async function searchSpecials(searchTerm: string, categoryId?: number) {
     loading.value = true
     try {
@@ -226,6 +249,7 @@ export const useSpecialStore = defineStore('special', () => {
     loading,
     error,
     searchResults,
+    venuesWithSpecials,
     // Getters
     specialsByCategory,
     specialsByVenue,
@@ -240,6 +264,7 @@ export const useSpecialStore = defineStore('special', () => {
     fetchSpecialsByVenue,
     searchSpecials,
     searchSpecialsEnhanced,
+    searchVenuesWithSpecials,
     clearSelectedSpecial,
     clearError
   }

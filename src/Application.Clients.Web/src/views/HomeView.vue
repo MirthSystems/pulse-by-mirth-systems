@@ -77,5 +77,4 @@ import {
   MapPinIcon 
 } from '@heroicons/vue/24/outline'
 import SearchSpecials from '../components/SearchSpecials.vue'
-import PopularSpecials from '../components/PopularSpecials.vue'
 </script>
