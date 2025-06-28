@@ -1,12 +1,13 @@
 <template>
-  <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 border-l-4"
-       :class="getBorderColor(special.categoryName)">
-    <div class="p-6">
+  <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 border-l-4 cursor-pointer"
+       :class="getBorderColor(special.categoryName)"
+       @click="$emit('view-details', special.id)">
+    <div class="p-4">
       <div class="flex items-start justify-between mb-3">
         <div class="flex items-center space-x-3">
           <span class="text-2xl">{{ special.categoryIcon }}</span>
           <div>
-            <h3 class="text-lg font-bold text-gray-900">{{ special.title }}</h3>
+            <h3 class="text-base font-bold text-gray-900">{{ special.title }}</h3>
             <p class="text-sm text-gray-600">{{ special.venueName }}</p>
           </div>
         </div>
@@ -24,51 +25,35 @@
         </div>
       </div>
       
-      <p class="text-gray-700 text-sm mb-4 line-clamp-3">{{ special.description }}</p>
+      <p class="text-gray-700 text-sm mb-3 line-clamp-2">{{ special.description }}</p>
       
-      <div class="grid grid-cols-2 gap-4 mb-4 text-sm">
+      <div class="grid grid-cols-2 gap-3 text-sm">
         <div>
           <span class="font-medium text-gray-700">When:</span>
           <div class="text-gray-600">
-            <div>{{ formatDate(special.startDate) }}</div>
-            <div>{{ special.startTime }} - {{ special.endTime || 'Late' }}</div>
+            <!-- For one-time specials, show the date -->
+            <div v-if="!special.isRecurring" class="text-xs">{{ formatDate(special.startDate) }}</div>
+            <!-- For recurring specials, show the recurring pattern -->
+            <div v-else-if="special.cronSchedule" class="text-xs">{{ formatCronSchedule(special.cronSchedule) }}</div>
+            <div class="text-xs">{{ special.startTime }} - {{ special.endTime || 'Late' }}</div>
           </div>
         </div>
         
         <div>
           <span class="font-medium text-gray-700">Type:</span>
           <div class="text-gray-600">
-            {{ special.isRecurring ? 'Recurring' : 'One-time' }}
-            <div v-if="special.cronSchedule" class="text-xs text-gray-500">
-              {{ formatCronSchedule(special.cronSchedule) }}
+            <div class="text-xs">{{ special.isRecurring ? 'Recurring' : 'One-time' }}</div>
+            <div v-if="special.endDate && !special.isRecurring" class="text-xs text-gray-500">
+              Ends {{ formatDate(special.endDate) }}
             </div>
           </div>
         </div>
-      </div>
-      
-      <div class="flex items-center justify-between pt-4 border-t border-gray-100">
-        <button
-          @click="$emit('view-details', special.id)"
-          class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          <EyeIcon class="h-4 w-4 mr-2" />
-          View Details
-        </button>
-        
-        <button
-          @click="$emit('view-venue', special.venueId)"
-          class="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors"
-        >
-          <BuildingStorefrontIcon class="h-4 w-4 mr-2" />
-          View Venue
-        </button>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { EyeIcon, BuildingStorefrontIcon } from '@heroicons/vue/24/outline'
 import type { SpecialSummary } from '@/types/api'
 import { format } from 'date-fns'
 
@@ -80,7 +65,6 @@ defineProps<Props>()
 
 defineEmits<{
   'view-details': [id: number]
-  'view-venue': [id: number]
 }>()
 
 function getBorderColor(category: string): string {
@@ -165,9 +149,10 @@ function formatCronSchedule(cron: string): string {
 </script>
 
 <style scoped>
-.line-clamp-3 {
+.line-clamp-2 {
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }

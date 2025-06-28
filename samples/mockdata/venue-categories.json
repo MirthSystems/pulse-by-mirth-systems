@@ -1,0 +1,6 @@
+[
+  { "id": 1, "name": "Restaurant", "icon": "🍽️" },
+  { "id": 2, "name": "Bar", "icon": "🍺" },
+  { "id": 3, "name": "Entertainment", "icon": "🎭" },
+  { "id": 4, "name": "Cafe", "icon": "☕" }
+]

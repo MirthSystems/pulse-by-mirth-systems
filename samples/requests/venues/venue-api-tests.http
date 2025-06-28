@@ -1,0 +1,65 @@
+### Get all venues
+GET {{baseUrl}}/api/venues
+Content-Type: application/json
+
+### Get venue by ID
+GET {{baseUrl}}/api/venues/1
+Content-Type: application/json
+
+### Get active venues only
+GET {{baseUrl}}/api/venues/active
+Content-Type: application/json
+
+### Get venues with active specials
+GET {{baseUrl}}/api/venues/with-specials
+Content-Type: application/json
+
+### Get venues near location (Seattle)
+GET {{baseUrl}}/api/venues/near?latitude=47.6089&longitude=-122.3356&radiusInMeters=5000
+Content-Type: application/json
+
+### Search venues
+POST {{baseUrl}}/api/venues/search
+Content-Type: application/json
+
+{
+  "searchTerm": "restaurant",
+  "latitude": 47.6089,
+  "longitude": -122.3356,
+  "radiusInMeters": 5000,
+  "activeOnly": true,
+  "pageNumber": 1,
+  "pageSize": 20,
+  "sortBy": "distance",
+  "sortOrder": "asc"
+}
+
+### Get venue categories
+GET {{baseUrl}}/api/venues/categories
+Content-Type: application/json
+
+### Get venues by category
+GET {{baseUrl}}/api/venues/category/1
+Content-Type: application/json
+
+### Create venue (requires auth)
+POST {{baseUrl}}/api/venues
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "name": "Test Restaurant & Bar",
+  "description": "A cozy restaurant and bar with great food and drinks",
+  "phoneNumber": "+1-555-123-4567",
+  "website": "https://testrestaurant.com",
+  "email": "info@testrestaurant.com",
+  "streetAddress": "123 Main Street",
+  "secondaryAddress": "Suite 101",
+  "locality": "Seattle",
+  "region": "WA",
+  "postalCode": "98101",
+  "country": "United States",
+  "latitude": 47.6089,
+  "longitude": -122.3356,
+  "categoryId": 1
+}

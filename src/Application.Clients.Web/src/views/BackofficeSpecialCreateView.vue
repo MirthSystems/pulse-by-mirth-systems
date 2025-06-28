@@ -206,6 +206,7 @@
                     <CronScheduler
                       v-model="form.cronSchedule"
                       :start-time="form.startTime"
+                      :selected-date="form.startDate"
                       :show-presets="true"
                       :show-builder="true"
                       @valid="onCronValid"

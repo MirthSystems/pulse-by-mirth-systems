@@ -1,0 +1,14 @@
+{
+  "searchTerm": "happy hour",
+  "latitude": 47.6089,
+  "longitude": -122.3356,
+  "radiusInMeters": 2000,
+  "date": "2025-06-28",
+  "time": "17:00",
+  "activeOnly": true,
+  "currentlyRunning": false,
+  "pageNumber": 1,
+  "pageSize": 10,
+  "sortBy": "special_count",
+  "sortOrder": "desc"
+}

@@ -1,0 +1,16 @@
+{
+  "endpoint": "POST /api/location/reverse-geocode?latitude={lat}&longitude={lng}",
+  "description": "Reverse geocode coordinates to address information",
+  "examples": [
+    {
+      "name": "Reverse geocode Google HQ",
+      "url": "https://localhost:7309/api/location/reverse-geocode?latitude=37.4221&longitude=-122.0841",
+      "method": "POST"
+    },
+    {
+      "name": "Reverse geocode Seattle",
+      "url": "https://localhost:7309/api/location/reverse-geocode?latitude=47.6062&longitude=-122.3321",
+      "method": "POST"
+    }
+  ]
+}

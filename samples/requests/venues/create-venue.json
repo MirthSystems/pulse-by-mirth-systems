@@ -1,0 +1,16 @@
+{
+  "name": "Test Restaurant & Bar",
+  "description": "A cozy restaurant and bar with great food and drinks",
+  "phoneNumber": "+1-555-123-4567",
+  "website": "https://testrestaurant.com",
+  "email": "info@testrestaurant.com",
+  "streetAddress": "123 Main Street",
+  "secondaryAddress": "Suite 101",
+  "locality": "Seattle",
+  "region": "WA",
+  "postalCode": "98101",
+  "country": "United States",
+  "latitude": 47.6089,
+  "longitude": -122.3356,
+  "categoryId": 1
+}

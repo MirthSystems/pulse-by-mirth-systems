@@ -1,0 +1,11 @@
+{
+  "searchTerm": "restaurant",
+  "latitude": 47.6089,
+  "longitude": -122.3356,
+  "radiusInMeters": 5000,
+  "activeOnly": true,
+  "pageNumber": 1,
+  "pageSize": 20,
+  "sortBy": "distance",
+  "sortOrder": "asc"
+}

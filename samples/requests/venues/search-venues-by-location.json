@@ -1,0 +1,11 @@
+{
+  "searchTerm": "bar",
+  "latitude": 47.6062,
+  "longitude": -122.3321,
+  "radiusInMeters": 5000,
+  "pageNumber": 1,
+  "pageSize": 20,
+  "sortBy": "distance",
+  "sortOrder": "asc",
+  "activeOnly": true
+}

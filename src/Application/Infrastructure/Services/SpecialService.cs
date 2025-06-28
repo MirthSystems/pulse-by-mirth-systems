@@ -343,16 +343,34 @@ public class SpecialService : ISpecialService
                 ? LocalTimePattern.CreateWithInvariantCulture("HH:mm").Parse(searchRequest.Time).GetValueOrThrow()
                 : _clock.GetCurrentInstant().InUtc().TimeOfDay;
 
+            // Resolve location coordinates if address is provided
+            double? resolvedLat = searchRequest.Latitude;
+            double? resolvedLng = searchRequest.Longitude;
+            
+            if (!string.IsNullOrEmpty(searchRequest.Address) && (!resolvedLat.HasValue || !resolvedLng.HasValue))
+            {
+                var geocodeResult = await _azureMapsService.GeocodeAddressAsync(searchRequest.Address, cancellationToken);
+                if (geocodeResult != null)
+                {
+                    resolvedLat = geocodeResult.Latitude;
+                    resolvedLng = geocodeResult.Longitude;
+                }
+            }
+
             // Get venues with active specials in the area
             var venuesWithSpecials = await GetVenuesWithSpecialsInArea(
-                searchRequest.Latitude,
-                searchRequest.Longitude,
+                resolvedLat,
+                resolvedLng,
                 searchRequest.RadiusInMeters ?? 5000,
                 searchDate,
                 searchTime,
                 searchRequest.SearchTerm,
                 searchRequest.ActiveOnly,
+                searchRequest.CurrentlyRunning,
                 cancellationToken);
+
+            // Apply sorting
+            venuesWithSpecials = ApplySorting(venuesWithSpecials, searchRequest.SortBy, searchRequest.SortOrder);
 
             // Apply pagination
             var totalCount = venuesWithSpecials.Count;
@@ -419,6 +437,7 @@ public class SpecialService : ISpecialService
         LocalTime searchTime,
         string? searchTerm,
         bool activeOnly,
+        bool currentlyRunning,
         CancellationToken cancellationToken)
     {
         var venues = new List<VenueWithCategorizedSpecials>();
@@ -445,14 +464,48 @@ public class SpecialService : ISpecialService
 
         foreach (var venue in venueEntities)
         {
-            // Get active specials for this venue and filter by date/time
-            var allSpecials = await _specialRepository.GetActiveSpecialsByVenueAsync(venue.Id, cancellationToken);
+            // Get specials for this venue based on active filter
+            IEnumerable<SpecialEntity> allSpecials;
+            if (activeOnly)
+            {
+                allSpecials = await _specialRepository.GetActiveSpecialsByVenueAsync(venue.Id, cancellationToken);
+            }
+            else
+            {
+                allSpecials = await _specialRepository.GetSpecialsByVenueAsync(venue.Id, cancellationToken);
+                allSpecials = allSpecials.Where(s => s.IsActive); // Still filter by IsActive flag
+            }
             
-            // Filter specials by the specified date and time
-            var searchDateTime = searchDate.At(searchTime);
-            var specials = allSpecials.Where(s => IsSpecialActiveAtTime(s, searchDateTime));
+            // Filter specials by the specified date and time if currentlyRunning is true
+            IEnumerable<SpecialEntity> specials;
+            if (currentlyRunning)
+            {
+                var searchDateTime = searchDate.At(searchTime);
+                specials = allSpecials.Where(s => CronScheduleEvaluator.IsSpecialCurrentlyActive(s, searchDateTime));
+            }
+            else
+            {
+                // When not filtering for currently running, filter out past one-time specials
+                var currentDate = searchDate;
+                specials = allSpecials.Where(s => 
+                {
+                    // Always include recurring specials (they don't expire based on date alone)
+                    if (s.IsRecurring)
+                        return true;
+                    
+                    // For one-time specials, only include future or current ones
+                    if (s.EndDate.HasValue)
+                    {
+                        return s.EndDate.Value >= currentDate;
+                    }
+                    else
+                    {
+                        return s.StartDate >= currentDate;
+                    }
+                });
+            }
 
-            if (!specials.Any() && activeOnly)
+            if (!specials.Any() && activeOnly && currentlyRunning)
                 continue;
 
             // Categorize specials by type (based on category names)
@@ -498,24 +551,8 @@ public class SpecialService : ISpecialService
 
     private static bool IsSpecialActiveAtTime(SpecialEntity special, LocalDateTime dateTime)
     {
-        var date = dateTime.Date;
-        var time = dateTime.TimeOfDay;
-
-        // Check date range
-        if (date < special.StartDate)
-            return false;
-
-        if (special.EndDate.HasValue && date > special.EndDate.Value)
-            return false;
-
-        // Check time range
-        if (time < special.StartTime)
-            return false;
-
-        if (special.EndTime.HasValue && time > special.EndTime.Value)
-            return false;
-
-        return special.IsActive;
+        // Use the consistent CRON schedule evaluator for all specials
+        return CronScheduleEvaluator.IsSpecialCurrentlyActive(special, dateTime);
     }
 
     private static bool IsSpecialCategory(string? categoryName, string targetType)
@@ -686,6 +723,32 @@ public class SpecialService : ISpecialService
         entity.IsRecurring = dto.IsRecurring;
         entity.CronSchedule = dto.CronSchedule;
         entity.IsActive = dto.IsActive;
+    }
+
+    private static List<VenueWithCategorizedSpecials> ApplySorting(
+        List<VenueWithCategorizedSpecials> venues, 
+        string? sortBy, 
+        string? sortOrder)
+    {
+        if (venues == null || !venues.Any())
+            return venues ?? new List<VenueWithCategorizedSpecials>();
+
+        var isDescending = string.Equals(sortOrder, "desc", StringComparison.OrdinalIgnoreCase);
+
+        return sortBy?.ToLowerInvariant() switch
+        {
+            "name" => isDescending 
+                ? venues.OrderByDescending(v => v.Name).ToList()
+                : venues.OrderBy(v => v.Name).ToList(),
+                
+            "special_count" => isDescending
+                ? venues.OrderByDescending(v => v.TotalSpecialCount).ToList()
+                : venues.OrderBy(v => v.TotalSpecialCount).ToList(),
+                
+            "distance" or _ => isDescending
+                ? venues.OrderByDescending(v => v.DistanceInMeters ?? double.MaxValue).ToList()
+                : venues.OrderBy(v => v.DistanceInMeters ?? double.MaxValue).ToList()
+        };
     }
 
     #endregion

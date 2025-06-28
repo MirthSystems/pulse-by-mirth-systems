@@ -1,0 +1,12 @@
+{
+  "address": "Seattle, WA",
+  "radiusInMeters": 5000,
+  "date": "2025-06-28",
+  "time": "16:30",
+  "activeOnly": true,
+  "currentlyRunning": true,
+  "pageNumber": 1,
+  "pageSize": 20,
+  "sortBy": "distance",
+  "sortOrder": "asc"
+}

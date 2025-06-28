@@ -1,0 +1,21 @@
+{
+  "endpoint": "GET /api/location/search?query={query}",
+  "description": "Search for address suggestions using Azure Maps",
+  "examples": [
+    {
+      "name": "Search Seattle addresses",
+      "url": "https://localhost:7309/api/location/search?query=Seattle WA",
+      "method": "GET"
+    },
+    {
+      "name": "Search New York addresses",
+      "url": "https://localhost:7309/api/location/search?query=Times Square New York",
+      "method": "GET"
+    },
+    {
+      "name": "Search partial address",
+      "url": "https://localhost:7309/api/location/search?query=123 Main St",
+      "method": "GET"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "name": "Lunch Special - Fish & Chips",
+  "description": "Fresh cod with house-made chips and coleslaw for $12.99",
+  "venueId": 1,
+  "specialCategoryId": 1,
+  "startDate": "2025-06-28",
+  "endDate": "2025-12-31",
+  "startTime": "11:00",
+  "endTime": "15:00",
+  "daysOfWeek": "Monday,Tuesday,Wednesday,Thursday,Friday",
+  "cronExpression": "0 0 11-14 * * MON-FRI",
+  "isActive": true,
+  "isRecurring": true
+}

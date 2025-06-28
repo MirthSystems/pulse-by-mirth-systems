@@ -20,6 +20,11 @@ public interface IAzureMapsService
     Task<IEnumerable<PointOfInterest>> SearchNearbyAsync(double latitude, double longitude, string? category = null, int radiusInMeters = 5000, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Searches for address suggestions using Azure Maps
+    /// </summary>
+    Task<IEnumerable<GeocodeResult>> SearchAddressAsync(string query, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Gets timezone information for a location using Azure Maps
     /// </summary>
     Task<TimeZoneInfo?> GetTimeZoneAsync(double latitude, double longitude, CancellationToken cancellationToken = default);

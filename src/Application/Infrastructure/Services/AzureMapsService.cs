@@ -186,4 +186,43 @@ public class AzureMapsService : IAzureMapsService
             return null;
         }
     }
+
+    public async Task<IEnumerable<GeocodeResult>> SearchAddressAsync(string query, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(query) || query.Length < 3)
+                return Enumerable.Empty<GeocodeResult>();
+
+            var response = await _searchClient.GetGeocodingAsync(query, cancellationToken: cancellationToken);
+            
+            if (response?.Value?.Features?.Any() == true)
+            {
+                return response.Value.Features
+                    .Take(10) // Limit to top 10 suggestions
+                    .Select(feature =>
+                    {
+                        var addressProps = feature.Properties?.Address;
+                        return new GeocodeResult
+                        {
+                            FormattedAddress = addressProps?.FormattedAddress ?? query,
+                            Latitude = feature.Geometry.Coordinates[1], // GeoJSON uses [longitude, latitude]
+                            Longitude = feature.Geometry.Coordinates[0],
+                            Street = addressProps?.AddressLine ?? string.Empty,
+                            City = addressProps?.Locality ?? string.Empty,
+                            Region = addressProps?.AdminDistricts?.FirstOrDefault()?.Name ?? string.Empty,
+                            PostalCode = addressProps?.PostalCode ?? string.Empty,
+                            Country = addressProps?.CountryRegion?.Name ?? string.Empty,
+                            Confidence = 0.95 // High confidence placeholder since Azure Maps doesn't provide this
+                        };
+                    });
+            }
+            
+            return Enumerable.Empty<GeocodeResult>();
+        }
+        catch
+        {
+            return Enumerable.Empty<GeocodeResult>();
+        }
+    }
 }
