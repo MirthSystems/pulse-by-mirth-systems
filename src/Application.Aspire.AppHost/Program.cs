@@ -57,6 +57,7 @@ var server =
 var client =
     builder.AddNpmApp("web-client", @"..\Application.Clients.Web", builder.Environment.IsDevelopment() ? "dev" : "build")
         .WithReference(server)
+        .WithHttpEndpoint(env: "PORT")
         .WithExternalHttpEndpoints()
         .WithEnvironment("VITE_AUTH0_DOMAIN", auth0Domain)
         .WithEnvironment("VITE_AUTH0_CLIENT_ID", auth0ClientId)
