@@ -77,18 +77,11 @@ function getBorderColor(category: string): string {
 }
 
 function getStatusClass(special: SpecialSummary): string {
-  const now = new Date()
-  const today = now.toISOString().split('T')[0]
-  const currentTime = now.toTimeString().slice(0, 5)
-  
   if (!special.isActive) {
     return 'bg-gray-100 text-gray-800'
   }
   
-  if (special.startDate <= today && 
-      (!special.endDate || special.endDate >= today) &&
-      special.startTime <= currentTime &&
-      (!special.endTime || special.endTime >= currentTime)) {
+  if (isSpecialRunningNow(special)) {
     return 'bg-green-100 text-green-800'
   }
   
@@ -96,18 +89,11 @@ function getStatusClass(special: SpecialSummary): string {
 }
 
 function getStatusText(special: SpecialSummary): string {
-  const now = new Date()
-  const today = now.toISOString().split('T')[0]
-  const currentTime = now.toTimeString().slice(0, 5)
-  
   if (!special.isActive) {
     return 'Inactive'
   }
   
-  if (special.startDate <= today && 
-      (!special.endDate || special.endDate >= today) &&
-      special.startTime <= currentTime &&
-      (!special.endTime || special.endTime >= currentTime)) {
+  if (isSpecialRunningNow(special)) {
     return 'Active Now'
   }
   
@@ -178,6 +164,93 @@ function formatCronSchedule(cron: string): string {
   }
 
   return dayPatterns[dayOfWeek] || 'Custom schedule'
+}
+
+function isSpecialRunningNow(special: SpecialSummary): boolean {
+  if (!special.isActive) {
+    return false
+  }
+  
+  const now = new Date()
+  const currentDate = now.toISOString().split('T')[0]
+  const currentTime = now.toTimeString().slice(0, 5)
+  
+  // For one-time specials
+  if (!special.isRecurring) {
+    // Check if we're on the right date
+    if (special.startDate !== currentDate) {
+      return false
+    }
+    
+    // Check if we're within the time range
+    if (special.startTime > currentTime) {
+      return false
+    }
+    
+    if (special.endTime && special.endTime < currentTime) {
+      return false
+    }
+    
+    return true
+  }
+  
+  // For recurring specials, do basic day-of-week checking
+  // This is a simplified implementation that can be improved later
+  if (special.cronSchedule) {
+    return isRecurringSpecialActive(special, now)
+  }
+  
+  return false
+}
+
+function isRecurringSpecialActive(special: SpecialSummary, currentTime: Date): boolean {
+  if (!special.cronSchedule) return false
+  
+  // Simple CRON parsing for day-of-week patterns
+  // This handles common patterns like "0 12 * * 1-5" (weekdays at noon)
+  const parts = special.cronSchedule.split(' ')
+  if (parts.length < 5) return false
+  
+  const dayOfWeekPattern = parts[4]
+  const currentDayOfWeek = currentTime.getDay() // 0 = Sunday, 1 = Monday, etc.
+  const currentTimeStr = currentTime.toTimeString().slice(0, 5)
+  
+  // Check if current day matches the pattern
+  if (!matchesDayOfWeek(currentDayOfWeek, dayOfWeekPattern)) {
+    return false
+  }
+  
+  // Check if we're within the time range
+  if (special.startTime > currentTimeStr) {
+    return false
+  }
+  
+  if (special.endTime && special.endTime < currentTimeStr) {
+    return false
+  }
+  
+  return true
+}
+
+function matchesDayOfWeek(currentDay: number, pattern: string): boolean {
+  if (pattern === '*') return true
+  
+  // Handle specific days (0-6)
+  if (pattern === currentDay.toString()) return true
+  
+  // Handle ranges like "1-5" (Monday to Friday)
+  if (pattern.includes('-')) {
+    const [start, end] = pattern.split('-').map(Number)
+    return currentDay >= start && currentDay <= end
+  }
+  
+  // Handle comma-separated lists like "1,3,5"
+  if (pattern.includes(',')) {
+    const days = pattern.split(',').map(Number)
+    return days.includes(currentDay)
+  }
+  
+  return false
 }
 </script>
 
