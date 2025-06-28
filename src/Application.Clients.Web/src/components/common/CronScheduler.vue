@@ -190,6 +190,7 @@ import { format } from 'date-fns'
 interface Props {
   modelValue?: string
   startTime?: string
+  selectedDate?: string
   showPresets?: boolean
   showBuilder?: boolean
   maxOccurrences?: number
@@ -204,6 +205,7 @@ interface Emits {
 const props = withDefaults(defineProps<Props>(), {
   modelValue: '',
   startTime: '',
+  selectedDate: '',
   showPresets: true,
   showBuilder: true,
   maxOccurrences: 10,
@@ -269,15 +271,41 @@ const cronPresets = computed(() => {
     }
   }
 
+  // Get day of week from selected date
+  let selectedDayOfWeek = 1 // Default to Monday
+  let selectedDayName = 'Monday'
+  
+  if (props.selectedDate) {
+    try {
+      // Parse date components to avoid timezone issues
+      // Expected format: YYYY-MM-DD
+      const dateParts = props.selectedDate.split('-')
+      if (dateParts.length === 3) {
+        const year = parseInt(dateParts[0], 10)
+        const month = parseInt(dateParts[1], 10) - 1 // Month is 0-indexed
+        const day = parseInt(dateParts[2], 10)
+        
+        const selectedDate = new Date(year, month, day)
+        if (!isNaN(selectedDate.getTime())) {
+          selectedDayOfWeek = selectedDate.getDay() // 0 = Sunday, 1 = Monday, etc.
+          selectedDayName = daysOfWeek[selectedDayOfWeek]
+        }
+      } else {
+        console.warn('Invalid selected date format, expected YYYY-MM-DD:', props.selectedDate)
+      }
+    } catch (error) {
+      console.warn('Invalid selected date format:', props.selectedDate)
+    }
+  }
+
   return [
     { label: 'Every minute', value: '* * * * *' },
     { label: 'Every hour', value: '0 * * * *' },
     { label: `Daily at ${timeLabel}`, value: `${minute} ${hour} * * *` },
     { label: `Weekdays at ${timeLabel}`, value: `${minute} ${hour} * * 1-5` },
     { label: `Weekends at ${timeLabel}`, value: `${minute} ${hour} * * 0,6` },
-    { label: `Monday at ${timeLabel}`, value: `${minute} ${hour} * * 1` },
-    { label: `First of month at ${timeLabel}`, value: `${minute} ${hour} 1 * *` },
-    { label: `Every Friday at ${timeLabel}`, value: `${minute} ${hour} * * 5` }
+    { label: `Every ${selectedDayName} at ${timeLabel}`, value: `${minute} ${hour} * * ${selectedDayOfWeek}` },
+    { label: `First of month at ${timeLabel}`, value: `${minute} ${hour} 1 * *` }
   ]
 })
 

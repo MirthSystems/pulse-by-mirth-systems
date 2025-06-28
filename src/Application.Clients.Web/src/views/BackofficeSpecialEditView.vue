@@ -237,6 +237,7 @@
                     <CronScheduler
                       v-model="form.cronSchedule"
                       :start-time="form.startTime"
+                      :selected-date="form.startDate"
                       :disabled="!isEditing"
                       :show-presets="true"
                       :show-builder="true"
