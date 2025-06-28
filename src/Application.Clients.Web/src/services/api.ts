@@ -22,6 +22,9 @@ import type {
   UpdateSpecialRequest
 } from '@/types/api'
 
+// Get API base URL from environment variable set by Aspire
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || ''
+
 class ApiService {
   private accessToken: string | null = null
 
@@ -52,7 +55,7 @@ class ApiService {
       })
     }
 
-    const response = await fetch(url, {
+    const response = await fetch(`${API_BASE_URL}${url}`, {
       ...options,
       headers,
     })
@@ -220,11 +223,6 @@ class ApiService {
     return this.request<boolean>(`/api/specials/${id}`, {
       method: 'DELETE',
     })
-  }
-
-  // Utility methods
-  async getWeatherForecast(): Promise<any> {
-    return this.request<any>('/api/weatherforecast')
   }
 }
 
