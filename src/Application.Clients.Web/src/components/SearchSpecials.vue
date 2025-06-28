@@ -136,7 +136,6 @@
 
             <!-- Currently Running Toggle -->
             <div>
-              <label class="block text-sm font-semibold text-gray-900 mb-2">Special Timing</label>
               <div class="flex items-center space-x-3">
                 <label class="relative inline-flex items-center cursor-pointer">
                   <input

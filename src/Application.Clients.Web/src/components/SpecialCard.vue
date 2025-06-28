@@ -131,20 +131,53 @@ function formatDate(dateString: string): string {
 }
 
 function formatCronSchedule(cron: string): string {
-  // Simple CRON schedule descriptions
-  const patterns: Record<string, string> = {
-    '0 16 * * 1-5': 'Weekdays at 4:00 PM',
-    '0 21 * * 5,6': 'Fri & Sat at 9:00 PM',
-    '0 21 * * 3': 'Wednesdays at 9:00 PM',
-    '0 11 * * 2': 'Tuesdays at 11:00 AM',
-    '0 16 * * 2-6': 'Tue-Sat at 4:00 PM',
-    '0 10 * * 0': 'Sundays at 10:00 AM',
-    '* * * * *': 'Every minute',
-    '0 19 * * 4': 'Thursdays at 7:00 PM',
-    '* 19 * * 4': 'Thursdays 7:00-7:59 PM'
+  if (!cron || cron.trim() === '') {
+    return 'Custom schedule'
   }
+
+  // Parse the CRON expression to extract just the day pattern
+  const parts = cron.trim().split(/\s+/)
+  if (parts.length < 5) {
+    return 'Custom schedule'
+  }
+
+  const dayOfWeek = parts[4] // 5th field is day of week (0=Sunday, 1=Monday, etc.)
   
-  return patterns[cron] || 'Custom schedule'
+  // Handle specific day patterns
+  const dayPatterns: Record<string, string> = {
+    // Individual days
+    '0': 'Sundays',
+    '1': 'Mondays', 
+    '2': 'Tuesdays',
+    '3': 'Wednesdays',
+    '4': 'Thursdays',
+    '5': 'Fridays',
+    '6': 'Saturdays',
+    
+    // Common ranges and combinations
+    '1-5': 'Weekdays',
+    '1,2,3,4,5': 'Weekdays',
+    '6,0': 'Weekends',
+    '0,6': 'Weekends',
+    '5,6': 'Fri & Sat',
+    '6,5': 'Fri & Sat',
+    '1-6': 'Mon-Sat',
+    '2-6': 'Tue-Sat',
+    '1-4': 'Mon-Thu',
+    '2-5': 'Tue-Fri',
+    '3-5': 'Wed-Fri',
+    '1,3,5': 'Mon, Wed, Fri',
+    '2,4,6': 'Tue, Thu, Sat',
+    '1,2,3': 'Mon-Wed',
+    '4,5,6': 'Thu-Sat',
+    '0,1': 'Sun & Mon',
+    '6,0,1': 'Weekends & Mon',
+    
+    // Every day
+    '*': 'Daily'
+  }
+
+  return dayPatterns[dayOfWeek] || 'Custom schedule'
 }
 </script>
 

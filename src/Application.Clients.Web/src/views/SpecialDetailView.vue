@@ -17,6 +17,7 @@ import {
   XCircleIcon
 } from '@heroicons/vue/24/outline'
 import { format, parseISO, isValid } from 'date-fns'
+import cronstrue from 'cronstrue'
 
 interface Props {
   id: string
@@ -65,9 +66,49 @@ const getScheduleDescription = (special: any) => {
   }
   
   if (special.cronSchedule) {
-    // This would parse the cron schedule into human readable format
-    // For now, return a simple description
-    return 'Recurring schedule - check venue for specific times'
+    // Parse the CRON expression to extract just the day pattern
+    const parts = special.cronSchedule.trim().split(/\s+/)
+    if (parts.length < 5) {
+      return 'Custom recurring schedule'
+    }
+
+    const dayOfWeek = parts[4] // 5th field is day of week (0=Sunday, 1=Monday, etc.)
+    
+    // Handle specific day patterns
+    const dayPatterns: Record<string, string> = {
+      // Individual days
+      '0': 'Sundays',
+      '1': 'Mondays', 
+      '2': 'Tuesdays',
+      '3': 'Wednesdays',
+      '4': 'Thursdays',
+      '5': 'Fridays',
+      '6': 'Saturdays',
+      
+      // Common ranges and combinations
+      '1-5': 'Weekdays',
+      '1,2,3,4,5': 'Weekdays',
+      '6,0': 'Weekends',
+      '0,6': 'Weekends',
+      '5,6': 'Fri & Sat',
+      '6,5': 'Fri & Sat',
+      '1-6': 'Mon-Sat',
+      '2-6': 'Tue-Sat',
+      '1-4': 'Mon-Thu',
+      '2-5': 'Tue-Fri',
+      '3-5': 'Wed-Fri',
+      '1,3,5': 'Mon, Wed, Fri',
+      '2,4,6': 'Tue, Thu, Sat',
+      '1,2,3': 'Mon-Wed',
+      '4,5,6': 'Thu-Sat',
+      '0,1': 'Sun & Mon',
+      '6,0,1': 'Weekends & Mon',
+      
+      // Every day
+      '*': 'Daily'
+    }
+
+    return dayPatterns[dayOfWeek] || 'Custom recurring schedule'
   }
   
   return 'Ongoing special'

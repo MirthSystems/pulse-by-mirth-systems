@@ -63,10 +63,10 @@ useApiAuth()
     </main>
     
     <!-- Footer -->
-    <footer class="bg-white border-t border-gray-200 mt-16">
+    <footer class="bg-white border-t border-gray-200">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div class="text-center text-gray-600">
-          <p>&copy; 2025 Pulse. Built with ❤️ for discovering amazing venues and specials.</p>
+          <p>&copy; 2025 Pulse. Your real-time guide for food, drink and entertainment specials!</p>
         </div>
       </div>
     </footer>
