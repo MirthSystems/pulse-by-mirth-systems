@@ -47,44 +47,43 @@ public static class CronScheduleEvaluator
             {
                 var cronExpression = CronExpression.Parse(special.CronSchedule);
                 
-                // Convert NodaTime LocalDateTime to System.DateTime for Cronos
-                // Cronos requires System.DateTime, so we need this conversion
-                var systemDateTime = currentDateTime.ToDateTimeUnspecified();
+                // Convert to UTC DateTime for Cronos library
+                var todayStartUtc = currentDate.AtMidnight().InUtc().ToDateTimeUtc();
+                var tomorrowStartUtc = currentDate.PlusDays(1).AtMidnight().InUtc().ToDateTimeUtc();
                 
-                // Check if today matches the CRON schedule
-                var todayMidnight = currentDate.AtMidnight().ToDateTimeUnspecified();
-                var nextOccurrence = cronExpression.GetNextOccurrence(todayMidnight, TimeZoneInfo.Utc);
-
                 bool isScheduleActive = false;
                 
-                if (nextOccurrence.HasValue)
+                // Check if there are any CRON occurrences that fall on today's date
+                // Start searching from yesterday to ensure we catch today's occurrences
+                var searchFromUtc = todayStartUtc.AddDays(-1);
+                var nextOccurrence = cronExpression.GetNextOccurrence(searchFromUtc, TimeZoneInfo.Utc);
+                
+                // Look through upcoming occurrences to see if any fall on today
+                while (nextOccurrence.HasValue && nextOccurrence.Value < tomorrowStartUtc)
                 {
-                    var nextDateTime = LocalDateTime.FromDateTime(nextOccurrence.Value);
-                    
-                    // Check if the next occurrence is today
-                    if (nextDateTime.Date == currentDate)
+                    if (nextOccurrence.Value.Date == todayStartUtc.Date)
                     {
                         isScheduleActive = true;
+                        break;
                     }
+                    
+                    // Get the next occurrence after this one
+                    nextOccurrence = cronExpression.GetNextOccurrence(nextOccurrence.Value, TimeZoneInfo.Utc);
                 }
 
                 // If today doesn't match, check if yesterday had an occurrence that might still be running
                 if (!isScheduleActive)
                 {
-                    var yesterdayMidnight = currentDate.PlusDays(-1).AtMidnight().ToDateTimeUnspecified();
-                    var yesterdayOccurrence = cronExpression.GetNextOccurrence(yesterdayMidnight, TimeZoneInfo.Utc);
+                    var yesterdayStartUtc = currentDate.PlusDays(-1).AtMidnight().InUtc().ToDateTimeUtc();
+                    var yesterdayOccurrence = cronExpression.GetNextOccurrence(yesterdayStartUtc.AddDays(-1), TimeZoneInfo.Utc);
                     
-                    if (yesterdayOccurrence.HasValue)
+                    if (yesterdayOccurrence.HasValue && yesterdayOccurrence.Value.Date == yesterdayStartUtc.Date)
                     {
-                        var yesterdayDateTime = LocalDateTime.FromDateTime(yesterdayOccurrence.Value);
-                        if (yesterdayDateTime.Date == currentDate.PlusDays(-1))
+                        // Check if the special from yesterday extends into today
+                        if (special.EndTime.HasValue && special.StartTime > special.EndTime.Value)
                         {
-                            // Check if the special from yesterday extends into today
-                            if (special.EndTime.HasValue && special.StartTime > special.EndTime.Value)
-                            {
-                                // This is a special that crosses midnight (e.g., 23:00 to 02:00)
-                                isScheduleActive = currentTime <= special.EndTime.Value;
-                            }
+                            // This is a special that crosses midnight (e.g., 23:00 to 02:00)
+                            isScheduleActive = currentTime <= special.EndTime.Value;
                         }
                     }
                 }
@@ -97,13 +96,15 @@ public static class CronScheduleEvaluator
             }
             catch
             {
-                // If CRON parsing fails, fall back to basic time checking
-                return IsWithinTimeRange(currentTime, special.StartTime, special.EndTime);
+                // If CRON parsing fails, the special should NOT be active
+                // Don't fall back to time-only checking as this ignores the day constraint
+                return false;
             }
         }
 
-        // If no CRON schedule, just check time range
-        return IsWithinTimeRange(currentTime, special.StartTime, special.EndTime);
+        // If no CRON schedule for a recurring special, it should not be active
+        // Recurring specials require a valid CRON schedule to determine when they occur
+        return false;
     }
 
     /// <summary>
