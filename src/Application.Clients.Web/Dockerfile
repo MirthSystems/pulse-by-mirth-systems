@@ -11,7 +11,7 @@ COPY . .
 
 ARG VITE_API_BASE_URL
 
-ENV VITE_API_BASE_URL="https://api-server.salmonbay-ec711319.centralus.azurecontainerapps.io/"
+ENV VITE_API_BASE_URL="https://api-server.salmonbay-ec711319.centralus.azurecontainerapps.io"
 
 RUN npm run build
 
