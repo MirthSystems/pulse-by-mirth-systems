@@ -1,0 +1,15 @@
+### Search for address suggestions
+GET {{baseUrl}}/api/location/search?query=123 Main Street
+Content-Type: application/json
+
+### Search for address suggestions - Seattle
+GET {{baseUrl}}/api/location/search?query=Seattle, WA
+Content-Type: application/json
+
+### Search for address suggestions - Restaurant
+GET {{baseUrl}}/api/location/search?query=Pike Place Market
+Content-Type: application/json
+
+### Search for address suggestions - Short query (should fail)
+GET {{baseUrl}}/api/location/search?query=ab
+Content-Type: application/json

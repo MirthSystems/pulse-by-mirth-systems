@@ -1,0 +1,11 @@
+{
+  "searchTerm": "happy hour",
+  "address": "Seattle, WA",
+  "radiusInMeters": 10000,
+  "activeOnly": true,
+  "currentlyRunning": false,
+  "pageNumber": 1,
+  "pageSize": 50,
+  "sortBy": "special_count",
+  "sortOrder": "desc"
+}

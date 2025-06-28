@@ -1,0 +1,16 @@
+{
+  "name": "Downtown Sports Bar",
+  "description": "Sports bar with multiple screens, pool tables, and game day specials",
+  "phoneNumber": "+1-206-555-0234",
+  "website": "https://www.downtownsportsbar.com",
+  "email": "info@downtownsportsbar.com",
+  "streetAddress": "456 Pine Street",
+  "locality": "Seattle",
+  "region": "WA",
+  "postalCode": "98101",
+  "country": "United States",
+  "latitude": 47.6115,
+  "longitude": -122.3370,
+  "categoryId": 1,
+  "isActive": true
+}

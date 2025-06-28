@@ -1,0 +1,16 @@
+{
+  "name": "Café Luna",
+  "description": "Coffee shop and bistro with fresh pastries and specialty drinks",
+  "phoneNumber": "+1-206-555-0345",
+  "website": "https://www.cafeluna.com",
+  "email": "hello@cafeluna.com",
+  "streetAddress": "789 Broadway Avenue",
+  "locality": "Seattle",
+  "region": "WA",
+  "postalCode": "98102",
+  "country": "United States",
+  "latitude": 47.6205,
+  "longitude": -122.3212,
+  "categoryId": 2,
+  "isActive": true
+}

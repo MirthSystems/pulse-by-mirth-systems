@@ -1,0 +1,10 @@
+{
+  "address": "Seattle, WA",
+  "radiusInMeters": 5000,
+  "activeOnly": true,
+  "currentlyRunning": true,
+  "pageNumber": 1,
+  "pageSize": 20,
+  "sortBy": "distance",
+  "sortOrder": "asc"
+}

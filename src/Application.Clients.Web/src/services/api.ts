@@ -224,6 +224,37 @@ class ApiService {
       method: 'DELETE',
     })
   }
+
+  // Location API methods
+  async searchAddresses(query: string): Promise<ApiResponse<GeocodeResult[]>> {
+    const params = new URLSearchParams({ query })
+    return this.request<GeocodeResult[]>(`/api/location/search?${params}`)
+  }
+
+  async geocodeAddress(address: string): Promise<ApiResponse<GeocodeResult | null>> {
+    return this.request<GeocodeResult | null>('/api/location/geocode', {
+      method: 'POST',
+      body: JSON.stringify({ address }),
+    })
+  }
+
+  async reverseGeocode(latitude: number, longitude: number): Promise<ApiResponse<ReverseGeocodeResult | null>> {
+    const params = new URLSearchParams({
+      latitude: latitude.toString(),
+      longitude: longitude.toString()
+    })
+    return this.request<ReverseGeocodeResult | null>(`/api/location/reverse-geocode?${params}`, {
+      method: 'POST',
+    })
+  }
+
+  async getTimeZone(latitude: number, longitude: number): Promise<ApiResponse<TimeZoneInfo | null>> {
+    const params = new URLSearchParams({
+      latitude: latitude.toString(),
+      longitude: longitude.toString()
+    })
+    return this.request<TimeZoneInfo | null>(`/api/location/timezone?${params}`)
+  }
 }
 
 export const apiService = new ApiService()

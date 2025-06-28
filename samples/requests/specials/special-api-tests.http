@@ -1,0 +1,90 @@
+### Get all specials
+GET {{baseUrl}}/api/specials
+Content-Type: application/json
+
+### Get special by ID
+GET {{baseUrl}}/api/specials/1
+Content-Type: application/json
+
+### Get active specials
+GET {{baseUrl}}/api/specials/active
+Content-Type: application/json
+
+### Get specials currently active now
+GET {{baseUrl}}/api/specials/active-now
+Content-Type: application/json
+
+### Get active specials near location
+GET {{baseUrl}}/api/specials/near?latitude=47.6089&longitude=-122.3356&radiusInMeters=5000
+Content-Type: application/json
+
+### Get specials by venue
+GET {{baseUrl}}/api/specials/venue/1
+Content-Type: application/json
+
+### Get active specials by venue
+GET {{baseUrl}}/api/specials/venue/1/active
+Content-Type: application/json
+
+### Get specials by category
+GET {{baseUrl}}/api/specials/category/1
+Content-Type: application/json
+
+### Search specials (basic)
+POST {{baseUrl}}/api/specials/search
+Content-Type: application/json
+
+{
+  "searchTerm": "pizza",
+  "latitude": 47.6089,
+  "longitude": -122.3356,
+  "radiusInMeters": 5000,
+  "activeOnly": true,
+  "pageNumber": 1,
+  "pageSize": 20
+}
+
+### 🎯 ENHANCED SEARCH - Venues with categorized specials (address-based)
+POST {{baseUrl}}/api/specials/search/venues
+Content-Type: application/json
+
+{
+  "searchTerm": "pizza",
+  "address": "Seattle, WA",
+  "radiusInMeters": 5000,
+  "date": "2025-06-28",
+  "time": "18:00",
+  "activeOnly": true,
+  "currentlyRunning": true,
+  "pageNumber": 1,
+  "pageSize": 20,
+  "sortBy": "distance",
+  "sortOrder": "asc"
+}
+
+### 🎯 ENHANCED SEARCH - All active specials (coordinate-based)
+POST {{baseUrl}}/api/specials/search/venues
+Content-Type: application/json
+
+{
+  "searchTerm": "happy hour",
+  "latitude": 47.6089,
+  "longitude": -122.3356,
+  "radiusInMeters": 2000,
+  "date": "2025-06-28",
+  "time": "17:00",
+  "activeOnly": true,
+  "currentlyRunning": false,
+  "pageNumber": 1,
+  "pageSize": 10,
+  "sortBy": "special_count",
+  "sortOrder": "desc"
+}
+
+### Get special categories
+GET {{baseUrl}}/api/specials/categories
+Content-Type: application/json
+
+### Get special category by ID
+GET {{baseUrl}}/api/specials/categories/1
+Content-Type: application/json

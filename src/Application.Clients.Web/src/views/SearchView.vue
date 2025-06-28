@@ -27,16 +27,16 @@ const totalResults = computed(() => {
   if (!Array.isArray(venues) || venues.length === 0) return 0
   
   return venues.reduce((total, venue) => {
-    const foodCount = Array.isArray(venue.food) ? venue.food.length : 0
-    const drinkCount = Array.isArray(venue.drink) ? venue.drink.length : 0
-    const entertainmentCount = Array.isArray(venue.entertainment) ? venue.entertainment.length : 0
+    const foodCount = Array.isArray(venue.specials?.food) ? venue.specials.food.length : 0
+    const drinkCount = Array.isArray(venue.specials?.drink) ? venue.specials.drink.length : 0
+    const entertainmentCount = Array.isArray(venue.specials?.entertainment) ? venue.specials.entertainment.length : 0
     return total + foodCount + drinkCount + entertainmentCount
   }, 0)
 })
 
 // Search handler
 const handleSearch = async (params: any) => {
-  if (!params.location && !params.searchTerm) {
+  if (!params.address && !params.location && !params.searchTerm && !params.latitude) {
     // Clear results if no search criteria
     return
   }
@@ -44,18 +44,29 @@ const handleSearch = async (params: any) => {
   isSearching.value = true
   
   try {
-    // TODO: Convert location string to lat/lng if provided
-    // For now, we'll handle this in the API or use a geocoding service
-    
     // Use the enhanced search API that returns venues with categorized specials
+    const currentlyRunning = params.currentlyRunning === 'true' || params.currentlyRunning === true
+    
+    // If currently running is true, use current date/time if not specified
+    let searchDate = params.date
+    let searchTime = params.time
+    
+    if (currentlyRunning && (!searchDate || !searchTime)) {
+      const now = new Date()
+      searchDate = searchDate || now.toISOString().split('T')[0] // YYYY-MM-DD
+      searchTime = searchTime || now.toTimeString().slice(0, 5) // HH:MM
+    }
+    
     const searchParams = {
       searchTerm: params.searchTerm || undefined,
-      latitude: params.latitude, // Will be undefined if location is a string
-      longitude: params.longitude, // Will be undefined if location is a string
+      address: params.address || params.location || undefined, // Handle both new and legacy params
+      latitude: params.latitude ? parseFloat(params.latitude) : undefined,
+      longitude: params.longitude ? parseFloat(params.longitude) : undefined,
       radiusInMeters: params.radius || 5000,
-      date: params.date || undefined,
-      time: params.time || undefined,
+      date: searchDate,
+      time: searchTime,
       activeOnly: true,
+      currentlyRunning: currentlyRunning,
       pageNumber: 1,
       pageSize: 20,
       sortBy: params.sortBy || 'distance',
@@ -71,14 +82,18 @@ const handleSearch = async (params: any) => {
 // Initialize with URL params if any
 onMounted(() => {
   const query = route.query
-  if (query.location || query.searchTerm) {
+  if (query.address || query.location || query.searchTerm || query.latitude) {
     handleSearch({
       searchTerm: query.searchTerm as string,
-      location: query.location as string,
+      address: query.address as string,
+      location: query.location as string, // Legacy support
+      latitude: query.latitude as string,
+      longitude: query.longitude as string,
       radius: query.radius ? parseInt(query.radius as string) : 5000,
       date: query.date as string,
       time: query.time as string,
       categoryId: query.category ? parseInt(query.category as string) : undefined,
+      currentlyRunning: query.currentlyRunning as string,
       sortBy: query.sortBy as string || 'distance',
       sortOrder: query.sortOrder as string || 'asc'
     })
@@ -87,14 +102,18 @@ onMounted(() => {
 
 // Watch for route changes
 watch(() => route.query, (newQuery) => {
-  if (newQuery.location || newQuery.searchTerm) {
+  if (newQuery.address || newQuery.location || newQuery.searchTerm || newQuery.latitude) {
     handleSearch({
       searchTerm: newQuery.searchTerm as string,
-      location: newQuery.location as string,
+      address: newQuery.address as string,
+      location: newQuery.location as string, // Legacy support
+      latitude: newQuery.latitude as string,
+      longitude: newQuery.longitude as string,
       radius: newQuery.radius ? parseInt(newQuery.radius as string) : 5000,
       date: newQuery.date as string,
       time: newQuery.time as string,
       categoryId: newQuery.category ? parseInt(newQuery.category as string) : undefined,
+      currentlyRunning: newQuery.currentlyRunning as string,
       sortBy: newQuery.sortBy as string || 'distance',
       sortOrder: newQuery.sortOrder as string || 'asc'
     })
@@ -144,93 +163,68 @@ watch(() => route.query, (newQuery) => {
         </div>
         
         <!-- Venues with Categorized Specials -->
-        <div class="space-y-8">
-          <template v-for="venue in venueResults" :key="venue.venue?.id || `venue-${Math.random()}`">
+        <div class="space-y-6">
+          <template v-for="venue in venueResults" :key="venue.id || `venue-${Math.random()}`">
             <div 
-              v-if="venue?.venue"
+              v-if="venue"
               class="bg-white rounded-lg shadow-lg overflow-hidden"
             >
             <!-- Venue Header -->
-            <div class="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-6">
+            <div class="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-4">
               <div class="flex items-center justify-between">
                 <div>
-                  <h3 class="text-xl font-bold">{{ venue.venue.name }}</h3>
-                  <p class="text-blue-100 mt-1">{{ venue.venue.streetAddress }}, {{ venue.venue.locality }}</p>
-                  <p v-if="venue.venue.distanceInMeters" class="text-blue-100 text-sm mt-1">
-                    {{ (venue.venue.distanceInMeters / 1000).toFixed(1) }} km away
+                  <h3 class="text-lg font-bold">{{ venue.name }}</h3>
+                  <p class="text-blue-100 text-sm mt-1">{{ venue.streetAddress }}, {{ venue.locality }}</p>
+                  <p v-if="venue.distanceInMeters" class="text-blue-100 text-xs mt-1">
+                    {{ (venue.distanceInMeters / 1000).toFixed(1) }} km away
                   </p>
                 </div>
                 <div class="text-right">
-                  <span class="inline-block bg-white/20 px-3 py-1 rounded-full text-sm font-semibold">
-                    {{ (venue.food?.length || 0) + (venue.drink?.length || 0) + (venue.entertainment?.length || 0) }} Specials
+                  <span class="inline-block bg-white/20 px-2 py-1 rounded-full text-xs font-semibold">
+                    {{ venue.categoryName }} {{ venue.categoryIcon }}
                   </span>
                 </div>
               </div>
             </div>
 
-            <!-- Categories and Specials -->
-            <div class="p-6 space-y-6">
-              <!-- Food Specials -->
-              <div v-if="venue.food?.length > 0" class="border-l-4 border-green-500 pl-4">
-                <div class="flex items-center mb-4">
-                  <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3">
-                    <span class="text-lg">🍽️</span>
-                  </div>
-                  <h4 class="text-lg font-semibold text-gray-900">Food</h4>
-                  <span class="ml-2 bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs">
-                    {{ venue.food.length }} {{ venue.food.length === 1 ? 'special' : 'specials' }}
-                  </span>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- Specials Grid -->
+            <div class="p-4">
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Food Specials -->
+                <template v-if="venue.specials?.food?.length > 0">
                   <SpecialCard 
-                    v-for="special in venue.food" 
-                    :key="special.id"
+                    v-for="special in venue.specials.food" 
+                    :key="`food-${special.id}`"
                     :special="special"
                     class="hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200"
                   />
-                </div>
+                </template>
+
+                <!-- Drink Specials -->
+                <template v-if="venue.specials?.drink?.length > 0">
+                  <SpecialCard 
+                    v-for="special in venue.specials.drink" 
+                    :key="`drink-${special.id}`"
+                    :special="special"
+                    class="hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200"
+                  />
+                </template>
+
+                <!-- Entertainment Specials -->
+                <template v-if="venue.specials?.entertainment?.length > 0">
+                  <SpecialCard 
+                    v-for="special in venue.specials.entertainment" 
+                    :key="`entertainment-${special.id}`"
+                    :special="special"
+                    class="hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200"
+                  />
+                </template>
               </div>
 
-              <!-- Drink Specials -->
-              <div v-if="venue.drink?.length > 0" class="border-l-4 border-blue-500 pl-4">
-                <div class="flex items-center mb-4">
-                  <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
-                    <span class="text-lg">🍹</span>
-                  </div>
-                  <h4 class="text-lg font-semibold text-gray-900">Drinks</h4>
-                  <span class="ml-2 bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs">
-                    {{ venue.drink.length }} {{ venue.drink.length === 1 ? 'special' : 'specials' }}
-                  </span>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <SpecialCard 
-                    v-for="special in venue.drink" 
-                    :key="special.id"
-                    :special="special"
-                    class="hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200"
-                  />
-                </div>
-              </div>
-
-              <!-- Entertainment Specials -->
-              <div v-if="venue.entertainment?.length > 0" class="border-l-4 border-purple-500 pl-4">
-                <div class="flex items-center mb-4">
-                  <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
-                    <span class="text-lg">🎵</span>
-                  </div>
-                  <h4 class="text-lg font-semibold text-gray-900">Entertainment</h4>
-                  <span class="ml-2 bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs">
-                    {{ venue.entertainment.length }} {{ venue.entertainment.length === 1 ? 'special' : 'specials' }}
-                  </span>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <SpecialCard 
-                    v-for="special in venue.entertainment" 
-                    :key="special.id"
-                    :special="special"
-                    class="hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200"
-                  />
-                </div>
+              <!-- No Specials Message -->
+              <div v-if="!venue.specials?.food?.length && !venue.specials?.drink?.length && !venue.specials?.entertainment?.length" 
+                   class="text-center py-8 text-gray-500">
+                <p>No specials available at this time</p>
               </div>
             </div>
             </div>

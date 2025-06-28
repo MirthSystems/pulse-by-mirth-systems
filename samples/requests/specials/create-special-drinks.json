@@ -1,0 +1,14 @@
+{
+  "name": "Happy Hour - Half Price Drinks",
+  "description": "All draft beers and house cocktails are 50% off during happy hour",
+  "venueId": 1,
+  "specialCategoryId": 2,
+  "startDate": "2025-06-28",
+  "endDate": "2025-12-31",
+  "startTime": "15:00",
+  "endTime": "18:00",
+  "daysOfWeek": "Monday,Tuesday,Wednesday,Thursday,Friday",
+  "cronExpression": "0 0 15-17 * * MON-FRI",
+  "isActive": true,
+  "isRecurring": true
+}

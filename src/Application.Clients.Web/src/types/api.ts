@@ -123,12 +123,14 @@ export interface SpecialSearch {
 
 export interface EnhancedSpecialSearch {
   searchTerm?: string;
+  address?: string;
   latitude?: number;
   longitude?: number;
   radiusInMeters?: number;
   date?: string;
   time?: string;
   activeOnly?: boolean;
+  currentlyRunning?: boolean;
   pageNumber: number;
   pageSize: number;
   sortBy?: string;
@@ -189,11 +191,31 @@ export interface EnhancedVenueSearchResult {
 }
 
 export interface VenueWithCategorizedSpecials {
-  venue: VenueSummary;
-  food: SpecialSummary[];
-  drink: SpecialSummary[];
-  entertainment: SpecialSummary[];
-  totalSpecials: number;
+  id: number;
+  name: string;
+  description?: string;
+  phoneNumber?: string;
+  website?: string;
+  email?: string;
+  profileImage?: string;
+  streetAddress: string;
+  secondaryAddress?: string;
+  locality: string;
+  region: string;
+  postalCode: string;
+  country: string;
+  latitude?: number;
+  longitude?: number;
+  categoryId: number;
+  categoryName: string;
+  categoryIcon?: string;
+  distanceInMeters?: number;
+  specials: {
+    food: SpecialSummary[];
+    drink: SpecialSummary[];
+    entertainment: SpecialSummary[];
+  };
+  totalSpecialCount: number;
 }
 
 // Management types for create/update operations

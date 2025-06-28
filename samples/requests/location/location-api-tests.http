@@ -1,0 +1,31 @@
+### Geocode an address
+POST {{baseUrl}}/api/location/geocode
+Content-Type: application/json
+
+{
+  "address": "1600 Amphitheatre Parkway, Mountain View, CA 94043"
+}
+
+### Geocode Seattle address
+POST {{baseUrl}}/api/location/geocode
+Content-Type: application/json
+
+{
+  "address": "Pike Place Market, Seattle, WA"
+}
+
+### Reverse geocode coordinates (Google HQ)
+POST {{baseUrl}}/api/location/reverse-geocode?latitude=37.4221&longitude=-122.0841
+Content-Type: application/json
+
+### Reverse geocode coordinates (Seattle)
+POST {{baseUrl}}/api/location/reverse-geocode?latitude=47.6089&longitude=-122.3356
+Content-Type: application/json
+
+### Get timezone for coordinates (Google HQ)
+GET {{baseUrl}}/api/location/timezone?latitude=37.4221&longitude=-122.0841
+Content-Type: application/json
+
+### Get timezone for coordinates (Seattle)
+GET {{baseUrl}}/api/location/timezone?latitude=47.6089&longitude=-122.3356
+Content-Type: application/json
