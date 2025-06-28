@@ -210,9 +210,9 @@ export const useSpecialStore = defineStore('special', () => {
         const allSpecials: any[] = []
         response.data.items.forEach(venueData => {
           // Add specials from each category
-          allSpecials.push(...venueData.food)
-          allSpecials.push(...venueData.drink)
-          allSpecials.push(...venueData.entertainment)
+          allSpecials.push(...venueData.specials.food)
+          allSpecials.push(...venueData.specials.drink)
+          allSpecials.push(...venueData.specials.entertainment)
         })
         
         // Filter by category if specified
