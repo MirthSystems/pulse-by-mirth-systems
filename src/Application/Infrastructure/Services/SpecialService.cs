@@ -485,7 +485,24 @@ public class SpecialService : ISpecialService
             }
             else
             {
-                specials = allSpecials;
+                // When not filtering for currently running, filter out past one-time specials
+                var currentDate = searchDate;
+                specials = allSpecials.Where(s => 
+                {
+                    // Always include recurring specials (they don't expire based on date alone)
+                    if (s.IsRecurring)
+                        return true;
+                    
+                    // For one-time specials, only include future or current ones
+                    if (s.EndDate.HasValue)
+                    {
+                        return s.EndDate.Value >= currentDate;
+                    }
+                    else
+                    {
+                        return s.StartDate >= currentDate;
+                    }
+                });
             }
 
             if (!specials.Any() && activeOnly && currentlyRunning)

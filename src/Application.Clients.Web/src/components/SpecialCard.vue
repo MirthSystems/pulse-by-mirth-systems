@@ -31,7 +31,10 @@
         <div>
           <span class="font-medium text-gray-700">When:</span>
           <div class="text-gray-600">
-            <div class="text-xs">{{ formatDate(special.startDate) }}</div>
+            <!-- For one-time specials, show the date -->
+            <div v-if="!special.isRecurring" class="text-xs">{{ formatDate(special.startDate) }}</div>
+            <!-- For recurring specials, show the recurring pattern -->
+            <div v-else-if="special.cronSchedule" class="text-xs">{{ formatCronSchedule(special.cronSchedule) }}</div>
             <div class="text-xs">{{ special.startTime }} - {{ special.endTime || 'Late' }}</div>
           </div>
         </div>
@@ -40,8 +43,8 @@
           <span class="font-medium text-gray-700">Type:</span>
           <div class="text-gray-600">
             <div class="text-xs">{{ special.isRecurring ? 'Recurring' : 'One-time' }}</div>
-            <div v-if="special.cronSchedule" class="text-xs text-gray-500">
-              {{ formatCronSchedule(special.cronSchedule) }}
+            <div v-if="special.endDate && !special.isRecurring" class="text-xs text-gray-500">
+              Ends {{ formatDate(special.endDate) }}
             </div>
           </div>
         </div>

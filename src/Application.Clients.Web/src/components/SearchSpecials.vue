@@ -163,7 +163,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useSpecialStore } from '../stores/special'
 import AddressAutocomplete from './AddressAutocomplete.vue'
 import type { GeocodeResult } from '@/types/api'
@@ -174,6 +174,7 @@ import {
 } from '@heroicons/vue/24/outline'
 
 const router = useRouter()
+const route = useRoute()
 const specialStore = useSpecialStore()
 
 // Search parameters
@@ -207,10 +208,24 @@ const handleCoordinatesUpdated = (latitude: number, longitude: number) => {
   currentLongitude.value = longitude
 }
 
-// Load categories on mount
+// Load categories on mount and initialize from URL params
 onMounted(async () => {
   await specialStore.fetchSpecialCategories()
   categories.value = specialStore.categories
+  
+  // Initialize form from URL parameters
+  const query = route.query
+  if (query.searchTerm) searchTerm.value = query.searchTerm as string
+  if (query.address) locationAddress.value = query.address as string
+  if (query.latitude) currentLatitude.value = parseFloat(query.latitude as string)
+  if (query.longitude) currentLongitude.value = parseFloat(query.longitude as string)
+  if (query.radius) radius.value = parseInt(query.radius as string)
+  if (query.date) date.value = query.date as string
+  if (query.time) time.value = query.time as string
+  if (query.category) categoryId.value = parseInt(query.category as string)
+  if (query.currentlyRunning) currentlyRunning.value = query.currentlyRunning === 'true'
+  if (query.sortBy) sortBy.value = query.sortBy as string
+  if (query.sortOrder) sortOrder.value = query.sortOrder as string
 })
 
 const handleSearch = async () => {
