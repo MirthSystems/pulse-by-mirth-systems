@@ -28,6 +28,23 @@ public class Program
         });
         builder.Services.AddHostedService<Worker>();
 
+        //builder.Services.AddDbContextPool<ApplicationDbContext>(options =>
+        //{
+        //    options.UseNpgsql(builder.Configuration.GetConnectionString("application-db"), npgsqlOptions =>
+        //    {
+        //        npgsqlOptions.MigrationsAssembly(typeof(Program).Assembly.FullName);
+        //        npgsqlOptions.UseNodaTime();
+        //        npgsqlOptions.UseNetTopologySuite();
+        //    })
+        //    .UseSnakeCaseNamingConvention();
+
+        //    #if DEBUG
+        //    options.EnableSensitiveDataLogging();
+        //    options.EnableDetailedErrors();
+        //    #endif
+        //});
+        //builder.EnrichNpgsqlDbContext<ApplicationDbContext>();
+
         var host = builder.Build();
         host.Run();
     }
