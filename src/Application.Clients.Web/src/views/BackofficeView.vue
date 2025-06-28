@@ -219,14 +219,6 @@
       </div>
     </div>
 
-    <!-- Backoffice Footer -->
-    <footer class="bg-white border-t border-gray-200 mt-auto">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div class="text-center text-gray-600">
-          <p>&copy; 2025 Pulse Backoffice. Manage your venues and specials with ease.</p>
-        </div>
-      </div>
-    </footer>
   </div>
 </template>
 
