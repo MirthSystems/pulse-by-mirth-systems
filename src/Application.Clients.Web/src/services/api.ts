@@ -23,7 +23,10 @@ import type {
 } from '@/types/api'
 
 // API Base URL configuration
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://localhost:7309'
+// In production, try to use the environment variable first, then fall back to relative URLs
+// In development, use the environment variable or fallback to localhost
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
+  (import.meta.env.PROD ? '' : 'https://localhost:7309')
 
 class ApiService {
   private accessToken: string | null = null
