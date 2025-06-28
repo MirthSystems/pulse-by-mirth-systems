@@ -55,7 +55,7 @@ class ApiService {
       })
     }
 
-    const response = await fetch(`${API_BASE_URL}/api${url}`, {
+    const response = await fetch(`${API_BASE_URL}${url}`, {
       ...options,
       headers,
     })
@@ -72,27 +72,27 @@ class ApiService {
 
   // Venue API methods
   async getVenues(): Promise<ApiResponse<VenueSummary[]>> {
-    return this.request<VenueSummary[]>('/venues')
+    return this.request<VenueSummary[]>('/api/venues')
   }
 
   async getVenue(id: number): Promise<ApiResponse<Venue>> {
-    return this.request<Venue>(`/venues/${id}`)
+    return this.request<Venue>(`/api/venues/${id}`)
   }
 
   async getVenueCategories(): Promise<ApiResponse<VenueCategory[]>> {
-    return this.request<VenueCategory[]>('/venues/categories')
+    return this.request<VenueCategory[]>('/api/venues/categories')
   }
 
   async getActiveVenues(): Promise<ApiResponse<VenueSummary[]>> {
-    return this.request<VenueSummary[]>('/venues/active')
+    return this.request<VenueSummary[]>('/api/venues/active')
   }
 
   async getVenuesByCategory(categoryId: number): Promise<ApiResponse<VenueSummary[]>> {
-    return this.request<VenueSummary[]>(`/venues/category/${categoryId}`)
+    return this.request<VenueSummary[]>(`/api/venues/category/${categoryId}`)
   }
 
   async getVenuesWithSpecials(): Promise<ApiResponse<VenueSummary[]>> {
-    return this.request<VenueSummary[]>('/venues/with-specials')
+    return this.request<VenueSummary[]>('/api/venues/with-specials')
   }
 
   async getVenuesNear(
@@ -101,19 +101,19 @@ class ApiService {
     radiusInMeters: number = 5000
   ): Promise<ApiResponse<VenueSummary[]>> {
     return this.request<VenueSummary[]>(
-      `/venues/near?latitude=${latitude}&longitude=${longitude}&radiusInMeters=${radiusInMeters}`
+      `/api/venues/near?latitude=${latitude}&longitude=${longitude}&radiusInMeters=${radiusInMeters}`
     )
   }
 
   async searchVenues(search: VenueSearch): Promise<ApiResponse<PagedResponse<VenueSummary>>> {
-    return this.request<PagedResponse<VenueSummary>>('/venues/search', {
+    return this.request<PagedResponse<VenueSummary>>('/api/venues/search', {
       method: 'POST',
       body: JSON.stringify(search),
     })
   }
 
   async searchVenuesEnhanced(search: VenueSearch): Promise<ApiResponse<EnhancedVenueSearchResult>> {
-    return this.request<EnhancedVenueSearchResult>('/venues/search/enhanced', {
+    return this.request<EnhancedVenueSearchResult>('/api/venues/search/enhanced', {
       method: 'POST',
       body: JSON.stringify(search),
     })
@@ -121,15 +121,15 @@ class ApiService {
 
   // Azure Maps venue methods
   async geocodeVenue(id: number): Promise<ApiResponse<GeocodeResult>> {
-    return this.request<GeocodeResult>(`/venues/${id}/geocode`, { method: 'POST' })
+    return this.request<GeocodeResult>(`/api/venues/${id}/geocode`, { method: 'POST' })
   }
 
   async getVenueLocationDetails(id: number): Promise<ApiResponse<ReverseGeocodeResult>> {
-    return this.request<ReverseGeocodeResult>(`/venues/${id}/location-details`)
+    return this.request<ReverseGeocodeResult>(`/api/venues/${id}/location-details`)
   }
 
   async getVenueTimeZone(id: number): Promise<ApiResponse<TimeZoneInfo>> {
-    return this.request<TimeZoneInfo>(`/venues/${id}/timezone`)
+    return this.request<TimeZoneInfo>(`/api/venues/${id}/timezone`)
   }
 
   async getNearbyPOIs(
@@ -138,58 +138,58 @@ class ApiService {
     radiusInMeters: number = 5000
   ): Promise<ApiResponse<PointOfInterest[]>> {
     return this.request<PointOfInterest[]>(
-      `/venues/${id}/nearby-pois?category=${category}&radiusInMeters=${radiusInMeters}`
+      `/api/venues/${id}/nearby-pois?category=${category}&radiusInMeters=${radiusInMeters}`
     )
   }
 
   // Venue Management API methods
   async createVenue(venue: CreateVenueRequest): Promise<ApiResponse<Venue>> {
-    return this.request<Venue>('/venues', {
+    return this.request<Venue>('/api/venues', {
       method: 'POST',
       body: JSON.stringify(venue),
     })
   }
 
   async updateVenue(id: number, venue: UpdateVenueRequest): Promise<ApiResponse<Venue>> {
-    return this.request<Venue>(`/venues/${id}`, {
+    return this.request<Venue>(`/api/venues/${id}`, {
       method: 'PUT',
       body: JSON.stringify(venue),
     })
   }
 
   async deleteVenue(id: number): Promise<ApiResponse<boolean>> {
-    return this.request<boolean>(`/venues/${id}`, {
+    return this.request<boolean>(`/api/venues/${id}`, {
       method: 'DELETE',
     })
   }
 
   // Special API methods
   async getSpecials(): Promise<ApiResponse<SpecialSummary[]>> {
-    return this.request<SpecialSummary[]>('/specials')
+    return this.request<SpecialSummary[]>('/api/specials')
   }
 
   async getSpecial(id: number): Promise<ApiResponse<Special>> {
-    return this.request<Special>(`/specials/${id}`)
+    return this.request<Special>(`/api/specials/${id}`)
   }
 
   async getSpecialCategories(): Promise<ApiResponse<SpecialCategory[]>> {
-    return this.request<SpecialCategory[]>('/specials/categories')
+    return this.request<SpecialCategory[]>('/api/specials/categories')
   }
 
   async getActiveSpecials(): Promise<ApiResponse<SpecialSummary[]>> {
-    return this.request<SpecialSummary[]>('/specials/active')
+    return this.request<SpecialSummary[]>('/api/specials/active')
   }
 
   async getSpecialsByCategory(categoryId: number): Promise<ApiResponse<SpecialSummary[]>> {
-    return this.request<SpecialSummary[]>(`/specials/category/${categoryId}`)
+    return this.request<SpecialSummary[]>(`/api/specials/category/${categoryId}`)
   }
 
   async getSpecialsByVenue(venueId: number): Promise<ApiResponse<SpecialSummary[]>> {
-    return this.request<SpecialSummary[]>(`/specials/venue/${venueId}`)
+    return this.request<SpecialSummary[]>(`/api/specials/venue/${venueId}`)
   }
 
   async searchSpecials(search: SpecialSearch): Promise<ApiResponse<PagedResponse<SpecialSummary>>> {
-    return this.request<PagedResponse<SpecialSummary>>('/specials/search', {
+    return this.request<PagedResponse<SpecialSummary>>('/api/specials/search', {
       method: 'POST',
       body: JSON.stringify(search),
     })
@@ -198,7 +198,7 @@ class ApiService {
   async searchVenuesWithSpecials(
     search: EnhancedSpecialSearch
   ): Promise<ApiResponse<PagedResponse<VenueWithCategorizedSpecials>>> {
-    return this.request<PagedResponse<VenueWithCategorizedSpecials>>('/specials/search/venues', {
+    return this.request<PagedResponse<VenueWithCategorizedSpecials>>('/api/specials/search/venues', {
       method: 'POST',
       body: JSON.stringify(search),
     })
@@ -206,28 +206,28 @@ class ApiService {
 
   // Special Management API methods
   async createSpecial(special: CreateSpecialRequest): Promise<ApiResponse<Special>> {
-    return this.request<Special>('/specials', {
+    return this.request<Special>('/api/specials', {
       method: 'POST',
       body: JSON.stringify(special),
     })
   }
 
   async updateSpecial(id: number, special: UpdateSpecialRequest): Promise<ApiResponse<Special>> {
-    return this.request<Special>(`/specials/${id}`, {
+    return this.request<Special>(`/api/specials/${id}`, {
       method: 'PUT',
       body: JSON.stringify(special),
     })
   }
 
   async deleteSpecial(id: number): Promise<ApiResponse<boolean>> {
-    return this.request<boolean>(`/specials/${id}`, {
+    return this.request<boolean>(`/api/specials/${id}`, {
       method: 'DELETE',
     })
   }
 
   // Utility methods
   async getWeatherForecast(): Promise<any> {
-    return this.request<any>('/weatherforecast')
+    return this.request<any>('/api/weatherforecast')
   }
 }
 

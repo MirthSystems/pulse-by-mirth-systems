@@ -18,21 +18,5 @@ export default defineConfig({
   server: {
     host: true,
     port: parseInt(process.env.PORT ?? "5173"),
-    proxy: {
-      '/api': {
-        target: process.env.services__api_server__https__0 || 
-                process.env.services__api_server__http__0 || 
-                'https://localhost:7309',
-        changeOrigin: true,
-        secure: false,
-        rewrite: path => path.replace(/^\/api/, ''),
-        configure: (proxy, options) => {
-          // Fallback to different ports if the main one fails
-          proxy.on('error', (err, req, res) => {
-            console.log('Proxy error, trying fallback...')
-          })
-        }
-      }
-    }
   }
 })

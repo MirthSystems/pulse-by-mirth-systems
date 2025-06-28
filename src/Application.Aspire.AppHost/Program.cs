@@ -63,6 +63,8 @@ var client =
         .WithEnvironment("VITE_AUTH0_CLIENT_ID", auth0ClientId)
         .WithEnvironment("VITE_AUTH0_AUDIENCE", auth0Audience)
         .WithEnvironment("VITE_API_BASE_URL", server.GetEndpoint("https"))
+        .WithEnvironment("services__api_server__https__0", server.GetEndpoint("https"))
+        .WithEnvironment("services__api_server__http__0", server.GetEndpoint("http"))
         .PublishAsDockerFile();
 
 builder.Build().Run();
