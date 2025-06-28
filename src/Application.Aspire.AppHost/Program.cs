@@ -45,6 +45,7 @@ var databaseMigrations =
 var server =
     builder.AddProject<Projects.Application_Services_API>("api-server")
         .WithReference(db)
+        .WithExternalHttpEndpoints()
         .WithEnvironment("Application__AzureMapsKey", azureMapsKey)
         .WithEnvironment("Auth0__Domain", auth0Domain)
         .WithEnvironment("Auth0__Audience", auth0Audience)
@@ -54,7 +55,7 @@ var server =
         .WaitForCompletion(databaseMigrations);
 
 var client =
-    builder.AddNpmApp("web-client", @"..\Application.Clients.Web", "dev")
+    builder.AddNpmApp("web-client", @"..\Application.Clients.Web", builder.Environment.IsDevelopment() ? "dev" : "build")
         .WithReference(server)
         .WithExternalHttpEndpoints()
         .WithEnvironment("VITE_AUTH0_DOMAIN", auth0Domain)
