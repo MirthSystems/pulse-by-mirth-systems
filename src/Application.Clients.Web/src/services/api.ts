@@ -22,12 +22,6 @@ import type {
   UpdateSpecialRequest
 } from '@/types/api'
 
-// API Base URL configuration
-// In production, try to use the environment variable first, then fall back to relative URLs
-// In development, use the environment variable or fallback to localhost
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
-  (import.meta.env.PROD ? '' : 'https://localhost:7309')
-
 class ApiService {
   private accessToken: string | null = null
 
@@ -58,7 +52,7 @@ class ApiService {
       })
     }
 
-    const response = await fetch(`${API_BASE_URL}${url}`, {
+    const response = await fetch(url, {
       ...options,
       headers,
     })
