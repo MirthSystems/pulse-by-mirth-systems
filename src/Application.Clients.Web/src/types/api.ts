@@ -293,3 +293,55 @@ export interface UpdateSpecialRequest {
   cronSchedule?: string;
   isActive: boolean;
 }
+
+// User and Permission types
+export interface User {
+  id: number;
+  sub: string;
+  email: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  lastLoginAt?: string;
+}
+
+export interface UserVenuePermission {
+  id: number;
+  userId: number;
+  venueId: number;
+  venueName: string;
+  name: string; // "venue:owner" | "venue:manager" | "venue:staff"
+  grantedByUserId: number;
+  grantedByUserEmail: string;
+  grantedAt: string;
+  isActive: boolean;
+  notes?: string;
+}
+
+export interface VenueInvitation {
+  id: number;
+  email: string;
+  venueId: number;
+  venueName: string;
+  permission: string; // "venue:owner" | "venue:manager" | "venue:staff"
+  invitedByUserId: number;
+  invitedByUserEmail: string;
+  invitedAt: string;
+  expiresAt: string;
+  acceptedAt?: string;
+  acceptedByUserId?: number;
+  isActive: boolean;
+  notes?: string;
+}
+
+export interface CreateInvitationRequest {
+  email: string;
+  venueId: number;
+  permission: string; // "venue:owner" | "venue:manager" | "venue:staff"
+  notes?: string;
+}
+
+export interface UpdatePermissionRequest {
+  name: string; // "venue:owner" | "venue:manager" | "venue:staff"
+  notes?: string;
+}

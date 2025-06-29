@@ -21,8 +21,16 @@
             </div>
           </div>
           <div class="flex items-center space-x-3">
+            <router-link
+              v-if="!isNewVenue && venuePermissions.canManageUsers"
+              :to="`/backoffice/venues/${venueId}/permissions`"
+              class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              <UserGroupIcon class="-ml-1 mr-2 h-4 w-4" />
+              Manage Users
+            </router-link>
             <button
-              v-if="!isNewVenue && !isEditing"
+              v-if="!isNewVenue && !isEditing && venuePermissions.canEdit"
               @click="startEditing"
               class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
@@ -376,6 +384,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import apiService from '@/services/api'
+import { usePermissions } from '@/composables/usePermissions'
 import type { 
   Venue,
   VenueCategory, 
@@ -389,12 +398,16 @@ import {
   PencilIcon,
   TrashIcon,
   StarIcon,
+  UserGroupIcon,
   ExclamationTriangleIcon
 } from '@heroicons/vue/24/outline'
 import BusinessHoursEditor from '../components/common/BusinessHoursEditor.vue'
 
 const route = useRoute()
 const router = useRouter()
+
+// Permissions
+const { getVenuePermissions } = usePermissions()
 
 // Props
 interface Props {
@@ -439,6 +452,12 @@ const venueId = computed(() => {
 })
 
 const isNewVenue = computed(() => venueId.value === null)
+
+// Venue permissions
+const venuePermissions = computed(() => {
+  if (!venueId.value) return { canEdit: true, canManageUsers: true } // New venue creation
+  return getVenuePermissions(venueId.value)
+})
 
 // Methods
 const loadVenue = async () => {

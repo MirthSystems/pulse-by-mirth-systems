@@ -80,4 +80,14 @@ public interface IPermissionService
     /// Check if user has any permission for a venue
     /// </summary>
     Task<bool> HasVenuePermissionAsync(string userSub, long venueId, CancellationToken cancellationToken = default);
+    
+    /// <summary>
+    /// Get all permissions for a specific venue
+    /// </summary>
+    Task<IEnumerable<UserVenuePermissionEntity>> GetVenuePermissionsAsync(long venueId, CancellationToken cancellationToken = default);
+    
+    /// <summary>
+    /// Get all invitations for a specific venue
+    /// </summary>
+    Task<IEnumerable<VenueInvitationEntity>> GetVenueInvitationsAsync(long venueId, CancellationToken cancellationToken = default);
 }

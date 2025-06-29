@@ -112,12 +112,16 @@ public class PermissionService : IPermissionService
 
             return permissions.Select(p => new VenuePermissionSummary
             {
+                Id = p.Id,
+                UserId = p.UserId,
                 VenueId = p.VenueId,
                 VenueName = p.Venue.Name,
                 Permission = p.Name,
-                GrantedAt = p.GrantedAt.ToDateTimeUtc(),
+                GrantedByUserId = p.GrantedByUserId,
                 GrantedByName = p.GrantedByUser.Email,
-                IsActive = p.IsActive
+                GrantedAt = p.GrantedAt.ToDateTimeUtc(),
+                IsActive = p.IsActive,
+                Notes = p.Notes
             });
         }
         catch (Exception ex)
@@ -327,6 +331,32 @@ public class PermissionService : IPermissionService
         {
             _logger.LogError(ex, "Error getting accessible venue IDs for user {UserSub}", userSub);
             return Enumerable.Empty<long>();
+        }
+    }
+
+    public async Task<IEnumerable<UserVenuePermissionEntity>> GetVenuePermissionsAsync(long venueId, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            return await _permissionRepository.GetVenuePermissionsAsync(venueId, cancellationToken: cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting permissions for venue {VenueId}", venueId);
+            return Enumerable.Empty<UserVenuePermissionEntity>();
+        }
+    }
+
+    public async Task<IEnumerable<VenueInvitationEntity>> GetVenueInvitationsAsync(long venueId, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            return await _invitationRepository.GetVenueInvitationsAsync(venueId, cancellationToken: cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting invitations for venue {VenueId}", venueId);
+            return Enumerable.Empty<VenueInvitationEntity>();
         }
     }
 }

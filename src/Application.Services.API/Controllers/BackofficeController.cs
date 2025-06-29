@@ -1,5 +1,6 @@
 using Application.Common.Interfaces.Services;
 using Application.Common.Models;
+using Application.Common.Models.Auth;
 using Application.Common.Models.Special;
 using Application.Common.Models.Venue;
 using Application.Infrastructure.Authorization.Requirements;
@@ -144,6 +145,175 @@ public class BackofficeController : ControllerBase
             _logger.LogError(ex, "Error getting specials for user {UserSub}", userSub);
             return StatusCode(500, ApiResponse<IEnumerable<SpecialSummary>>.ErrorResult("Internal server error"));
         }
+    }
+
+    /// <summary>
+    /// Create a new venue (requires system admin or content manager permissions)
+    /// </summary>
+    [HttpPost("venues")]
+    public async Task<ActionResult<ApiResponse<Venue>>> CreateVenue(
+        [FromBody] CreateVenue createVenue,
+        CancellationToken cancellationToken = default)
+    {
+        // Check backoffice access
+        var authResult = await _authorizationService.AuthorizeAsync(User, null, new BackofficeAccessRequirement());
+        if (!authResult.Succeeded)
+        {
+            return Forbid();
+        }
+
+        var userSub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userSub))
+        {
+            return Unauthorized();
+        }
+
+        try
+        {
+            // Only system admins and content managers can create venues
+            var isSystemAdmin = User.HasClaim("permissions", "system:admin");
+            var isContentManager = User.HasClaim("permissions", "content:manager");
+            
+            if (!isSystemAdmin && !isContentManager)
+            {
+                return Forbid();
+            }
+
+            var result = await _venueService.CreateVenueAsync(createVenue, cancellationToken);
+            
+            if (!result.Success)
+            {
+                return BadRequest(result);
+            }
+
+            return CreatedAtAction(
+                nameof(GetVenueById),
+                new { id = result.Data!.Id },
+                result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating venue");
+            return StatusCode(500, ApiResponse<Venue>.ErrorResult("Internal server error"));
+        }
+    }
+
+    /// <summary>
+    /// Update a venue (must have permission for the venue)
+    /// </summary>
+    [HttpPut("venues/{id}")]
+    public async Task<ActionResult<ApiResponse<Venue?>>> UpdateVenue(
+        long id,
+        [FromBody] UpdateVenue updateVenue,
+        CancellationToken cancellationToken = default)
+    {
+        // Check backoffice access
+        var authResult = await _authorizationService.AuthorizeAsync(User, null, new BackofficeAccessRequirement());
+        if (!authResult.Succeeded)
+        {
+            return Forbid();
+        }
+
+        var userSub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userSub))
+        {
+            return Unauthorized();
+        }
+
+        try
+        {
+            // Check if user can manage this venue (unless they're admin/content manager)
+            var isSystemAdmin = User.HasClaim("permissions", "system:admin");
+            var isContentManager = User.HasClaim("permissions", "content:manager");
+            
+            if (!isSystemAdmin && !isContentManager)
+            {
+                var hasVenueAccess = await _permissionService.HasVenuePermissionAsync(userSub, id, cancellationToken);
+                if (!hasVenueAccess)
+                {
+                    return Forbid();
+                }
+            }
+
+            var result = await _venueService.UpdateVenueAsync(id, updateVenue, cancellationToken);
+            
+            if (!result.Success)
+            {
+                return BadRequest(result);
+            }
+
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating venue {VenueId}", id);
+            return StatusCode(500, ApiResponse<Venue>.ErrorResult("Internal server error"));
+        }
+    }
+
+    /// <summary>
+    /// Delete a venue (must have permission for the venue)
+    /// </summary>
+    [HttpDelete("venues/{id}")]
+    public async Task<ActionResult<ApiResponse<bool>>> DeleteVenue(long id, CancellationToken cancellationToken = default)
+    {
+        // Check backoffice access
+        var authResult = await _authorizationService.AuthorizeAsync(User, null, new BackofficeAccessRequirement());
+        if (!authResult.Succeeded)
+        {
+            return Forbid();
+        }
+
+        var userSub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userSub))
+        {
+            return Unauthorized();
+        }
+
+        try
+        {
+            // Check if user can manage this venue (unless they're admin/content manager)
+            var isSystemAdmin = User.HasClaim("permissions", "system:admin");
+            var isContentManager = User.HasClaim("permissions", "content:manager");
+            
+            if (!isSystemAdmin && !isContentManager)
+            {
+                var hasVenueAccess = await _permissionService.HasVenuePermissionAsync(userSub, id, cancellationToken);
+                if (!hasVenueAccess)
+                {
+                    return Forbid();
+                }
+            }
+
+            var result = await _venueService.DeleteVenueAsync(id, cancellationToken);
+            
+            if (!result.Success)
+            {
+                return BadRequest(result);
+            }
+
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting venue {VenueId}", id);
+            return StatusCode(500, ApiResponse<bool>.ErrorResult("Internal server error"));
+        }
+    }
+
+    /// <summary>
+    /// Get venue by ID (helper method for created response)
+    /// </summary>
+    private async Task<ActionResult<ApiResponse<Venue?>>> GetVenueById(long id, CancellationToken cancellationToken = default)
+    {
+        var result = await _venueService.GetVenueByIdAsync(id, cancellationToken);
+        
+        if (!result.Success || result.Data == null)
+        {
+            return NotFound(result);
+        }
+        
+        return Ok(result);
     }
 
     /// <summary>
@@ -339,5 +509,197 @@ public class BackofficeController : ControllerBase
         }
         
         return Ok(result);
+    }
+
+    /// <summary>
+    /// Get current user's venue permissions
+    /// </summary>
+    [HttpGet("my-permissions")]
+    public async Task<ActionResult<ApiResponse<IEnumerable<VenuePermissionSummary>>>> GetMyPermissions(CancellationToken cancellationToken = default)
+    {
+        // Check backoffice access
+        var authResult = await _authorizationService.AuthorizeAsync(User, null, new BackofficeAccessRequirement());
+        if (!authResult.Succeeded)
+        {
+            return Forbid();
+        }
+
+        var userSub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userSub))
+        {
+            return Unauthorized();
+        }
+
+        try
+        {
+            var permissions = await _permissionService.GetUserVenuePermissionsAsync(userSub, cancellationToken);
+            return Ok(ApiResponse<IEnumerable<VenuePermissionSummary>>.SuccessResult(permissions));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting user venue permissions for user {UserSub}", userSub);
+            return StatusCode(500, ApiResponse<IEnumerable<VenuePermissionSummary>>.ErrorResult("Internal server error"));
+        }
+    }
+
+    /// <summary>
+    /// Get permissions for a specific venue
+    /// </summary>
+    [HttpGet("venues/{venueId}/permissions")]
+    public async Task<ActionResult<ApiResponse<IEnumerable<VenuePermissionResponse>>>> GetVenuePermissions(
+        long venueId,
+        CancellationToken cancellationToken = default)
+    {
+        // Check backoffice access
+        var authResult = await _authorizationService.AuthorizeAsync(User, null, new BackofficeAccessRequirement());
+        if (!authResult.Succeeded)
+        {
+            return Forbid();
+        }
+
+        var userSub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userSub))
+        {
+            return Unauthorized();
+        }
+
+        try
+        {
+            // Check if user can manage this venue (unless they're admin/content manager)
+            var isSystemAdmin = User.HasClaim("permissions", "system:admin");
+            var isContentManager = User.HasClaim("permissions", "content:manager");
+            
+            if (!isSystemAdmin && !isContentManager)
+            {
+                var hasVenueAccess = await _permissionService.HasVenuePermissionAsync(userSub, venueId, cancellationToken);
+                if (!hasVenueAccess)
+                {
+                    return Forbid();
+                }
+            }
+
+            var permissions = await _permissionService.GetVenuePermissionsAsync(venueId, cancellationToken);
+            
+            // Transform to response model
+            var result = permissions.Select(p => new VenuePermissionResponse
+            {
+                Id = p.Id,
+                UserId = p.UserId,
+                VenueId = p.VenueId,
+                VenueName = p.Venue?.Name ?? "",
+                Name = p.Name,
+                GrantedByUserId = p.GrantedByUserId,
+                GrantedByUserEmail = p.GrantedByUser?.Email ?? "",
+                GrantedAt = p.GrantedAt.ToDateTimeUtc(),
+                IsActive = p.IsActive,
+                Notes = p.Notes
+            });
+
+            return Ok(ApiResponse<IEnumerable<VenuePermissionResponse>>.SuccessResult(result));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting venue permissions for venue {VenueId}", venueId);
+            return StatusCode(500, ApiResponse<IEnumerable<VenuePermissionResponse>>.ErrorResult("Internal server error"));
+        }
+    }
+
+    /// <summary>
+    /// Get invitations for a specific venue
+    /// </summary>
+    [HttpGet("venues/{venueId}/invitations")]
+    public async Task<ActionResult<ApiResponse<IEnumerable<VenueInvitationResponse>>>> GetVenueInvitations(
+        long venueId,
+        CancellationToken cancellationToken = default)
+    {
+        // Check backoffice access
+        var authResult = await _authorizationService.AuthorizeAsync(User, null, new BackofficeAccessRequirement());
+        if (!authResult.Succeeded)
+        {
+            return Forbid();
+        }
+
+        var userSub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userSub))
+        {
+            return Unauthorized();
+        }
+
+        try
+        {
+            // Check if user can manage this venue (unless they're admin/content manager)
+            var isSystemAdmin = User.HasClaim("permissions", "system:admin");
+            var isContentManager = User.HasClaim("permissions", "content:manager");
+            
+            if (!isSystemAdmin && !isContentManager)
+            {
+                var hasVenueAccess = await _permissionService.HasVenuePermissionAsync(userSub, venueId, cancellationToken);
+                if (!hasVenueAccess)
+                {
+                    return Forbid();
+                }
+            }
+
+            var invitations = await _permissionService.GetVenueInvitationsAsync(venueId, cancellationToken);
+            
+            // Transform to response model
+            var result = invitations.Select(i => new VenueInvitationResponse
+            {
+                Id = i.Id,
+                Email = i.Email,
+                VenueId = i.VenueId,
+                VenueName = i.Venue?.Name ?? "",
+                Permission = i.Permission,
+                InvitedByUserId = i.InvitedByUserId,
+                InvitedByUserEmail = i.InvitedByUser?.Email ?? "",
+                InvitedAt = i.InvitedAt.ToDateTimeUtc(),
+                ExpiresAt = i.ExpiresAt.ToDateTimeUtc(),
+                AcceptedAt = i.AcceptedAt?.ToDateTimeUtc(),
+                AcceptedByUserId = i.AcceptedByUserId,
+                IsActive = i.IsActive,
+                Notes = i.Notes
+            });
+
+            return Ok(ApiResponse<IEnumerable<VenueInvitationResponse>>.SuccessResult(result));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting venue invitations for venue {VenueId}", venueId);
+            return StatusCode(500, ApiResponse<IEnumerable<VenueInvitationResponse>>.ErrorResult("Internal server error"));
+        }
+    }
+
+    /// <summary>
+    /// Send an invitation to join venue management
+    /// </summary>
+    [HttpPost("invitations")]
+    public async Task<ActionResult<ApiResponse<object>>> SendInvitation(
+        [FromBody] object invitationRequest,
+        CancellationToken cancellationToken = default)
+    {
+        // Check backoffice access
+        var authResult = await _authorizationService.AuthorizeAsync(User, null, new BackofficeAccessRequirement());
+        if (!authResult.Succeeded)
+        {
+            return Forbid();
+        }
+
+        var userSub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userSub))
+        {
+            return Unauthorized();
+        }
+
+        try
+        {
+            // For now, return a placeholder response
+            // TODO: Implement invitation sending logic
+            return Ok(ApiResponse<object>.SuccessResult(new { message = "Invitation functionality coming soon" }));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error sending invitation");
+            return StatusCode(500, ApiResponse<object>.ErrorResult("Internal server error"));
+        }
     }
 }

@@ -50,7 +50,7 @@ const router = createRouter({
     {
       path: '/backoffice/venues',
       name: 'VenueManagement',
-      component: () => import('../views/VenueManagementView.vue'),
+      component: () => import('../views/BackofficeView.vue'),
       beforeEnter: requireAuth,
       meta: {
         requiresAuth: true,
@@ -66,6 +66,17 @@ const router = createRouter({
       meta: {
         requiresAuth: true,
         title: 'Venue Detail'
+      }
+    },
+    {
+      path: '/backoffice/venues/:venueId/permissions',
+      name: 'VenuePermissions',
+      component: () => import('../views/VenuePermissionsView.vue'),
+      beforeEnter: requireAuth,
+      props: true,
+      meta: {
+        requiresAuth: true,
+        title: 'Venue Permissions'
       }
     },
     {

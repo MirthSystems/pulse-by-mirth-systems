@@ -354,7 +354,7 @@ const createSpecial = async () => {
     if (!specialData.endDate) specialData.endDate = undefined
     if (!specialData.isRecurring) specialData.cronSchedule = undefined
 
-    const response = await apiService.createSpecial(specialData)
+    const response = await apiService.createSpecial(venueId.value, specialData)
     if (!response.success) {
       throw new Error(response.message || 'Failed to create special')
     }
