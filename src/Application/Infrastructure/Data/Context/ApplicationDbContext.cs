@@ -11,6 +11,11 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
     public DbSet<DayOfWeekEntity> DaysOfWeek => Set<DayOfWeekEntity>();
     public DbSet<SpecialEntity> Specials => Set<SpecialEntity>();
     public DbSet<SpecialCategoryEntity> SpecialCategories => Set<SpecialCategoryEntity>();
+    
+    // Authorization entities
+    public DbSet<UserEntity> Users => Set<UserEntity>();
+    public DbSet<UserVenuePermissionEntity> UserVenuePermissions => Set<UserVenuePermissionEntity>();
+    public DbSet<VenueInvitationEntity> VenueInvitations => Set<VenueInvitationEntity>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

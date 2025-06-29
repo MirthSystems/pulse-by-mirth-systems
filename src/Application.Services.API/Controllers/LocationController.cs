@@ -9,7 +9,7 @@ namespace Application.Services.API.Controllers;
 /// API controller for location-based operations including geocoding and address search
 /// </summary>
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/location")]
 public class LocationController : ControllerBase
 {
     private readonly IAzureMapsService _azureMapsService;

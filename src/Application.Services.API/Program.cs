@@ -99,6 +99,8 @@ public class Program
             configure.OperationProcessors.Add(new NSwag.Generation.Processors.Security.AspNetCoreOperationSecurityScopeProcessor("Bearer"));
         });
 
+        builder.Services.AddScoped<Microsoft.AspNetCore.Authorization.IAuthorizationHandler, Application.Infrastructure.Authorization.Handlers.BackofficeAuthorizationHandler>();
+
         var app = builder.Build();
 
         app.MapDefaultEndpoints();

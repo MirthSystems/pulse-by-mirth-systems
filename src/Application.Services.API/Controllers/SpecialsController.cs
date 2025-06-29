@@ -11,7 +11,7 @@ namespace Application.Services.API.Controllers;
 /// API controller for special operations
 /// </summary>
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/specials")]
 public class SpecialsController : ControllerBase
 {
     private readonly ISpecialService _specialService;
@@ -55,7 +55,6 @@ public class SpecialsController : ControllerBase
     /// Create a new special
     /// </summary>
     [HttpPost]
-    [Authorize]
     public async Task<ActionResult<ApiResponse<Special>>> CreateSpecial([FromBody] CreateSpecial createSpecial, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Creating new special: {SpecialTitle}", createSpecial.Title);
@@ -76,53 +75,6 @@ public class SpecialsController : ControllerBase
             nameof(GetSpecialById),
             new { id = result.Data!.Id },
             result);
-    }
-
-    /// <summary>
-    /// Update an existing special
-    /// </summary>
-    [HttpPut("{id}")]
-    [Authorize]
-    public async Task<ActionResult<ApiResponse<Special?>>> UpdateSpecial(long id, [FromBody] UpdateSpecial updateSpecial, CancellationToken cancellationToken = default)
-    {
-        _logger.LogInformation("Updating special with ID: {SpecialId}", id);
-        
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
-        }
-        
-        var result = await _specialService.UpdateSpecialAsync(id, updateSpecial, cancellationToken);
-        
-        if (!result.Success)
-        {
-            if (result.Message?.Contains("not found") == true)
-            {
-                return NotFound(result);
-            }
-            return BadRequest(result);
-        }
-        
-        return Ok(result);
-    }
-
-    /// <summary>
-    /// Delete a special
-    /// </summary>
-    [HttpDelete("{id}")]
-    [Authorize]
-    public async Task<ActionResult<ApiResponse<bool>>> DeleteSpecial(long id, CancellationToken cancellationToken = default)
-    {
-        _logger.LogInformation("Deleting special with ID: {SpecialId}", id);
-        
-        var result = await _specialService.DeleteSpecialAsync(id, cancellationToken);
-        
-        if (!result.Success)
-        {
-            return BadRequest(result);
-        }
-        
-        return Ok(result);
     }
 
     /// <summary>
