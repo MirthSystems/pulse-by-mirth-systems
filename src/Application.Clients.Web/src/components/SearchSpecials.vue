@@ -165,6 +165,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useSpecialStore } from '../stores/special'
 import AddressAutocomplete from './AddressAutocomplete.vue'
+import apiService from '@/services/api'
 import type { GeocodeResult } from '@/types/api'
 import { 
   MagnifyingGlassIcon, 
@@ -228,21 +229,40 @@ onMounted(async () => {
 })
 
 const handleSearch = async () => {
-  // Validate required fields
-  if (!locationAddress.value.trim()) {
-    // Could add a toast notification here
-    return
+  // Validate required fields - prioritize coordinates over address
+  if (!currentLatitude.value || !currentLongitude.value) {
+    if (!locationAddress.value.trim()) {
+      alert('Please select a location or use your current location.')
+      return
+    }
+    
+    // If we have address but no coordinates, try to geocode it first
+    try {
+      const geocodeResponse = await apiService.geocodeAddress(locationAddress.value.trim())
+      if (geocodeResponse.success && geocodeResponse.data) {
+        currentLatitude.value = geocodeResponse.data.latitude
+        currentLongitude.value = geocodeResponse.data.longitude
+      } else {
+        alert('Unable to find coordinates for the provided address. Please try a different address or use your current location.')
+        return
+      }
+    } catch (error) {
+      console.error('Error geocoding address:', error)
+      alert('Unable to geocode the provided address. Please try a different address or use your current location.')
+      return
+    }
   }
 
   isSearching.value = true
   
   try {
     // Navigate to search page with parameters that match the enhanced API
+    // Prioritize coordinates over address for better accuracy
     router.push({
       name: 'Search',
       query: {
         searchTerm: searchTerm.value.trim() || undefined,
-        address: locationAddress.value.trim(),
+        address: locationAddress.value.trim() || undefined,
         latitude: currentLatitude.value?.toString(),
         longitude: currentLongitude.value?.toString(),
         radius: radius.value.toString(),

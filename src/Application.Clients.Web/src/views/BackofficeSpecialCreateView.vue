@@ -359,8 +359,8 @@ const createSpecial = async () => {
       throw new Error(response.message || 'Failed to create special')
     }
     
-    // Navigate to the new special's detail page
-    router.replace(`/backoffice/venues/${venueId.value}/specials/${response.data.id}`)
+    // Navigate back to the venue detail page instead of the new special's detail page
+    router.replace(`/backoffice/venues/${venueId.value}`)
   } catch (error) {
     console.error('Error creating special:', error)
     submitError.value = error instanceof Error ? error.message : 'An unexpected error occurred'

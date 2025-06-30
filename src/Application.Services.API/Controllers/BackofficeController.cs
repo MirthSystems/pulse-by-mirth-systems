@@ -179,10 +179,7 @@ public class BackofficeController : ControllerBase
                 return BadRequest(result);
             }
 
-            return CreatedAtAction(
-                nameof(GetVenueById),
-                new { id = result.Data!.Id },
-                result);
+            return StatusCode(201, result);
         }
         catch (Exception ex)
         {
@@ -356,10 +353,7 @@ public class BackofficeController : ControllerBase
                 return BadRequest(result);
             }
 
-            return CreatedAtAction(
-                nameof(GetSpecialById),
-                new { id = result.Data!.Id },
-                result);
+            return StatusCode(201, result);
         }
         catch (Exception ex)
         {

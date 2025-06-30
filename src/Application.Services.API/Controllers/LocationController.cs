@@ -120,4 +120,50 @@ public class LocationController : ControllerBase
             return StatusCode(500, ApiResponse<TimeZoneInfo?>.ErrorResult($"Error getting timezone: {ex.Message}"));
         }
     }
+
+    /// <summary>
+    /// Validate and geocode a complete address from components
+    /// </summary>
+    [HttpPost("validate-address")]
+    public async Task<ActionResult<ApiResponse<GeocodeResult?>>> ValidateAddress(
+        [FromBody] ValidateAddressRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        _logger.LogInformation("Validating address: {StreetAddress}, {Locality}, {Region}, {PostalCode}", 
+            request.StreetAddress, request.Locality, request.Region, request.PostalCode);
+        
+        try
+        {
+            // Build full address string
+            var addressParts = new List<string>();
+            if (!string.IsNullOrWhiteSpace(request.StreetAddress)) addressParts.Add(request.StreetAddress.Trim());
+            if (!string.IsNullOrWhiteSpace(request.SecondaryAddress)) addressParts.Add(request.SecondaryAddress.Trim());
+            if (!string.IsNullOrWhiteSpace(request.Locality)) addressParts.Add(request.Locality.Trim());
+            if (!string.IsNullOrWhiteSpace(request.Region)) addressParts.Add(request.Region.Trim());
+            if (!string.IsNullOrWhiteSpace(request.PostalCode)) addressParts.Add(request.PostalCode.Trim());
+            if (!string.IsNullOrWhiteSpace(request.Country)) addressParts.Add(request.Country.Trim());
+
+            var fullAddress = string.Join(", ", addressParts);
+            
+            if (string.IsNullOrWhiteSpace(fullAddress))
+            {
+                return BadRequest(ApiResponse<GeocodeResult?>.ErrorResult("At least one address component is required"));
+            }
+
+            var result = await _azureMapsService.GeocodeAddressAsync(fullAddress, cancellationToken);
+            
+            if (result == null)
+            {
+                return Ok(ApiResponse<GeocodeResult?>.ErrorResult("Address could not be validated or geocoded"));
+            }
+
+            return Ok(ApiResponse<GeocodeResult?>.SuccessResult(result));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error validating address: {StreetAddress}, {Locality}, {Region}, {PostalCode}", 
+                request.StreetAddress, request.Locality, request.Region, request.PostalCode);
+            return StatusCode(500, ApiResponse<GeocodeResult?>.ErrorResult($"Error validating address: {ex.Message}"));
+        }
+    }
 }

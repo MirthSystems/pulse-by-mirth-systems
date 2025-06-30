@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router'
 import { useSpecialStore } from '../stores/special'
 import SpecialCard from '../components/SpecialCard.vue'
 import SearchSpecials from '../components/SearchSpecials.vue'
+import apiService from '@/services/api'
 import { StarIcon } from '@heroicons/vue/24/outline'
 
 const route = useRoute()
@@ -57,11 +58,31 @@ const handleSearch = async (params: any) => {
       searchTime = searchTime || now.toTimeString().slice(0, 5) // HH:MM
     }
     
+    // Prioritize coordinates - if we don't have them but have an address, geocode first
+    let latitude = params.latitude ? parseFloat(params.latitude) : undefined
+    let longitude = params.longitude ? parseFloat(params.longitude) : undefined
+    
+    if ((!latitude || !longitude) && (params.address || params.location)) {
+      try {
+        const addressToGeocode = params.address || params.location
+        const geocodeResponse = await apiService.geocodeAddress(addressToGeocode)
+        if (geocodeResponse.success && geocodeResponse.data) {
+          latitude = geocodeResponse.data.latitude
+          longitude = geocodeResponse.data.longitude
+          console.log(`Geocoded "${addressToGeocode}" to coordinates:`, { latitude, longitude })
+        } else {
+          console.warn('Failed to geocode address:', addressToGeocode)
+        }
+      } catch (error) {
+        console.error('Error geocoding address for search:', error)
+      }
+    }
+    
     const searchParams = {
       searchTerm: params.searchTerm || undefined,
       address: params.address || params.location || undefined, // Handle both new and legacy params
-      latitude: params.latitude ? parseFloat(params.latitude) : undefined,
-      longitude: params.longitude ? parseFloat(params.longitude) : undefined,
+      latitude: latitude,
+      longitude: longitude,
       radiusInMeters: params.radius || 5000,
       date: searchDate,
       time: searchTime,

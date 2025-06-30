@@ -183,61 +183,13 @@
                 </div>
 
                 <div>
-                  <label for="streetAddress" class="block text-sm font-medium text-gray-700">Street Address *</label>
-                  <input
-                    v-model="form.streetAddress"
-                    type="text"
-                    id="streetAddress"
+                  <label for="streetAddress" class="block text-sm font-medium text-gray-700 mb-4">Address Information</label>
+                  <VenueAddressForm
+                    v-model="addressForm"
                     :readonly="!isEditing && !isNewVenue"
-                    required
-                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                    :class="{ 'bg-gray-50': !isEditing && !isNewVenue, 'border-red-300': errors.streetAddress }"
+                    :errors="errors"
+                    @address-geocoded="onAddressGeocoded"
                   />
-                  <p v-if="errors.streetAddress" class="mt-1 text-sm text-red-600">{{ errors.streetAddress }}</p>
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                  <div>
-                    <label for="locality" class="block text-sm font-medium text-gray-700">City *</label>
-                    <input
-                      v-model="form.locality"
-                      type="text"
-                      id="locality"
-                      :readonly="!isEditing && !isNewVenue"
-                      required
-                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                      :class="{ 'bg-gray-50': !isEditing && !isNewVenue, 'border-red-300': errors.locality }"
-                    />
-                    <p v-if="errors.locality" class="mt-1 text-sm text-red-600">{{ errors.locality }}</p>
-                  </div>
-
-                  <div>
-                    <label for="region" class="block text-sm font-medium text-gray-700">State/Region *</label>
-                    <input
-                      v-model="form.region"
-                      type="text"
-                      id="region"
-                      :readonly="!isEditing && !isNewVenue"
-                      required
-                      class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                      :class="{ 'bg-gray-50': !isEditing && !isNewVenue, 'border-red-300': errors.region }"
-                    />
-                    <p v-if="errors.region" class="mt-1 text-sm text-red-600">{{ errors.region }}</p>
-                  </div>
-                </div>
-
-                <div>
-                  <label for="postalCode" class="block text-sm font-medium text-gray-700">Postal Code *</label>
-                  <input
-                    v-model="form.postalCode"
-                    type="text"
-                    id="postalCode"
-                    :readonly="!isEditing && !isNewVenue"
-                    required
-                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                    :class="{ 'bg-gray-50': !isEditing && !isNewVenue, 'border-red-300': errors.postalCode }"
-                  />
-                  <p v-if="errors.postalCode" class="mt-1 text-sm text-red-600">{{ errors.postalCode }}</p>
                 </div>
               </div>
             </div>
@@ -391,7 +343,8 @@ import type {
   SpecialSummary,
   CreateVenueRequest, 
   UpdateVenueRequest,
-  BusinessHoursRequest
+  BusinessHoursRequest,
+  GeocodeResult
 } from '@/types/api'
 import {
   ChevronLeftIcon,
@@ -402,6 +355,7 @@ import {
   ExclamationTriangleIcon
 } from '@heroicons/vue/24/outline'
 import BusinessHoursEditor from '../components/common/BusinessHoursEditor.vue'
+import VenueAddressForm from '../components/VenueAddressForm.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -457,6 +411,24 @@ const isNewVenue = computed(() => venueId.value === null)
 const venuePermissions = computed(() => {
   if (!venueId.value) return { canEdit: true, canManageUsers: true } // New venue creation
   return getVenuePermissions(venueId.value)
+})
+
+// Address form computed property for the VenueAddressForm component
+const addressForm = computed({
+  get: () => ({
+    streetAddress: form.value.streetAddress,
+    locality: form.value.locality,
+    region: form.value.region,
+    postalCode: form.value.postalCode,
+    country: form.value.country
+  }),
+  set: (value) => {
+    form.value.streetAddress = value.streetAddress
+    form.value.locality = value.locality
+    form.value.region = value.region
+    form.value.postalCode = value.postalCode
+    form.value.country = value.country
+  }
 })
 
 // Methods
@@ -530,6 +502,17 @@ const loadSpecials = async () => {
 
 const loadSpecialCategories = async () => {
   // No longer needed - categories are loaded in special detail view
+}
+
+const onAddressGeocoded = (result: GeocodeResult) => {
+  // Clear address validation errors when address is successfully geocoded
+  errors.value.streetAddress = ''
+  errors.value.locality = ''
+  errors.value.region = ''
+  errors.value.postalCode = ''
+  errors.value.country = ''
+  
+  console.log('Address geocoded successfully:', result)
 }
 
 const startEditing = () => {
@@ -621,8 +604,8 @@ const saveVenue = async () => {
       if (!response.success) {
         throw new Error(response.message || 'Failed to create venue')
       }
-      // Navigate to the new venue's detail page
-      router.replace(`/backoffice/venues/${response.data.id}`)
+      // Navigate back to the backoffice main page instead of the new venue's detail page
+      router.replace('/backoffice')
     } else {
       const response = await apiService.updateVenue(venueId.value!, venueData as UpdateVenueRequest)
       if (!response.success) {
