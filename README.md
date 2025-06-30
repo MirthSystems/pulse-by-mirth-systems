@@ -219,31 +219,47 @@ For our initial release, we're focusing on delivering these essential features:
 
 ### Frontend:
 
-- Progressive Web App (PWA) built with **React**, using **Vite** as the build tool for fast development and optimized production builds.
-  - Installable on mobile devices
-  - Offline capabilities
+- **Vue.js 3 Progressive Web App (PWA)** built with **Vite** as the build tool for lightning-fast development and optimized production builds.
+  - **Vue 3 Composition API** for reactive, maintainable component architecture
+  - **TypeScript** integration for enhanced developer experience and code reliability
+  - **Pinia** for intuitive state management with Vue 3 reactivity
+  - **Vue Router 4** for client-side routing and navigation
+  - **TailwindCSS 4** for utility-first styling and consistent design system
+  - **Headless UI for Vue** for accessible, unstyled UI components
+  - **Heroicons** for consistent iconography throughout the application
+  - **@vueuse/core** for essential Vue 3 composition utilities
+  - Installable on mobile devices as a PWA
+  - Offline capabilities and caching strategies
   - Push notifications (with user permission)
-  - Responsive design for all screen sizes
-- Written in **TypeScript** for improved code quality and developer experience.
-- State management handled by **Redux**, providing a predictable state container.
-- User interface components from **MUI (Material-UI)**, implementing Material Design for a consistent and modern look.
-- Future native mobile applications planned post-MVP (iOS & Android).
-- Web portal for venue management.
+  - Responsive design optimized for all screen sizes
+  - **Cypress** for end-to-end testing and **Vitest** for unit testing
+- **Auth0 Vue SDK** (@auth0/auth0-vue) for seamless authentication integration
+- Future native mobile applications planned post-MVP (iOS & Android)
+- Dedicated web portal for venue management built with the same Vue.js stack
 
 ### Backend:
 
-- .NET Core (C#) API services
-- PostgreSQL database for data storage and initial recommendation engine
-- Real-time messaging infrastructure for instant updates
+- **.NET 9 (C#) API services** built with modern ASP.NET Core architecture
+- **Entity Framework Core 9** with PostgreSQL for robust data persistence
+- **PostgreSQL database** for data storage and initial recommendation algorithms
+- **.NET Aspire** for cloud-native application orchestration and development
+  - Microservices architecture with service discovery
+  - Built-in observability and monitoring
+  - Container orchestration for development and deployment
+  - Redis integration for caching and session management
+- Real-time messaging infrastructure using **SignalR** for instant updates
 - **Auth0** integration for authentication and authorization services
-  - Secure user registration and login
+  - Secure user registration and login flows
   - Social login options (Google, Facebook, etc.)
-  - JWT token-based authentication
+  - JWT token-based API authentication
   - Role-based access control for users, venues, and administrators
   - Single Sign-On (SSO) capabilities
-- Content expiration system for managing ephemeral posts
-- Category indexing and search optimization
-- Special scheduling and recurrence handling
+- **Cronos** library for advanced cron expression parsing and special scheduling
+- **FluentValidation** for robust input validation and business rules
+- Content expiration system for managing ephemeral posts (15-minute auto-deletion)
+- Advanced category indexing and search optimization
+- Special scheduling with complex recurrence patterns (daily, weekly, monthly, custom cron)
+- **Azure Maps** integration for location services and geocoding
 
 ### Identity and Authentication:
 
@@ -326,13 +342,21 @@ This hybrid approach allows granular control over which users can manage specifi
   - Profile status (active/inactive)
   - Note: Basic profile info (name, email, profile picture) managed by Auth0
 
-### Infrastructure:
+### Infrastructure
 
-- Azure cloud hosting and services
-- Containerized deployment with Docker
-- Scalable microservices architecture
-- Real-time data synchronization
-- Secure API communication with Auth0
+- **Azure cloud hosting** with modern containerized deployment
+- **Docker containerization** with multi-stage builds for optimal production images
+- **.NET Aspire orchestration** for cloud-native application development
+  - Service discovery and communication
+  - Built-in health checks and monitoring
+  - Redis for distributed caching and session management
+  - PostgreSQL for primary data storage
+- **Azure Container Apps** for scalable, serverless container hosting
+- **Azure Database for PostgreSQL** for managed database services
+- Real-time data synchronization with SignalR hubs
+- Secure API communication with JWT tokens via Auth0
+- **GitHub Actions** CI/CD pipelines for automated testing and deployment
+- Environment-specific configuration management
 
 ## MVP Constraints & Limitations
 
@@ -362,10 +386,13 @@ For our initial release, we're implementing the following constraints to focus d
     - Basic moderation for inappropriate content
     - Tag/Vibe consolidation for common misspellings or variations
 
-5. **PWA-First Approach:**
-    - Focus on web-based Progressive Web App for MVP
-    - Mobile apps planned for post-MVP development
-    - Ensure mobile-friendly experience through responsive design
+5. **Vue.js PWA-First Approach:**
+    - **Vue 3 with Composition API** chosen over React for its intuitive reactivity system and gentler learning curve
+    - **Pinia** state management selected over Redux for its simplicity and Vue 3 optimization
+    - **TailwindCSS** utility-first approach for rapid, consistent styling
+    - Progressive Web App capabilities for mobile-like experience without app store distribution
+    - Native mobile apps planned for post-MVP development phase
+    - Responsive design ensures optimal experience across all device types
 
 6. **PostgreSQL for Recommendations:**
     - Using traditional database queries for initial recommendations
@@ -388,9 +415,11 @@ For our initial release, we're implementing the following constraints to focus d
 After successful MVP launch and validation, we plan to implement:
 
 1. **Native Mobile Applications:**
-    - iOS and Android dedicated apps
-    - Enhanced performance and device integration
-    - Expanded offline capabilities
+    - iOS and Android apps built with modern frameworks (React Native or Flutter)
+    - Enhanced performance leveraging device-specific capabilities
+    - Expanded offline capabilities with local data caching
+    - Push notifications and background sync
+    - Integration with device cameras and location services
 
 2. **AI-Powered Recommendation Engine:**
     - Upgrade from PostgreSQL to Azure Cognitive Services
@@ -483,16 +512,19 @@ For our upcoming playtesting phase, we'll focus on:
     - Auth0-based account management
 
 3. **Technical Validation:**
-    - Performance of the React application under various load conditions
-    - Real-time update delivery speed in the React frontend
-    - Address geocoding accuracy
-    - Content expiration system reliability
-    - Category indexing and search performance
-    - Special recurrence handling accuracy
-    - Database query performance for recommendations
-    - PWA performance across different devices and browsers
-    - Auth0 integration reliability and performance
-    - Authentication flow and session management in the React app
+    - Performance of the **Vue 3** application under various load conditions with Pinia state management
+    - Real-time update delivery speed using **SignalR** integration in the Vue frontend
+    - **TailwindCSS** responsiveness across different screen sizes and devices
+    - Address geocoding accuracy with **Azure Maps** integration
+    - Content expiration system reliability (15-minute auto-deletion)
+    - Category indexing and search performance with PostgreSQL
+    - Special recurrence handling accuracy using **Cronos** library
+    - Database query performance for recommendation algorithms
+    - PWA performance across different devices, browsers, and network conditions
+    - **Auth0 Vue SDK** integration reliability and authentication flow performance
+    - **Vite** build performance and hot module replacement during development
+    - **Cypress** end-to-end testing coverage and **Vitest** unit test reliability
+    - **.NET Aspire** service orchestration and health monitoring effectiveness
 
 ## Success Metrics
 
@@ -532,3 +564,24 @@ We'll measure MVP success through these key metrics:
 Pulse represents a significant opportunity to transform the nightlife discovery experience by bringing real-time, community-driven insights to both users and venues. Our MVP focuses on delivering essential functionality through a carefully structured Type, Tag, and Vibe categorization system that maintains simplicity while providing powerful discovery options.
 
 By implementing a privacy-first location system, ephemeral content model, and three-category classification approach, we prioritize user privacy, real-time information, and intuitive discovery. This approach balances the needs of venues to promote their offerings with users' desire for authentic, current information.
+
+## Architectural Decision Record
+
+### Why Vue.js Over React
+
+Our MVP implementation chose **Vue 3** over React for several strategic reasons:
+
+1. **Developer Experience**: Vue's template syntax and Composition API provide a more intuitive development experience
+2. **Learning Curve**: Faster onboarding for new team members compared to React's JSX and hooks complexity
+3. **Bundle Size**: Vue 3's tree-shaking and smaller runtime footprint result in faster initial page loads
+4. **Reactivity System**: Vue's proxy-based reactivity is more performant and easier to debug than React's reconciliation
+5. **Ecosystem Maturity**: Pinia, Vue Router, and the official Vue tooling provide a cohesive, well-maintained ecosystem
+
+### Technology Stack Rationale
+
+- **Vite**: Chosen for its lightning-fast HMR and optimized production builds
+- **TailwindCSS**: Utility-first approach enables rapid prototyping and consistent design system
+- **Pinia**: Modern Vue 3 state management that's simpler and more intuitive than Vuex
+- **TypeScript**: Provides type safety and enhanced developer experience across the entire stack
+- **.NET Aspire**: Microsoft's cloud-native framework enables modern microservices architecture
+- **Auth0**: Industry-leading authentication eliminates security implementation complexity

@@ -1,21 +1,35 @@
-MIT License
+PROPRIETARY SOFTWARE LICENSE
 
-Copyright (c) [year] [fullname]
+Copyright (c) 2025 Davis Kolakowski. All Rights Reserved.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+This software and associated documentation files (the "Software") are the exclusive 
+property of Davis Kolakowski and are protected by copyright, trade secret, and other 
+intellectual property laws.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+RESTRICTIONS:
+- NO COPYING: You may not copy, reproduce, or duplicate any part of this Software.
+- NO DISTRIBUTION: You may not distribute, share, or make this Software available to any third party.
+- NO MODIFICATION: You may not modify, adapt, alter, translate, or create derivative works of this Software.
+- NO REVERSE ENGINEERING: You may not reverse engineer, decompile, disassemble, or attempt to derive the source code.
+- NO COMMERCIAL USE: You may not use this Software for any commercial purposes without explicit written permission.
+- NO UNAUTHORIZED ACCESS: Access to this Software is strictly limited to authorized personnel only.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+ENFORCEMENT:
+Unauthorized use, copying, distribution, or any violation of these terms will result in:
+- Immediate termination of any access rights
+- Legal action for damages and injunctive relief
+- Criminal prosecution to the fullest extent of the law
+
+CONTACT:
+For licensing inquiries or authorized use requests, contact: davis_kolakowski@mirthsystems.com
+
+THIS SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A 
+PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL DAVIS KOLAKOWSKI BE LIABLE 
+FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT 
+OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE 
+OR OTHER DEALINGS IN THE SOFTWARE.
+
+CONFIDENTIAL AND PROPRIETARY INFORMATION
+This Software contains confidential and proprietary information of Davis Kolakowski. 
+Any unauthorized disclosure is strictly prohibited.
