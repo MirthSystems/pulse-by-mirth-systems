@@ -10,6 +10,7 @@ public class VenuePermissionResponse
     public long VenueId { get; set; }
     public string VenueName { get; set; } = null!;
     public string Name { get; set; } = null!;
+    public string UserEmail { get; set; } = null!;
     public long GrantedByUserId { get; set; }
     public string GrantedByUserEmail { get; set; } = null!;
     public DateTime GrantedAt { get; set; }

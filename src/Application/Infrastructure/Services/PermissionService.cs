@@ -5,6 +5,7 @@ using Application.Domain.Entities;
 using Application.Infrastructure.Authorization.Permissions;
 using Microsoft.Extensions.Logging;
 using NodaTime;
+using System.Linq;
 
 namespace Application.Infrastructure.Services;
 
@@ -13,7 +14,7 @@ namespace Application.Infrastructure.Services;
 /// </summary>
 public class PermissionService : IPermissionService
 {
-    private readonly IUserRepository _userRepository;
+    private readonly IUserRepository _userRepository;    
     private readonly IUserVenuePermissionRepository _permissionRepository;
     private readonly IVenueInvitationRepository _invitationRepository;
     private readonly IVenueRepository _venueRepository;
@@ -34,6 +35,20 @@ public class PermissionService : IPermissionService
         _venueRepository = venueRepository ?? throw new ArgumentNullException(nameof(venueRepository));
         _clock = clock ?? throw new ArgumentNullException(nameof(clock));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    }
+
+    public async Task<string?> GetUserEmailBySubAsync(string userSub, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var user = await _userRepository.GetBySubAsync(userSub, cancellationToken);
+            return user?.Email;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting user email for user {UserSub}", userSub);
+            return null;
+        }
     }
 
     public async Task<bool> CanUserManageVenueAsync(string userSub, long venueId, CancellationToken cancellationToken = default)
@@ -357,6 +372,294 @@ public class PermissionService : IPermissionService
         {
             _logger.LogError(ex, "Error getting invitations for venue {VenueId}", venueId);
             return Enumerable.Empty<VenueInvitationEntity>();
+        }
+    }
+
+    public async Task<UserVenuePermissionEntity?> GetUserVenuePermissionAsync(string email, long venueId, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var user = await _userRepository.GetByEmailAsync(email, cancellationToken);
+            if (user == null) return null;
+
+            return await _permissionRepository.GetUserVenuePermissionAsync(user.Id, venueId, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting user venue permission for email {Email} and venue {VenueId}", email, venueId);
+            return null;
+        }
+    }
+
+    public async Task<VenueInvitationEntity?> GetPendingInvitationAsync(string email, long venueId, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            return await _invitationRepository.GetPendingInvitationAsync(email, venueId, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting pending invitation for email {Email} and venue {VenueId}", email, venueId);
+            return null;
+        }
+    }
+
+    public async Task<VenueInvitationEntity?> CreateInvitationAsync(CreateInvitationRequest request, string invitedByUserSub, string invitedByUserEmail, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            _logger.LogInformation("Creating invitation: Email={Email}, VenueId={VenueId}, Permission={Permission}, InvitedBy={InvitedByUserSub}, InvitedByEmail={InvitedByUserEmail}", 
+                request.Email, request.VenueId, request.Permission, invitedByUserSub, invitedByUserEmail);
+            
+            // Ensure the inviting user exists WITH their email
+            var invitingUserId = await EnsureUserExistsAsync(invitedByUserSub, invitedByUserEmail, cancellationToken: cancellationToken);
+            
+            _logger.LogInformation("Inviting user ID: {InvitingUserId}", invitingUserId);
+            
+            var invitation = await _invitationRepository.CreateInvitationAsync(
+                request.Email,
+                request.VenueId,
+                request.Permission,
+                invitingUserId,
+                7, // 7 days expiration
+                request.Notes,
+                cancellationToken);
+                
+            _logger.LogInformation("Created invitation with ID: {InvitationId}", invitation?.Id);
+            
+            await _invitationRepository.SaveChangesAsync(cancellationToken);
+            
+            _logger.LogInformation("Invitation saved to database successfully");
+            
+            return invitation;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating invitation for email {Email} and venue {VenueId}", request.Email, request.VenueId);
+            return null;
+        }
+    }
+
+    public async Task<IEnumerable<VenueInvitationEntity>> GetUserPendingInvitationsAsync(string email, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            return await _invitationRepository.GetPendingInvitationsAsync(email, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting pending invitations for email {Email}", email);
+            return Enumerable.Empty<VenueInvitationEntity>();
+        }
+    }
+
+    public async Task<bool> AcceptInvitationAsync(long invitationId, string userSub, string userEmail, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            // Get the invitation
+            var invitation = await _invitationRepository.GetByIdAsync(invitationId, cancellationToken);
+            if (invitation == null || !invitation.IsValid)
+            {
+                _logger.LogWarning("Invalid invitation {InvitationId} for user {UserSub}", invitationId, userSub);
+                return false;
+            }
+
+            // Verify email matches the invitation (security check)
+            if (!string.Equals(userEmail, invitation.Email, StringComparison.OrdinalIgnoreCase))
+            {
+                _logger.LogWarning("Email mismatch when accepting invitation {InvitationId}. Expected {ExpectedEmail}, got {ActualEmail}", 
+                    invitationId, invitation.Email, userEmail);
+                return false;
+            }
+
+            // Ensure user exists in our database with their email
+            var userId = await EnsureUserExistsAsync(userSub, userEmail, cancellationToken: cancellationToken);
+
+            // Check if user already has permission for this venue
+            var existingPermission = await _permissionRepository.GetUserVenuePermissionAsync(userId, invitation.VenueId, cancellationToken);
+            if (existingPermission != null)
+            {
+                _logger.LogWarning("User {UserSub} already has permission for venue {VenueId}", userSub, invitation.VenueId);
+                // Mark invitation as accepted anyway to clean up
+                await _invitationRepository.MarkAsAcceptedAsync(invitationId, userId, _clock.GetCurrentInstant(), cancellationToken);
+                return false;
+            }
+
+            // Create the permission
+            var permissionResult = await _permissionRepository.GrantVenuePermissionAsync(
+                userId,
+                invitation.VenueId,
+                invitation.Permission,
+                invitation.InvitedByUserId,
+                $"Granted via invitation {invitationId}",
+                cancellationToken);
+            
+            if (permissionResult == null)
+            {
+                _logger.LogError("Failed to create permission for user {UserSub} and venue {VenueId}", userSub, invitation.VenueId);
+                return false;
+            }
+
+            // Mark invitation as accepted
+            await _invitationRepository.MarkAsAcceptedAsync(invitationId, userId, _clock.GetCurrentInstant(), cancellationToken);
+
+            // Save all changes to database
+            await _invitationRepository.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation("User {UserSub} accepted invitation {InvitationId} for venue {VenueId} with permission {Permission}", 
+                userSub, invitationId, invitation.VenueId, invitation.Permission);
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error accepting invitation {InvitationId} for user {UserSub}", invitationId, userSub);
+            return false;
+        }
+    }
+
+    public async Task<bool> DeclineInvitationAsync(long invitationId, string userSub, string userEmail, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            // Get the invitation
+            var invitation = await _invitationRepository.GetByIdAsync(invitationId, cancellationToken);
+            if (invitation == null)
+            {
+                _logger.LogWarning("Invitation {InvitationId} not found for user {UserSub}", invitationId, userSub);
+                return false;
+            }
+
+            // Verify email matches the invitation (security check)
+            if (!string.Equals(userEmail, invitation.Email, StringComparison.OrdinalIgnoreCase))
+            {
+                _logger.LogWarning("Email mismatch when declining invitation {InvitationId}. Expected {ExpectedEmail}, got {ActualEmail}", 
+                    invitationId, invitation.Email, userEmail);
+                return false;
+            }
+
+            // Ensure user exists in our database with their email (they might be new)
+            await EnsureUserExistsAsync(userSub, userEmail, cancellationToken: cancellationToken);
+
+            // Mark invitation as declined
+            await _invitationRepository.MarkAsDeclinedAsync(invitationId, cancellationToken);
+
+            // Save changes to database
+            await _invitationRepository.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation("User {UserSub} declined invitation {InvitationId} for venue {VenueId}", 
+                userSub, invitationId, invitation.VenueId);
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error declining invitation {InvitationId} for user {UserSub}", invitationId, userSub);
+            return false;
+        }
+    }
+
+    public async Task<VenueInvitationEntity?> GetInvitationByIdAsync(long invitationId, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            return await _invitationRepository.GetInvitationByIdAsync(invitationId, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting invitation {InvitationId}", invitationId);
+            return null;
+        }
+    }
+
+    public async Task<bool> RevokeInvitationAsync(long invitationId, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var result = await _invitationRepository.RevokeInvitationAsync(invitationId, cancellationToken);
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error revoking invitation {InvitationId}", invitationId);
+            return false;
+        }
+    }
+
+    public async Task<UserEntity?> GetUserBySubAsync(string userSub, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            return await _userRepository.GetBySubAsync(userSub, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting user by sub {UserSub}", userSub);
+            return null;
+        }
+    }
+
+    public async Task<UserVenuePermissionEntity?> UpdateUserVenuePermissionAsync(long permissionId, string permission, string updatedByUserSub, string? notes = null, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            // Get the permission to update
+            var existingPermission = await _permissionRepository.GetByIdAsync(permissionId, cancellationToken);
+            if (existingPermission == null || !existingPermission.IsActive)
+            {
+                _logger.LogWarning("Permission {PermissionId} not found or inactive", permissionId);
+                return null;
+            }
+
+            // Update the permission
+            existingPermission.Name = permission;
+            existingPermission.Notes = notes;
+
+            await _permissionRepository.UpdateAsync(existingPermission, cancellationToken);
+            await _permissionRepository.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation("Permission {PermissionId} updated to {Permission} by user {UserSub}", 
+                permissionId, permission, updatedByUserSub);
+
+            // Fetch the updated permission with includes
+            var permissionsWithIncludes = await _permissionRepository.GetVenuePermissionsAsync(existingPermission.VenueId, cancellationToken: cancellationToken);
+            return permissionsWithIncludes.FirstOrDefault(p => p.Id == permissionId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating permission {PermissionId}", permissionId);
+            return null;
+        }
+    }
+
+    public async Task<bool> RevokeUserVenuePermissionAsync(long permissionId, string revokedByUserSub, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            // Get the permission to revoke
+            var permission = await _permissionRepository.GetByIdAsync(permissionId, cancellationToken);
+            if (permission == null || !permission.IsActive)
+            {
+                _logger.LogWarning("Permission {PermissionId} not found or already inactive", permissionId);
+                return false;
+            }
+
+            // Mark as inactive (soft delete)
+            permission.IsActive = false;
+
+            await _permissionRepository.UpdateAsync(permission, cancellationToken);
+            await _permissionRepository.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation("Permission {PermissionId} revoked by user {UserSub}", 
+                permissionId, revokedByUserSub);
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error revoking permission {PermissionId}", permissionId);
+            return false;
         }
     }
 }

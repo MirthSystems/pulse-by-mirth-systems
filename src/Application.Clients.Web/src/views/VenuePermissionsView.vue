@@ -84,12 +84,11 @@
               </div>
               <div>
                 <p class="text-sm font-medium text-gray-900">{{ getUserEmail(permission) }}</p>
-                <p class="text-sm text-gray-500">
-                  {{ getPermissionLabel(permission.name) }} • 
-                  Granted {{ formatDate(permission.grantedAt) }}
+                <p class="text-sm font-semibold text-blue-600">
+                  {{ getPermissionLabel(permission.name) }}
                 </p>
-                <p v-if="permission.notes" class="text-xs text-gray-400 mt-1">
-                  {{ permission.notes }}
+                <p class="text-xs text-gray-500">
+                  Granted {{ formatDate(permission.grantedAt) }}
                 </p>
               </div>
             </div>
@@ -149,7 +148,7 @@
               <div>
                 <p class="text-sm font-medium text-gray-900">{{ invitation.email }}</p>
                 <p class="text-sm text-gray-500">
-                  {{ getPermissionLabel(invitation.permission) }} • 
+                  {{ getPermissionLabel(invitation.name) }} • 
                   Invited {{ formatDate(invitation.invitedAt) }}
                 </p>
                 <p class="text-xs text-gray-400">
@@ -235,12 +234,119 @@
         </div>
       </div>
     </div>
+
+    <!-- Edit Permission Modal -->
+    <div v-if="showEditModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+      <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-medium">Edit Permission</h3>
+          <button
+            @click="showEditModal = false"
+            class="text-gray-400 hover:text-gray-500"
+          >
+            <XMarkIcon class="h-5 w-5" />
+          </button>
+        </div>
+        
+        <form @submit.prevent="updatePermission">
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              User Email
+            </label>
+            <div class="text-sm text-gray-900 bg-gray-50 px-3 py-2 border border-gray-300 rounded-md">
+              {{ editForm.userEmail }}
+            </div>
+          </div>
+          
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Permission Level *
+            </label>
+            <select
+              v-model="editForm.permission"
+              required
+              class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="venue:owner">Owner</option>
+              <option value="venue:manager">Manager</option>
+              <option value="venue:staff">Staff</option>
+            </select>
+          </div>
+          
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Notes (Optional)
+            </label>
+            <textarea
+              v-model="editForm.notes"
+              rows="3"
+              class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Additional notes or instructions..."
+            ></textarea>
+          </div>
+          
+          <div class="flex justify-end space-x-3">
+            <button
+              type="button"
+              @click="showEditModal = false"
+              class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              :disabled="updatingPermission"
+              class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 disabled:opacity-50"
+            >
+              {{ updatingPermission ? 'Updating...' : 'Update Permission' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div v-if="showToast" class="fixed bottom-4 right-4 z-50">
+      <div 
+        v-if="toastType === 'success'"
+        class="bg-green-500 text-white text-sm font-medium rounded-lg px-4 py-2 shadow-md"
+      >
+        {{ toastMessage }}
+      </div>
+      <div 
+        v-else-if="toastType === 'error'"
+        class="bg-red-500 text-white text-sm font-medium rounded-lg px-4 py-2 shadow-md"
+      >
+        {{ toastMessage }}
+      </div>
+      <div 
+        v-else-if="toastType === 'warning'"
+        class="bg-yellow-500 text-white text-sm font-medium rounded-lg px-4 py-2 shadow-md"
+      >
+        {{ toastMessage }}
+      </div>
+      <div 
+        v-else-if="toastType === 'info'"
+        class="bg-blue-500 text-white text-sm font-medium rounded-lg px-4 py-2 shadow-md"
+      >
+        {{ toastMessage }}
+      </div>
+    </div>
   </div>
+
+  <!-- Toast Notifications -->
+  <Toast
+    v-if="showToast"
+    :type="toastType"
+    :title="toastMessage"
+    @close="showToast = false"
+  />
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useAuth0 } from '@auth0/auth0-vue'
 import {
   ChevronRightIcon,
   UserIcon,
@@ -252,6 +358,7 @@ import {
   XMarkIcon
 } from '@heroicons/vue/24/outline'
 import apiService from '@/services/api'
+import Toast from '@/components/Toast.vue'
 import type { VenueSummary, UserVenuePermission, VenueInvitation, CreateInvitationRequest } from '@/types/api'
 
 interface Props {
@@ -261,6 +368,7 @@ interface Props {
 const props = defineProps<Props>()
 const route = useRoute()
 const router = useRouter()
+const { user } = useAuth0()
 
 // State
 const venue = ref<VenueSummary | null>(null)
@@ -268,14 +376,29 @@ const permissions = ref<UserVenuePermission[]>([])
 const invitations = ref<VenueInvitation[]>([])
 const loading = ref(true)
 const showInviteModal = ref(false)
+const showEditModal = ref(false)
 const sendingInvite = ref(false)
+const updatingPermission = ref(false)
+
+// Toast notifications
+const showToast = ref(false)
+const toastMessage = ref('')
+const toastType = ref<'success' | 'error' | 'warning' | 'info'>('info')
 
 // Form state
 const inviteForm = ref<CreateInvitationRequest>({
   email: '',
   venueId: 0,
   permission: 'venue:staff',
-  notes: ''
+  notes: '',
+  senderEmail: '' // Will be set from Auth0 user
+})
+
+const editForm = ref({
+  permissionId: 0,
+  permission: '',
+  notes: '',
+  userEmail: ''
 })
 
 // Computed
@@ -331,64 +454,119 @@ const loadData = async () => {
 }
 
 const sendInvitation = async () => {
+  console.log('Sending invitation:', inviteForm.value)
   sendingInvite.value = true
   try {
+    // Set the venue ID and sender email
     inviteForm.value.venueId = venueId.value
+    inviteForm.value.senderEmail = user.value?.email || ''
+    
+    if (!inviteForm.value.senderEmail) {
+      console.error('Cannot send invitation: No sender email available')
+      return
+    }
+    
+    console.log('Sending invitation with venueId and senderEmail:', inviteForm.value)
     const response = await apiService.sendInvitation(inviteForm.value)
+    console.log('Invitation response:', response)
     if (response.success) {
+      console.log('Invitation sent successfully')
       // Reset form and close modal
       inviteForm.value = {
         email: '',
         venueId: 0,
         permission: 'venue:staff',
-        notes: ''
+        notes: '',
+        senderEmail: ''
       }
       showInviteModal.value = false
       // Reload invitations
       await loadInvitations()
+      // Show success toast
+      toastMessage.value = 'Invitation sent successfully.'
+      toastType.value = 'success'
+      showToast.value = true
+    } else {
+      console.error('Invitation failed:', response)
+      // Show error toast
+      toastMessage.value = 'Failed to send invitation. Please try again.'
+      toastType.value = 'error'
+      showToast.value = true
     }
   } catch (error) {
     console.error('Error sending invitation:', error)
+    // Show error toast
+    toastMessage.value = 'Error sending invitation. Please try again.'
+    toastType.value = 'error'
+    showToast.value = true
   } finally {
     sendingInvite.value = false
   }
 }
 
-const cancelInvitation = async (invitation: VenueInvitation) => {
-  if (confirm('Are you sure you want to cancel this invitation?')) {
-    try {
-      const response = await apiService.cancelInvitation(invitation.id)
-      if (response.success) {
-        await loadInvitations()
-      }
-    } catch (error) {
-      console.error('Error canceling invitation:', error)
+const cancelInvitation = (invitation: VenueInvitation) => {
+  router.push({
+    path: '/confirm',
+    query: {
+      type: 'cancel-invitation',
+      id: invitation.id.toString(),
+      name: invitation.email,
+      returnTo: `/backoffice/venues/${venueId.value}/permissions`
     }
-  }
+  })
 }
 
 const editPermission = (permission: UserVenuePermission) => {
-  // TODO: Implement permission editing modal
-  console.log('Edit permission:', permission)
+  editForm.value = {
+    permissionId: permission.id,
+    permission: permission.name,
+    notes: permission.notes || '',
+    userEmail: permission.userEmail || ''
+  }
+  showEditModal.value = true
 }
 
-const confirmRevokePermission = async (permission: UserVenuePermission) => {
-  if (confirm('Are you sure you want to revoke this permission?')) {
-    try {
-      const response = await apiService.revokeUserPermission(permission.id)
-      if (response.success) {
-        await loadPermissions()
-      }
-    } catch (error) {
-      console.error('Error revoking permission:', error)
+const confirmRevokePermission = (permission: UserVenuePermission) => {
+  router.push({
+    path: '/confirm',
+    query: {
+      type: 'revoke-permission',
+      id: permission.id.toString(),
+      name: permission.userEmail,
+      returnTo: `/backoffice/venues/${venueId.value}/permissions`
     }
+  })
+}
+
+const updatePermission = async () => {
+  updatingPermission.value = true
+  try {
+    const response = await apiService.updateUserPermission(editForm.value.permissionId, {
+      permission: editForm.value.permission,
+      notes: editForm.value.notes
+    })
+    
+    if (response.success) {
+      showEditModal.value = false
+      await loadPermissions()
+      // Show success toast
+      toastMessage.value = 'Permission updated successfully.'
+      toastType.value = 'success'
+      showToast.value = true
+    }
+  } catch (error) {
+    console.error('Error updating permission:', error)
+    // Show error toast
+    toastMessage.value = 'Error updating permission. Please try again.'
+    toastType.value = 'error'
+    showToast.value = true
+  } finally {
+    updatingPermission.value = false
   }
 }
 
 const getUserEmail = (permission: UserVenuePermission) => {
-  // In a real implementation, you might want to fetch user details
-  // For now, we can use a placeholder or the permission data
-  return permission.grantedByUserEmail || 'Unknown User'
+  return permission.userEmail || 'Unknown User'
 }
 
 const getPermissionLabel = (permission: string) => {
@@ -413,7 +591,30 @@ const formatDate = (dateString: string) => {
   }
 }
 
+const showToastMessage = (message: string, type: 'success' | 'error' | 'warning' | 'info') => {
+  toastMessage.value = message
+  toastType.value = type
+  showToast.value = true
+}
+
+const handleQueryParameters = () => {
+  // Check for success/error messages from the confirm view
+  if (route.query.success === 'true' && route.query.message) {
+    showToastMessage(route.query.message as string, 'success')
+    // Reload data after successful action
+    loadData()
+  } else if (route.query.error === 'true' && route.query.message) {
+    showToastMessage(route.query.message as string, 'error')
+  }
+  
+  // Clean up query parameters
+  if (route.query.success || route.query.error || route.query.message) {
+    router.replace({ path: route.path })
+  }
+}
+
 onMounted(() => {
   loadData()
+  handleQueryParameters()
 })
 </script>

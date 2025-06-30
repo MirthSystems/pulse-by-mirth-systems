@@ -9,6 +9,11 @@ namespace Application.Common.Interfaces.Services;
 public interface IPermissionService
 {
     /// <summary>
+    /// Get user's email by their sub
+    /// </summary>
+    Task<string?> GetUserEmailBySubAsync(string userSub, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Check if user can manage venue (any permission level)
     /// </summary>
     Task<bool> CanUserManageVenueAsync(string userSub, long venueId, CancellationToken cancellationToken = default);
@@ -90,4 +95,59 @@ public interface IPermissionService
     /// Get all invitations for a specific venue
     /// </summary>
     Task<IEnumerable<VenueInvitationEntity>> GetVenueInvitationsAsync(long venueId, CancellationToken cancellationToken = default);
+    
+    /// <summary>
+    /// Get user's venue permission by email and venue ID
+    /// </summary>
+    Task<UserVenuePermissionEntity?> GetUserVenuePermissionAsync(string email, long venueId, CancellationToken cancellationToken = default);
+    
+    /// <summary>
+    /// Get pending invitation by email and venue ID
+    /// </summary>
+    Task<VenueInvitationEntity?> GetPendingInvitationAsync(string email, long venueId, CancellationToken cancellationToken = default);
+    
+    /// <summary>
+    /// Create a new invitation
+    /// </summary>
+    Task<VenueInvitationEntity?> CreateInvitationAsync(CreateInvitationRequest request, string invitedByUserSub, string invitedByUserEmail, CancellationToken cancellationToken = default);
+    
+    /// <summary>
+    /// Get current user's pending invitations
+    /// </summary>
+    Task<IEnumerable<VenueInvitationEntity>> GetUserPendingInvitationsAsync(string email, CancellationToken cancellationToken = default);
+    
+    /// <summary>
+    /// Accept an invitation by ID
+    /// </summary>
+    Task<bool> AcceptInvitationAsync(long invitationId, string userSub, string userEmail, CancellationToken cancellationToken = default);
+    
+    /// <summary>
+    /// Decline an invitation by ID
+    /// </summary>
+    Task<bool> DeclineInvitationAsync(long invitationId, string userSub, string userEmail, CancellationToken cancellationToken = default);
+    
+    /// <summary>
+    /// Get invitation by ID
+    /// </summary>
+    Task<VenueInvitationEntity?> GetInvitationByIdAsync(long invitationId, CancellationToken cancellationToken = default);
+    
+    /// <summary>
+    /// Revoke/cancel an invitation
+    /// </summary>
+    Task<bool> RevokeInvitationAsync(long invitationId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Get user by Auth0 sub
+    /// </summary>
+    Task<UserEntity?> GetUserBySubAsync(string userSub, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Update user venue permission
+    /// </summary>
+    Task<UserVenuePermissionEntity?> UpdateUserVenuePermissionAsync(long permissionId, string permission, string updatedByUserSub, string? notes = null, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Revoke user venue permission
+    /// </summary>
+    Task<bool> RevokeUserVenuePermissionAsync(long permissionId, string revokedByUserSub, CancellationToken cancellationToken = default);
 }

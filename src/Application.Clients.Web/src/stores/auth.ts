@@ -19,6 +19,7 @@ export const useAuthStore = defineStore('auth', () => {
   const isAuthenticated = ref(false)
   const isLoading = ref(true)
   const error = ref<string | null>(null)
+  const accessToken = ref<string | null>(null)
 
   const displayName = computed(() => {
     if (!user.value) return ''
@@ -48,10 +49,15 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = errorMessage
   }
 
+  function setAccessToken(token: string | null) {
+    accessToken.value = token
+  }
+
   function logout() {
     user.value = null
     isAuthenticated.value = false
     error.value = null
+    accessToken.value = null
   }
 
   return {
@@ -59,11 +65,13 @@ export const useAuthStore = defineStore('auth', () => {
     isAuthenticated,
     isLoading,
     error,
+    accessToken,
     displayName,
     userInitials,
     setUser,
     setLoading,
     setError,
+    setAccessToken,
     logout
   }
 })

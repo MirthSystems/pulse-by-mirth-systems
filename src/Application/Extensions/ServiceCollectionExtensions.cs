@@ -71,6 +71,9 @@ public static class ServiceCollectionExtensions
 
     private static void RegisterApplicationServices(IServiceCollection services)
     {
+        // Register caching services
+        services.AddMemoryCache();
+        
         // Register application services
         services.AddScoped<Application.Common.Interfaces.Services.IVenueService, Application.Infrastructure.Services.VenueService>();
         services.AddScoped<Application.Common.Interfaces.Services.ISpecialService, Application.Infrastructure.Services.SpecialService>();
@@ -82,6 +85,7 @@ public static class ServiceCollectionExtensions
 
         // Register authorization services
         services.AddScoped<Application.Common.Interfaces.Services.IPermissionService, Application.Infrastructure.Services.PermissionService>();
+        services.AddScoped<Application.Common.Interfaces.Services.IVenuePermissionTypeService, Application.Infrastructure.Services.VenuePermissionTypeService>();
     }
 
     private static void RegisterInfrastructureServices(IServiceCollection services, ApplicationOptions config)

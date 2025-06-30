@@ -4,6 +4,7 @@ using Application.Common.Models.Auth;
 using Application.Common.Models.Special;
 using Application.Common.Models.Venue;
 using Application.Infrastructure.Authorization.Requirements;
+using Application.Infrastructure.Authorization.Permissions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -23,21 +24,27 @@ public class BackofficeController : ControllerBase
     private readonly IVenueService _venueService;
     private readonly ISpecialService _specialService;
     private readonly IPermissionService _permissionService;
+    private readonly IVenuePermissionTypeService _permissionTypeService;
     private readonly IAuthorizationService _authorizationService;
     private readonly ILogger<BackofficeController> _logger;
+    private readonly IConfiguration _configuration;
 
     public BackofficeController(
         IVenueService venueService,
         ISpecialService specialService,
         IPermissionService permissionService,
+        IVenuePermissionTypeService permissionTypeService,
         IAuthorizationService authorizationService,
-        ILogger<BackofficeController> logger)
+        ILogger<BackofficeController> logger,
+        IConfiguration configuration)
     {
         _venueService = venueService ?? throw new ArgumentNullException(nameof(venueService));
         _specialService = specialService ?? throw new ArgumentNullException(nameof(specialService));
         _permissionService = permissionService ?? throw new ArgumentNullException(nameof(permissionService));
+        _permissionTypeService = permissionTypeService ?? throw new ArgumentNullException(nameof(permissionTypeService));
         _authorizationService = authorizationService ?? throw new ArgumentNullException(nameof(authorizationService));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
     }
 
     /// <summary>
@@ -588,6 +595,7 @@ public class BackofficeController : ControllerBase
                 VenueId = p.VenueId,
                 VenueName = p.Venue?.Name ?? "",
                 Name = p.Name,
+                UserEmail = p.User?.Email ?? "",
                 GrantedByUserId = p.GrantedByUserId,
                 GrantedByUserEmail = p.GrantedByUser?.Email ?? "",
                 GrantedAt = p.GrantedAt.ToDateTimeUtc(),
@@ -642,6 +650,8 @@ public class BackofficeController : ControllerBase
 
             var invitations = await _permissionService.GetVenueInvitationsAsync(venueId, cancellationToken);
             
+            _logger.LogInformation("Retrieved {Count} invitations for venue {VenueId}", invitations.Count(), venueId);
+            
             // Transform to response model
             var result = invitations.Select(i => new VenueInvitationResponse
             {
@@ -673,8 +683,8 @@ public class BackofficeController : ControllerBase
     /// Send an invitation to join venue management
     /// </summary>
     [HttpPost("invitations")]
-    public async Task<ActionResult<ApiResponse<object>>> SendInvitation(
-        [FromBody] object invitationRequest,
+    public async Task<ActionResult<ApiResponse<VenueInvitationResponse>>> SendInvitation(
+        [FromBody] CreateInvitationRequest invitationRequest,
         CancellationToken cancellationToken = default)
     {
         // Check backoffice access
@@ -692,14 +702,521 @@ public class BackofficeController : ControllerBase
 
         try
         {
-            // For now, return a placeholder response
-            // TODO: Implement invitation sending logic
-            return Ok(ApiResponse<object>.SuccessResult(new { message = "Invitation functionality coming soon" }));
+            // Use the sender's email from the request (passed from frontend)
+            var senderEmail = invitationRequest.SenderEmail;
+            
+            // Ensure the inviting user exists in our database with their email
+            await _permissionService.EnsureUserExistsAsync(userSub, senderEmail, cancellationToken: cancellationToken);
+
+            // Validate the request
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ApiResponse<VenueInvitationResponse>.ErrorResult("Invalid invitation data"));
+            }
+
+            // Check if user can manage this venue (unless they're admin/content manager)
+            var isSystemAdmin = User.HasClaim("permissions", "system:admin");
+            var isContentManager = User.HasClaim("permissions", "content:manager");
+            
+            if (!isSystemAdmin && !isContentManager)
+            {
+                var hasVenueAccess = await _permissionService.HasVenuePermissionAsync(userSub, invitationRequest.VenueId, cancellationToken);
+                if (!hasVenueAccess)
+                {
+                    return Forbid();
+                }
+            }
+
+            // Validate permission type using the service
+            if (!await _permissionTypeService.IsValidPermissionTypeAsync(invitationRequest.Permission, cancellationToken))
+            {
+                return BadRequest(ApiResponse<VenueInvitationResponse>.ErrorResult("Invalid permission type"));
+            }
+
+            // Check if venue exists
+            var venueResult = await _venueService.GetVenueByIdAsync(invitationRequest.VenueId, cancellationToken);
+            if (!venueResult.Success || venueResult.Data == null)
+            {
+                return NotFound(ApiResponse<VenueInvitationResponse>.ErrorResult("Venue not found"));
+            }
+
+            // Check if user already has permission for this venue
+            var existingPermission = await _permissionService.GetUserVenuePermissionAsync(
+                invitationRequest.Email, invitationRequest.VenueId, cancellationToken);
+            
+            if (existingPermission != null)
+            {
+                return BadRequest(ApiResponse<VenueInvitationResponse>.ErrorResult("User already has permission for this venue"));
+            }
+
+            // Check if there's already a pending invitation
+            var existingInvitation = await _permissionService.GetPendingInvitationAsync(
+                invitationRequest.Email, invitationRequest.VenueId, cancellationToken);
+            
+            if (existingInvitation != null)
+            {
+                return BadRequest(ApiResponse<VenueInvitationResponse>.ErrorResult("Invitation already pending for this user"));
+            }
+
+            // Create the invitation
+            _logger.LogInformation("Creating invitation for {Email} to venue {VenueId} with permission {Permission} from sender {SenderEmail}", 
+                invitationRequest.Email, invitationRequest.VenueId, invitationRequest.Permission, senderEmail);
+            
+            var invitation = await _permissionService.CreateInvitationAsync(invitationRequest, userSub, senderEmail, cancellationToken);
+            
+            if (invitation == null)
+            {
+                _logger.LogError("Failed to create invitation for {Email} to venue {VenueId}", invitationRequest.Email, invitationRequest.VenueId);
+                return StatusCode(500, ApiResponse<VenueInvitationResponse>.ErrorResult("Failed to create invitation"));
+            }
+
+            _logger.LogInformation("Successfully created invitation {InvitationId} for {Email} to venue {VenueId}", 
+                invitation.Id, invitationRequest.Email, invitationRequest.VenueId);
+
+            // Create response
+            var response = new VenueInvitationResponse
+            {
+                Id = invitation.Id,
+                Email = invitation.Email,
+                VenueId = invitation.VenueId,
+                VenueName = invitation.Venue?.Name ?? venueResult.Data.Name,
+                Permission = invitation.Permission,
+                InvitedByUserId = invitation.InvitedByUserId,
+                InvitedByUserEmail = invitation.InvitedByUser?.Email ?? User.FindFirst(ClaimTypes.Email)?.Value ?? User.FindFirst("email")?.Value ?? "",
+                InvitedAt = invitation.InvitedAt.ToDateTimeUtc(),
+                ExpiresAt = invitation.ExpiresAt.ToDateTimeUtc(),
+                AcceptedAt = invitation.AcceptedAt?.ToDateTimeUtc(),
+                AcceptedByUserId = invitation.AcceptedByUserId,
+                IsActive = invitation.IsActive,
+                Notes = invitation.Notes
+            };
+
+            _logger.LogInformation("Invitation sent to {Email} for venue {VenueId} with permission {Permission}", 
+                invitationRequest.Email, invitationRequest.VenueId, invitationRequest.Permission);
+
+            return Ok(ApiResponse<VenueInvitationResponse>.SuccessResult(response));
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error sending invitation");
-            return StatusCode(500, ApiResponse<object>.ErrorResult("Internal server error"));
+            _logger.LogError(ex, "Error sending invitation for venue {VenueId} to {Email}", 
+                invitationRequest.VenueId, invitationRequest.Email);
+            return StatusCode(500, ApiResponse<VenueInvitationResponse>.ErrorResult("Internal server error"));
+        }
+    }
+
+    /// <summary>
+    /// Get current user's pending invitations
+    /// </summary>
+    [HttpGet("my-invitations")]
+    public async Task<ActionResult<ApiResponse<IEnumerable<VenueInvitationResponse>>>> GetMyInvitations(
+        [FromQuery] string? email = null,
+        CancellationToken cancellationToken = default)
+    {
+        // Check backoffice access first
+        var authResult = await _authorizationService.AuthorizeAsync(User, null, new BackofficeAccessRequirement());
+        if (!authResult.Succeeded)
+        {
+            return Forbid();
+        }
+
+        var userSub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userSub))
+        {
+            return Unauthorized();
+        }
+
+        try
+        {
+            // Use email from query parameter if provided, otherwise try to get from database
+            string? userEmail = email;
+            
+            if (string.IsNullOrEmpty(userEmail))
+            {
+                userEmail = await _permissionService.GetUserEmailBySubAsync(userSub, cancellationToken);
+            }
+            
+            if (string.IsNullOrEmpty(userEmail))
+            {
+                _logger.LogWarning("No user email available for user {UserSub}", userSub);
+                return BadRequest(ApiResponse<IEnumerable<VenueInvitationResponse>>.ErrorResult("User email not available"));
+            }
+
+            var invitations = await _permissionService.GetUserPendingInvitationsAsync(userEmail, cancellationToken);
+            
+            // Transform to response model
+            var result = invitations.Select(i => new VenueInvitationResponse
+            {
+                Id = i.Id,
+                Email = i.Email,
+                VenueId = i.VenueId,
+                VenueName = i.Venue?.Name ?? "",
+                Permission = i.Permission,
+                InvitedByUserId = i.InvitedByUserId,
+                InvitedByUserEmail = i.InvitedByUser?.Email ?? "",
+                InvitedAt = i.InvitedAt.ToDateTimeUtc(),
+                ExpiresAt = i.ExpiresAt.ToDateTimeUtc(),
+                AcceptedAt = i.AcceptedAt?.ToDateTimeUtc(),
+                AcceptedByUserId = i.AcceptedByUserId,
+                IsActive = i.IsActive,
+                Notes = i.Notes
+            });
+
+            return Ok(ApiResponse<IEnumerable<VenueInvitationResponse>>.SuccessResult(result));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting user invitations for user {UserSub}", userSub);
+            return StatusCode(500, ApiResponse<IEnumerable<VenueInvitationResponse>>.ErrorResult("Internal server error"));
+        }
+    }
+
+    /// <summary>
+    /// Accept an invitation
+    /// </summary>
+    [HttpPost("invitations/{invitationId}/accept")]
+    public async Task<ActionResult<ApiResponse<bool>>> AcceptInvitation(long invitationId, CancellationToken cancellationToken = default)
+    {
+        var userSub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userSub))
+        {
+            return Unauthorized();
+        }
+
+        try
+        {
+            // Try to get email from claims first, then database
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value 
+                           ?? User.FindFirst("email")?.Value 
+                           ?? User.FindFirst("https://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress")?.Value;
+            
+            if (string.IsNullOrEmpty(userEmail))
+            {
+                userEmail = await _permissionService.GetUserEmailBySubAsync(userSub, cancellationToken);
+            }
+            
+            if (string.IsNullOrEmpty(userEmail))
+            {
+                return BadRequest(ApiResponse<bool>.ErrorResult("Cannot accept invitation: Your user account does not have an email address. Please contact support."));
+            }
+
+            // Ensure user exists in database
+            await _permissionService.EnsureUserExistsAsync(userSub, userEmail, cancellationToken: cancellationToken);
+
+            var success = await _permissionService.AcceptInvitationAsync(invitationId, userSub, userEmail, cancellationToken);
+            
+            if (!success)
+            {
+                return BadRequest(ApiResponse<bool>.ErrorResult("Failed to accept invitation"));
+            }
+
+            return Ok(ApiResponse<bool>.SuccessResult(true));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error accepting invitation {InvitationId} for user {UserSub}", invitationId, userSub);
+            return StatusCode(500, ApiResponse<bool>.ErrorResult("Internal server error"));
+        }
+    }
+
+    /// <summary>
+    /// Decline an invitation
+    /// </summary>
+    [HttpPost("invitations/{invitationId}/decline")]
+    public async Task<ActionResult<ApiResponse<bool>>> DeclineInvitation(long invitationId, CancellationToken cancellationToken = default)
+    {
+        var userSub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userSub))
+        {
+            return Unauthorized();
+        }
+
+        try
+        {
+            // Try to get email from claims first, then database
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value 
+                           ?? User.FindFirst("email")?.Value 
+                           ?? User.FindFirst("https://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress")?.Value;
+            
+            if (string.IsNullOrEmpty(userEmail))
+            {
+                userEmail = await _permissionService.GetUserEmailBySubAsync(userSub, cancellationToken);
+            }
+            
+            if (string.IsNullOrEmpty(userEmail))
+            {
+                return BadRequest(ApiResponse<bool>.ErrorResult("Cannot decline invitation: Your user account does not have an email address. Please contact support."));
+            }
+
+            // Ensure user exists in database
+            await _permissionService.EnsureUserExistsAsync(userSub, userEmail, cancellationToken: cancellationToken);
+
+            var success = await _permissionService.DeclineInvitationAsync(invitationId, userSub, userEmail, cancellationToken);
+            
+            if (!success)
+            {
+                return BadRequest(ApiResponse<bool>.ErrorResult("Failed to decline invitation"));
+            }
+
+            return Ok(ApiResponse<bool>.SuccessResult(true));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error declining invitation {InvitationId} for user {UserSub}", invitationId, userSub);
+            return StatusCode(500, ApiResponse<bool>.ErrorResult("Internal server error"));
+        }
+    }
+
+    /// <summary>
+    /// Cancel/revoke an invitation (for venue owners/managers)
+    /// </summary>
+    [HttpDelete("invitations/{invitationId}")]
+    public async Task<ActionResult<ApiResponse<bool>>> CancelInvitation(long invitationId, CancellationToken cancellationToken = default)
+    {
+        // Check backoffice access
+        var authResult = await _authorizationService.AuthorizeAsync(User, null, new BackofficeAccessRequirement());
+        if (!authResult.Succeeded)
+        {
+            return Forbid();
+        }
+
+        var userSub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userSub))
+        {
+            return Unauthorized();
+        }
+
+        try
+        {
+            // Get the invitation to check permissions
+            var invitation = await _permissionService.GetInvitationByIdAsync(invitationId, cancellationToken);
+            if (invitation == null)
+            {
+                return NotFound(ApiResponse<bool>.ErrorResult("Invitation not found"));
+            }
+
+            // Check if user can manage this venue (unless they're admin/content manager)
+            var isSystemAdmin = User.HasClaim("permissions", "system:admin");
+            var isContentManager = User.HasClaim("permissions", "content:manager");
+            
+            if (!isSystemAdmin && !isContentManager)
+            {
+                var hasVenueAccess = await _permissionService.HasVenuePermissionAsync(userSub, invitation.VenueId, cancellationToken);
+                if (!hasVenueAccess)
+                {
+                    return Forbid();
+                }
+            }
+
+            // Cancel the invitation
+            var success = await _permissionService.RevokeInvitationAsync(invitationId, cancellationToken);
+            
+            if (!success)
+            {
+                return BadRequest(ApiResponse<bool>.ErrorResult("Failed to cancel invitation"));
+            }
+
+            _logger.LogInformation("Invitation {InvitationId} cancelled by user {UserSub}", invitationId, userSub);
+            return Ok(ApiResponse<bool>.SuccessResult(true));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error cancelling invitation {InvitationId} by user {UserSub}", invitationId, userSub);
+            return StatusCode(500, ApiResponse<bool>.ErrorResult("Internal server error"));
+        }
+    }
+
+    /// <summary>
+    /// Get valid permission types for venue management
+    /// </summary>
+    [HttpGet("permission-types")]
+    public async Task<ActionResult<ApiResponse<IEnumerable<PermissionTypeResponse>>>> GetPermissionTypes(CancellationToken cancellationToken = default)
+    {
+        // Check backoffice access
+        var authResult = await _authorizationService.AuthorizeAsync(User, null, new BackofficeAccessRequirement());
+        if (!authResult.Succeeded)
+        {
+            return Forbid();
+        }
+
+        try
+        {
+            var permissionTypes = await _permissionTypeService.GetValidPermissionTypesAsync(cancellationToken);
+            
+            var result = new List<PermissionTypeResponse>();
+            foreach (var permissionType in permissionTypes)
+            {
+                var displayName = await _permissionTypeService.GetPermissionDisplayNameAsync(permissionType, cancellationToken);
+                var hierarchy = await _permissionTypeService.GetPermissionHierarchyAsync(permissionType, cancellationToken);
+                
+                result.Add(new PermissionTypeResponse
+                {
+                    Value = permissionType,
+                    DisplayName = displayName,
+                    Hierarchy = hierarchy
+                });
+            }
+
+            return Ok(ApiResponse<IEnumerable<PermissionTypeResponse>>.SuccessResult(result));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting permission types");
+            return StatusCode(500, ApiResponse<IEnumerable<PermissionTypeResponse>>.ErrorResult("Internal server error"));
+        }
+    }
+
+    /// <summary>
+    /// Update/sync user information from frontend token
+    /// </summary>
+    [HttpPost("sync-user")]
+    public async Task<ActionResult<ApiResponse<UserInfoResponse>>> SyncUser(
+        [FromBody] UserInfo userInfo,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            // Validate the request
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ApiResponse<UserInfoResponse>.ErrorResult("Invalid user information"));
+            }
+
+            // Ensure user exists with the provided information
+            var userId = await _permissionService.EnsureUserExistsAsync(
+                userInfo.Sub, 
+                userInfo.Email, 
+                userInfo.Name, 
+                cancellationToken);
+
+            // Get the updated user to return
+            var user = await _permissionService.GetUserBySubAsync(userInfo.Sub, cancellationToken);
+            if (user == null)
+            {
+                return StatusCode(500, ApiResponse<UserInfoResponse>.ErrorResult("Failed to retrieve user after sync"));
+            }
+
+            var response = new UserInfoResponse
+            {
+                Id = user.Id,
+                Sub = user.Sub,
+                Email = user.Email,
+                Name = null, // UserEntity doesn't have Name property yet
+                IsActive = user.IsActive,
+                CreatedAt = user.CreatedAt.ToDateTimeUtc(),
+                UpdatedAt = user.UpdatedAt.ToDateTimeUtc(),
+                LastLoginAt = user.LastLoginAt?.ToDateTimeUtc()
+            };
+
+            return Ok(ApiResponse<UserInfoResponse>.SuccessResult(response));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error syncing user information for {UserSub}", userInfo.Sub);
+            return StatusCode(500, ApiResponse<UserInfoResponse>.ErrorResult("Internal server error"));
+        }
+    }
+
+    /// <summary>
+    /// Update user permission for a venue
+    /// </summary>
+    [HttpPut("permissions/{permissionId}")]
+    public async Task<ActionResult<ApiResponse<VenuePermissionResponse>>> UpdateUserPermission(
+        long permissionId,
+        [FromBody] UpdatePermissionRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        // Check backoffice access
+        var authResult = await _authorizationService.AuthorizeAsync(User, null, new BackofficeAccessRequirement());
+        if (!authResult.Succeeded)
+        {
+            return Forbid();
+        }
+
+        var userSub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userSub))
+        {
+            return Unauthorized();
+        }
+
+        try
+        {
+            // Validate the request
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ApiResponse<VenuePermissionResponse>.ErrorResult("Invalid permission data"));
+            }
+
+            // Update the permission
+            var updatedPermission = await _permissionService.UpdateUserVenuePermissionAsync(
+                permissionId, request.Permission, userSub, request.Notes, cancellationToken);
+
+            if (updatedPermission == null)
+            {
+                return NotFound(ApiResponse<VenuePermissionResponse>.ErrorResult("Permission not found"));
+            }
+
+            // Create response
+            var response = new VenuePermissionResponse
+            {
+                Id = updatedPermission.Id,
+                UserId = updatedPermission.UserId,
+                VenueId = updatedPermission.VenueId,
+                VenueName = updatedPermission.Venue?.Name ?? "",
+                Name = updatedPermission.Name,
+                UserEmail = updatedPermission.User?.Email ?? "",
+                GrantedByUserId = updatedPermission.GrantedByUserId,
+                GrantedByUserEmail = updatedPermission.GrantedByUser?.Email ?? "",
+                GrantedAt = updatedPermission.GrantedAt.ToDateTimeUtc(),
+                IsActive = updatedPermission.IsActive,
+                Notes = updatedPermission.Notes
+            };
+
+            return Ok(ApiResponse<VenuePermissionResponse>.SuccessResult(response));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating permission {PermissionId}", permissionId);
+            return StatusCode(500, ApiResponse<VenuePermissionResponse>.ErrorResult("Internal server error"));
+        }
+    }
+
+    /// <summary>
+    /// Revoke user permission for a venue
+    /// </summary>
+    [HttpDelete("permissions/{permissionId}")]
+    public async Task<ActionResult<ApiResponse<bool>>> RevokeUserPermission(
+        long permissionId,
+        CancellationToken cancellationToken = default)
+    {
+        // Check backoffice access
+        var authResult = await _authorizationService.AuthorizeAsync(User, null, new BackofficeAccessRequirement());
+        if (!authResult.Succeeded)
+        {
+            return Forbid();
+        }
+
+        var userSub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userSub))
+        {
+            return Unauthorized();
+        }
+
+        try
+        {
+            // Revoke the permission
+            var success = await _permissionService.RevokeUserVenuePermissionAsync(permissionId, userSub, cancellationToken);
+
+            if (!success)
+            {
+                return NotFound(ApiResponse<bool>.ErrorResult("Permission not found or could not be revoked"));
+            }
+
+            return Ok(ApiResponse<bool>.SuccessResult(true));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error revoking permission {PermissionId}", permissionId);
+            return StatusCode(500, ApiResponse<bool>.ErrorResult("Internal server error"));
         }
     }
 }

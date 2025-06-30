@@ -38,11 +38,13 @@ public class VenueInvitationRepository : BaseRepository<VenueInvitationEntity, l
         var query = Query
             .Include(vi => vi.InvitedByUser)
             .Include(vi => vi.AcceptedByUser)
+            .Include(vi => vi.Venue)
             .Where(vi => vi.VenueId == venueId);
 
         if (activeOnly)
         {
-            query = query.Where(vi => vi.IsActive);
+            var now = SystemClock.Instance.GetCurrentInstant();
+            query = query.Where(vi => vi.IsActive && !vi.AcceptedAt.HasValue && vi.ExpiresAt > now);
         }
 
         return await query
@@ -146,6 +148,7 @@ public class VenueInvitationRepository : BaseRepository<VenueInvitationEntity, l
 
         invitation.IsActive = false;
         await UpdateAsync(invitation, cancellationToken);
+        await SaveChangesAsync(cancellationToken);
         return true;
     }
 
@@ -183,5 +186,57 @@ public class VenueInvitationRepository : BaseRepository<VenueInvitationEntity, l
                            !vi.AcceptedAt.HasValue &&
                            vi.ExpiresAt > now, 
                      cancellationToken);
+    }
+
+    public async Task<VenueInvitationEntity?> GetPendingInvitationAsync(
+        string email,
+        long venueId,
+        CancellationToken cancellationToken = default)
+    {
+        var now = SystemClock.Instance.GetCurrentInstant();
+        return await Query
+            .Include(vi => vi.Venue)
+            .Include(vi => vi.InvitedByUser)
+            .FirstOrDefaultAsync(vi => vi.Email.ToLower() == email.ToLower() &&
+                                      vi.VenueId == venueId &&
+                                      vi.IsActive &&
+                                      !vi.AcceptedAt.HasValue &&
+                                      vi.ExpiresAt > now, 
+                                cancellationToken);
+    }
+
+    public async Task<bool> MarkAsAcceptedAsync(
+        long invitationId,
+        long acceptedByUserId,
+        Instant acceptedAt,
+        CancellationToken cancellationToken = default)
+    {
+        var invitation = await GetByIdAsync(invitationId, cancellationToken);
+        if (invitation == null)
+        {
+            return false;
+        }
+
+        invitation.AcceptedAt = acceptedAt;
+        invitation.AcceptedByUserId = acceptedByUserId;
+        
+        await UpdateAsync(invitation, cancellationToken);
+        return true;
+    }
+
+    public async Task<bool> MarkAsDeclinedAsync(
+        long invitationId,
+        CancellationToken cancellationToken = default)
+    {
+        var invitation = await GetByIdAsync(invitationId, cancellationToken);
+        if (invitation == null)
+        {
+            return false;
+        }
+
+        invitation.IsActive = false;
+        
+        await UpdateAsync(invitation, cancellationToken);
+        return true;
     }
 }

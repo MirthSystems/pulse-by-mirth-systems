@@ -31,7 +31,7 @@
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
             </span>
-            {{ loading ? 'Deleting...' : 'Delete' }}
+            {{ loading ? getLoadingText() : getActionText() }}
           </button>
           <button
             @click="handleCancel"
@@ -65,6 +65,8 @@ const returnTo = computed(() => route.query.returnTo as string || '/backoffice')
 const title = computed(() => {
   if (type.value === 'venue') return 'Delete Venue'
   if (type.value === 'special') return 'Delete Special'
+  if (type.value === 'cancel-invitation') return 'Cancel Invitation'
+  if (type.value === 'revoke-permission') return 'Revoke Permission'
   return 'Confirm Delete'
 })
 
@@ -75,8 +77,26 @@ const message = computed(() => {
   if (type.value === 'special') {
     return `Are you sure you want to delete the special "${name.value}"? This action cannot be undone.`
   }
+  if (type.value === 'cancel-invitation') {
+    return `Are you sure you want to cancel the invitation for "${name.value}"? They will no longer be able to accept this invitation.`
+  }
+  if (type.value === 'revoke-permission') {
+    return `Are you sure you want to revoke permission for "${name.value}"? They will lose access to this venue immediately.`
+  }
   return 'Are you sure you want to delete this item? This action cannot be undone.'
 })
+
+const getActionText = () => {
+  if (type.value === 'cancel-invitation') return 'Cancel Invitation'
+  if (type.value === 'revoke-permission') return 'Revoke Permission'
+  return 'Delete'
+}
+
+const getLoadingText = () => {
+  if (type.value === 'cancel-invitation') return 'Canceling...'
+  if (type.value === 'revoke-permission') return 'Revoking...'
+  return 'Deleting...'
+}
 
 const handleConfirm = async () => {
   if (!type.value || !id.value) {
@@ -91,6 +111,10 @@ const handleConfirm = async () => {
       await apiService.deleteVenue(parseInt(id.value))
     } else if (type.value === 'special') {
       await apiService.deleteSpecial(parseInt(id.value))
+    } else if (type.value === 'cancel-invitation') {
+      await apiService.cancelInvitation(parseInt(id.value))
+    } else if (type.value === 'revoke-permission') {
+      await apiService.revokeUserPermission(parseInt(id.value))
     }
     
     // Navigate back with success
@@ -98,22 +122,34 @@ const handleConfirm = async () => {
       path: returnTo.value, 
       query: { 
         success: 'true', 
-        message: `${type.value} deleted successfully` 
+        message: getSuccessMessage() 
       } 
     })
   } catch (error) {
-    console.error('Delete error:', error)
+    console.error('Action error:', error)
     // Navigate back with error
     router.push({ 
       path: returnTo.value, 
       query: { 
         error: 'true', 
-        message: `Failed to delete ${type.value}` 
+        message: getErrorMessage() 
       } 
     })
   } finally {
     loading.value = false
   }
+}
+
+const getSuccessMessage = () => {
+  if (type.value === 'cancel-invitation') return 'Invitation canceled successfully'
+  if (type.value === 'revoke-permission') return 'Permission revoked successfully'
+  return `${type.value} deleted successfully`
+}
+
+const getErrorMessage = () => {
+  if (type.value === 'cancel-invitation') return 'Failed to cancel invitation'
+  if (type.value === 'revoke-permission') return 'Failed to revoke permission'
+  return `Failed to delete ${type.value}`
 }
 
 const handleCancel = () => {

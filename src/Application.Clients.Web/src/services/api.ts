@@ -23,8 +23,10 @@ import type {
   User,
   UserVenuePermission,
   VenueInvitation,
+  VenueInvitationResponse,
   CreateInvitationRequest,
-  UpdatePermissionRequest
+  UpdatePermissionRequest,
+  PermissionTypeResponse
 } from '@/types/api'
 
 // Get API base URL from environment variable set by Aspire
@@ -56,6 +58,9 @@ class ApiService {
   private async request<T>(url: string, options?: RequestInit): Promise<ApiResponse<T>> {
     const headers = await this.getAuthHeaders()
     
+    // Debug token usage
+    console.log('Making API request to:', url, 'hasToken:', !!this.accessToken, 'tokenStart:', this.accessToken?.substring(0, 20) + '...')
+    
     // Merge custom headers with auth headers
     if (options?.headers) {
       const customHeaders = new Headers(options.headers)
@@ -70,6 +75,7 @@ class ApiService {
     })
 
     if (!response.ok) {
+      console.error('API request failed:', response.status, response.statusText, 'URL:', url)
       const errorData = await response.json().catch(() => ({ 
         message: `HTTP ${response.status}: ${response.statusText}` 
       }))
@@ -235,23 +241,38 @@ class ApiService {
   }
 
   // Invitation Management
-  async sendInvitation(invitation: CreateInvitationRequest): Promise<ApiResponse<VenueInvitation>> {
-    return this.request<VenueInvitation>('/api/backoffice/invitations', {
+  async sendInvitation(invitation: CreateInvitationRequest): Promise<ApiResponse<VenueInvitationResponse>> {
+    return this.request<VenueInvitationResponse>('/api/backoffice/invitations', {
       method: 'POST',
       body: JSON.stringify(invitation),
     })
   }
 
-  async getVenueInvitations(venueId: number): Promise<ApiResponse<VenueInvitation[]>> {
-    return this.request<VenueInvitation[]>(`/api/backoffice/venues/${venueId}/invitations`)
+  // User management
+  async syncUser(userInfo: any): Promise<ApiResponse<any>> {
+    return this.request<any>('/api/backoffice/sync-user', {
+      method: 'POST',
+      body: JSON.stringify(userInfo),
+    })
   }
 
-  async getPendingInvitations(): Promise<ApiResponse<VenueInvitation[]>> {
-    return this.request<VenueInvitation[]>('/api/backoffice/invitations/pending')
+  async getVenueInvitations(venueId: number): Promise<ApiResponse<VenueInvitationResponse[]>> {
+    return this.request<VenueInvitationResponse[]>(`/api/backoffice/venues/${venueId}/invitations`)
   }
 
-  async acceptInvitation(invitationId: number): Promise<ApiResponse<UserVenuePermission>> {
-    return this.request<UserVenuePermission>(`/api/backoffice/invitations/${invitationId}/accept`, {
+  async getMyInvitations(email?: string): Promise<ApiResponse<VenueInvitationResponse[]>> {
+    const params = email ? `?email=${encodeURIComponent(email)}` : ''
+    return this.request<VenueInvitationResponse[]>(`/api/backoffice/my-invitations${params}`)
+  }
+
+  async acceptInvitation(invitationId: number): Promise<ApiResponse<boolean>> {
+    return this.request<boolean>(`/api/backoffice/invitations/${invitationId}/accept`, {
+      method: 'POST',
+    })
+  }
+
+  async declineInvitation(invitationId: number): Promise<ApiResponse<boolean>> {
+    return this.request<boolean>(`/api/backoffice/invitations/${invitationId}/decline`, {
       method: 'POST',
     })
   }
@@ -332,6 +353,10 @@ class ApiService {
       longitude: longitude.toString()
     })
     return this.request<TimeZoneInfo | null>(`/api/location/timezone?${params}`)
+  }
+
+  async getPermissionTypes(): Promise<ApiResponse<PermissionTypeResponse[]>> {
+    return this.request<PermissionTypeResponse[]>('/api/backoffice/permission-types')
   }
 }
 

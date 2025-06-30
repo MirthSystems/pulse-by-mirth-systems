@@ -76,4 +76,28 @@ public interface IVenueInvitationRepository : IRepository<VenueInvitationEntity,
         string email,
         long venueId,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets a pending invitation for a specific email/venue combination
+    /// </summary>
+    Task<VenueInvitationEntity?> GetPendingInvitationAsync(
+        string email,
+        long venueId,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Marks an invitation as accepted
+    /// </summary>
+    Task<bool> MarkAsAcceptedAsync(
+        long invitationId,
+        long acceptedByUserId,
+        NodaTime.Instant acceptedAt,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Marks an invitation as declined
+    /// </summary>
+    Task<bool> MarkAsDeclinedAsync(
+        long invitationId,
+        CancellationToken cancellationToken = default);
 }
