@@ -11,6 +11,7 @@
             </p>
           </div>
           <router-link
+            v-if="canCreateVenues"
             to="/backoffice/venues/new"
             class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
@@ -242,6 +243,7 @@
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <div class="flex items-center justify-end space-x-2">
                     <router-link
+                      v-if="getVenuePermissions(venue.id).canEdit"
                       :to="`/backoffice/venues/${venue.id}`"
                       class="text-blue-600 hover:text-blue-900 p-1"
                       title="View/Edit venue"
@@ -249,6 +251,7 @@
                       <PencilIcon class="h-4 w-4" />
                     </router-link>
                     <button
+                      v-if="canDeleteVenues"
                       @click="confirmDelete(venue)"
                       class="text-red-600 hover:text-red-900 p-1"
                       title="Delete venue"
@@ -336,6 +339,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useVenueStore } from '@/stores/venue'
 import apiService from '@/services/api'
+import { usePermissions } from '@/composables/usePermissions'
 import type { VenueSummary, VenueCategory } from '@/types/api'
 import {
   BuildingStorefrontIcon,
@@ -352,6 +356,9 @@ import {
 const router = useRouter()
 const route = useRoute()
 const venueStore = useVenueStore()
+
+// Permissions
+const { canCreateVenues, canDeleteVenues, getVenuePermissions } = usePermissions()
 
 // State
 const venues = ref<VenueSummary[]>([])
@@ -424,7 +431,7 @@ const loadData = async () => {
   loading.value = true
   try {
     const [venuesResponse, categoriesResponse] = await Promise.all([
-      apiService.getVenues(),
+      apiService.getMyVenues(), // Use the backoffice endpoint for user's venues
       apiService.getVenueCategories()
     ])
 

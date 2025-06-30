@@ -1,7 +1,10 @@
 <script setup lang="ts">
-import { onMounted, computed } from 'vue'
+import { onMounted, computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useVenueStore } from '../stores/venue'
+import { useAuthStore } from '../stores/auth'
+import { apiService } from '../services/api'
+import type { UserVenuePermission } from '../types/api'
 import SpecialCard from '../components/SpecialCard.vue'
 import { 
   BuildingStorefrontIcon,
@@ -14,7 +17,10 @@ import {
   ShareIcon,
   HeartIcon,
   ArrowLeftIcon,
-  CameraIcon
+  CameraIcon,
+  PencilIcon,
+  UsersIcon,
+  Cog6ToothIcon
 } from '@heroicons/vue/24/outline'
 import { HeartIcon as HeartIconSolid } from '@heroicons/vue/24/solid'
 
@@ -26,12 +32,72 @@ const props = defineProps<Props>()
 const route = useRoute()
 const router = useRouter()
 const venueStore = useVenueStore()
+const authStore = useAuthStore()
 
 const venue = computed(() => venueStore.selectedVenue)
 const loading = computed(() => venueStore.loading)
 const error = computed(() => venueStore.error)
 
 const venueId = computed(() => parseInt(props.id))
+
+// User permissions
+const userPermissions = ref<UserVenuePermission[]>([])
+const loadingPermissions = ref(false)
+
+// Check if user has permission for this venue
+const venuePermission = computed(() => {
+  return userPermissions.value.find(p => p.venueId === venueId.value)
+})
+
+const canManageVenue = computed(() => {
+  if (!userPermissions.value || !venueId.value) return false
+  console.log('Checking canManageVenue. UserPermissions:', userPermissions.value, 'VenueId:', venueId.value)
+  const permission = userPermissions.value.find(p => p.venueId === venueId.value)
+  console.log('Found permission:', permission)
+  return permission && (permission.name === 'venue:owner' || permission.name === 'venue:manager')
+})
+
+const canManageUsers = computed(() => {
+  if (!userPermissions.value || !venueId.value) return false
+  console.log('Checking canManageUsers. UserPermissions:', userPermissions.value, 'VenueId:', venueId.value)
+  const permission = userPermissions.value.find(p => p.venueId === venueId.value)
+  console.log('Found permission for users:', permission)
+  return permission && permission.name === 'venue:owner'
+})
+
+const isSystemAdmin = computed(() => {
+  // For now, we'll rely on venue permissions. System admin check would need JWT token inspection
+  return false
+})
+
+// Load user permissions
+const loadUserPermissions = async () => {
+  if (!authStore.isAuthenticated) return
+  
+  try {
+    console.log('Loading user permissions...')
+    loadingPermissions.value = true
+    const response = await apiService.getMyPermissions()
+    console.log('Permissions response:', response)
+    if (response.success && response.data) {
+      userPermissions.value = response.data
+      console.log('User permissions loaded:', userPermissions.value)
+    }
+  } catch (error) {
+    console.error('Error loading user permissions:', error)
+  } finally {
+    loadingPermissions.value = false
+  }
+}
+
+// Navigation functions
+const editVenue = () => {
+  router.push(`/venues/${venueId.value}/edit`)
+}
+
+const manageVenueUsers = () => {
+  router.push(`/venues/${venueId.value}/permissions`)
+}
 
 const currentDay = computed(() => {
   const today = new Date().getDay()
@@ -103,7 +169,10 @@ const getDirections = () => {
 
 onMounted(async () => {
   if (venueId.value) {
-    await venueStore.fetchVenue(venueId.value)
+    await Promise.all([
+      venueStore.fetchVenue(venueId.value),
+      loadUserPermissions()
+    ])
   }
 })
 </script>
@@ -170,6 +239,25 @@ onMounted(async () => {
           
           <!-- Action Buttons -->
           <div class="absolute top-4 right-4 flex space-x-2">
+            <!-- Management Buttons (for venue owners/managers) -->
+            <button
+              v-if="canManageVenue"
+              @click="editVenue"
+              class="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full transition-colors"
+              title="Edit Venue Details"
+            >
+              <PencilIcon class="h-5 w-5" />
+            </button>
+            <button
+              v-if="canManageUsers"
+              @click="manageVenueUsers"
+              class="p-2 bg-green-600 hover:bg-green-700 text-white rounded-full transition-colors"
+              title="Manage Users & Permissions"
+            >
+              <UsersIcon class="h-5 w-5" />
+            </button>
+            
+            <!-- Standard Action Buttons -->
             <button
               @click="shareVenue"
               class="p-2 bg-white/90 hover:bg-white text-gray-900 rounded-full transition-colors"
@@ -301,6 +389,40 @@ onMounted(async () => {
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- Management Section (for venue owners/managers) -->
+      <div v-if="canManageVenue || canManageUsers" class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex items-center mb-4">
+          <Cog6ToothIcon class="h-6 w-6 text-blue-600 mr-3" />
+          <h2 class="text-xl font-bold text-gray-900">Venue Management</h2>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <button
+            v-if="canManageVenue"
+            @click="editVenue"
+            class="flex items-center p-4 bg-blue-50 hover:bg-blue-100 rounded-lg border border-blue-200 transition-colors group"
+          >
+            <PencilIcon class="h-8 w-8 text-blue-600 mr-4" />
+            <div class="text-left">
+              <h3 class="font-semibold text-gray-900 group-hover:text-blue-900">Edit Venue Details</h3>
+              <p class="text-sm text-gray-600">Update venue information, hours, and contact details</p>
+            </div>
+          </button>
+          
+          <button
+            v-if="canManageUsers"
+            @click="manageVenueUsers"
+            class="flex items-center p-4 bg-green-50 hover:bg-green-100 rounded-lg border border-green-200 transition-colors group"
+          >
+            <UsersIcon class="h-8 w-8 text-green-600 mr-4" />
+            <div class="text-left">
+              <h3 class="font-semibold text-gray-900 group-hover:text-green-900">Manage Users</h3>
+              <p class="text-sm text-gray-600">Invite staff and manage permissions</p>
+            </div>
+          </button>
         </div>
       </div>
 

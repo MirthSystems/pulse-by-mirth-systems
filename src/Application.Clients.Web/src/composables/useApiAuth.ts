@@ -23,7 +23,10 @@ export function useApiAuth() {
       try {
         const token = await getAccessTokenSilently()
         apiService.setAccessToken(token)
-        console.log('API token updated successfully')
+        console.debug('API token updated successfully')
+        
+        // Emit a custom event to notify other parts of the app
+        window.dispatchEvent(new CustomEvent('api-token-updated'))
       } catch (error) {
         console.warn('Failed to get access token:', error)
         apiService.setAccessToken(null)

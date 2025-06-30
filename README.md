@@ -260,6 +260,20 @@ For our initial release, we're focusing on delivering these essential features:
 
 ### Authentication & Authorization Model:
 
+**📋 Updated Authorization System (December 2024)**
+
+A comprehensive, production-ready authorization system has been designed and documented. See the `docs/auth/` directory for complete details:
+
+- **Architecture Overview**: `docs/auth/authorization-architecture-overview.md`
+- **Implementation Guide**: `docs/auth/api-authorization-patterns-v2.md`
+- **Recommendation**: `docs/auth/authorization-approach-recommendation.md`
+- **Implementation Roadmap**: `docs/auth/implementation-roadmap.md`
+- **Developer Instructions**: `docs/auth/copilot-instructions.md`
+
+The updated system uses a **hybrid approach** combining Auth0's enterprise authentication with database-driven venue permissions for optimal security, scalability, and maintainability.
+
+**Legacy Documentation Below** (to be updated during implementation):
+
 The application uses a two-tiered approach to user permissions:
 
 - **Application-Level Authorization (via Auth0):**

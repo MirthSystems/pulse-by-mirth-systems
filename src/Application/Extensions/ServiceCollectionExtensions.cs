@@ -71,6 +71,9 @@ public static class ServiceCollectionExtensions
 
     private static void RegisterApplicationServices(IServiceCollection services)
     {
+        // Register caching services
+        services.AddMemoryCache();
+        
         // Register application services
         services.AddScoped<Application.Common.Interfaces.Services.IVenueService, Application.Infrastructure.Services.VenueService>();
         services.AddScoped<Application.Common.Interfaces.Services.ISpecialService, Application.Infrastructure.Services.SpecialService>();
@@ -79,6 +82,10 @@ public static class ServiceCollectionExtensions
         // services.AddScoped<INotificationService, NotificationService>();
         // services.AddScoped<IPostService, PostService>();
         // services.AddScoped<IActivityThreadService, ActivityThreadService>();
+
+        // Register authorization services
+        services.AddScoped<Application.Common.Interfaces.Services.IPermissionService, Application.Infrastructure.Services.PermissionService>();
+        services.AddScoped<Application.Common.Interfaces.Services.IVenuePermissionTypeService, Application.Infrastructure.Services.VenuePermissionTypeService>();
     }
 
     private static void RegisterInfrastructureServices(IServiceCollection services, ApplicationOptions config)
@@ -109,6 +116,11 @@ public static class ServiceCollectionExtensions
         services.AddScoped<Application.Common.Interfaces.Repositories.ISpecialRepository, Application.Infrastructure.Data.Repositories.SpecialRepository>();
         services.AddScoped<Application.Common.Interfaces.Repositories.IVenueCategoryRepository, Application.Infrastructure.Data.Repositories.VenueCategoryRepository>();
         services.AddScoped<Application.Common.Interfaces.Repositories.ISpecialCategoryRepository, Application.Infrastructure.Data.Repositories.SpecialCategoryRepository>();
+
+        // Register authorization repositories
+        services.AddScoped<Application.Common.Interfaces.Repositories.IUserRepository, Application.Infrastructure.Data.Repositories.UserRepository>();
+        services.AddScoped<Application.Common.Interfaces.Repositories.IUserVenuePermissionRepository, Application.Infrastructure.Data.Repositories.UserVenuePermissionRepository>();
+        services.AddScoped<Application.Common.Interfaces.Repositories.IVenueInvitationRepository, Application.Infrastructure.Data.Repositories.VenueInvitationRepository>();
 
         // Note: BaseRepository<,> is abstract and should not be registered directly.
         // Only concrete implementations should be registered with the DI container.

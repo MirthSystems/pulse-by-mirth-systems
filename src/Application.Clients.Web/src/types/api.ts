@@ -293,3 +293,79 @@ export interface UpdateSpecialRequest {
   cronSchedule?: string;
   isActive: boolean;
 }
+
+// User and Permission types
+export interface User {
+  id: number;
+  sub: string;
+  email: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  lastLoginAt?: string;
+}
+
+export interface UserVenuePermission {
+  id: number;
+  userId: number;
+  venueId: number;
+  venueName: string;
+  name: string; // "venue:owner" | "venue:manager" | "venue:staff" - matches backend response
+  userEmail: string;
+  grantedByUserId: number;
+  grantedByUserEmail: string;
+  grantedAt: string;
+  isActive: boolean;
+  notes?: string;
+}
+
+export interface VenueInvitation {
+  id: number;
+  email: string;
+  venueId: number;
+  venueName: string;
+  name: string; // "venue:owner" | "venue:manager" | "venue:staff"
+  invitedByUserId: number;
+  invitedByUserEmail: string;
+  invitedAt: string;
+  expiresAt: string;
+  acceptedAt?: string;
+  acceptedByUserId?: number;
+  isActive: boolean;
+  notes?: string;
+}
+
+export interface VenueInvitationResponse {
+  id: number;
+  email: string;
+  venueId: number;
+  venueName: string;
+  name: string; // "venue:owner" | "venue:manager" | "venue:staff"
+  invitedByUserId: number;
+  invitedByUserEmail: string;
+  invitedAt: string;
+  expiresAt: string;
+  acceptedAt?: string;
+  acceptedByUserId?: number;
+  isActive: boolean;
+  notes?: string;
+}
+
+export interface CreateInvitationRequest {
+  email: string;
+  venueId: number;
+  permission: string; // "venue:owner" | "venue:manager" | "venue:staff"
+  notes?: string;
+  senderEmail: string; // Add the sender's email to the request
+}
+
+export interface UpdatePermissionRequest {
+  permission: string; // "venue:owner" | "venue:manager" | "venue:staff" - changed from 'name' to match backend
+  notes?: string;
+}
+
+export interface PermissionTypeResponse {
+  name: string;
+  displayName: string;
+  description: string;
+}

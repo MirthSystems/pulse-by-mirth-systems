@@ -1,5 +1,6 @@
 using Application.Extensions;
 using Application.Infrastructure.Data.Context;
+using Application.Services.API.Middleware;
 using Microsoft.EntityFrameworkCore;
 using Npgsql.EntityFrameworkCore.PostgreSQL;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -40,7 +41,41 @@ public class Program
                 options.Audience = builder.Configuration["Auth0:Audience"];
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    NameClaimType = ClaimTypes.NameIdentifier
+                    NameClaimType = ClaimTypes.NameIdentifier,
+                    // Map Auth0 claims to standard claims
+                    RoleClaimType = "permissions"
+                };
+                
+                // Subscribe to events to handle additional claim mapping
+                options.Events = new JwtBearerEvents
+                {
+                    OnTokenValidated = context =>
+                    {
+                        // Ensure email claim is properly mapped
+                        var claimsIdentity = context.Principal?.Identity as ClaimsIdentity;
+                        if (claimsIdentity != null)
+                        {
+                            // Auth0 might send email in different claim types
+                            var emailClaim = claimsIdentity.FindFirst("email") 
+                                          ?? claimsIdentity.FindFirst("https://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress");
+                            
+                            if (emailClaim != null && !claimsIdentity.HasClaim(ClaimTypes.Email, emailClaim.Value))
+                            {
+                                claimsIdentity.AddClaim(new Claim(ClaimTypes.Email, emailClaim.Value));
+                            }
+                            
+                            // Ensure name claim mapping
+                            var nameClaim = claimsIdentity.FindFirst("name") 
+                                         ?? claimsIdentity.FindFirst("nickname")
+                                         ?? claimsIdentity.FindFirst("given_name");
+                            
+                            if (nameClaim != null && !claimsIdentity.HasClaim(ClaimTypes.Name, nameClaim.Value))
+                            {
+                                claimsIdentity.AddClaim(new Claim(ClaimTypes.Name, nameClaim.Value));
+                            }
+                        }
+                        return Task.CompletedTask;
+                    }
                 };
             });
 
@@ -99,6 +134,8 @@ public class Program
             configure.OperationProcessors.Add(new NSwag.Generation.Processors.Security.AspNetCoreOperationSecurityScopeProcessor("Bearer"));
         });
 
+        builder.Services.AddScoped<Microsoft.AspNetCore.Authorization.IAuthorizationHandler, Application.Infrastructure.Authorization.Handlers.BackofficeAuthorizationHandler>();
+
         var app = builder.Build();
 
         app.MapDefaultEndpoints();
@@ -131,6 +168,7 @@ public class Program
 
         app.UseCors("AllowedOrigins");
         app.UseAuthentication();
+        app.UseUserProvisioning(); // Ensure users exist in database after authentication
         app.UseAuthorization();
 
         app.MapControllers();

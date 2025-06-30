@@ -37,6 +37,7 @@
         <div class="py-1">
           <!-- Backoffice Link (for authenticated users with admin access) -->
           <router-link
+            v-if="canAccessBackoffice"
             to="/backoffice"
             @click="closeDropdown"
             class="group flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
@@ -81,10 +82,12 @@ import {
   ArrowRightOnRectangleIcon,
   ChevronDownIcon
 } from '@heroicons/vue/24/outline'
+import { usePermissions } from '@/composables/usePermissions'
 import UserAvatar from './UserAvatar.vue'
 
 const router = useRouter()
 const { user, logout } = useAuth0()
+const { canAccessBackoffice } = usePermissions()
 
 const isOpen = ref(false)
 const dropdownRef = ref<HTMLElement>()

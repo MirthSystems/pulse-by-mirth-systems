@@ -3,8 +3,10 @@ using Application.Common.Models.Location;
 using Application.Common.Models;
 using Application.Common.Models.Venue;
 using Application.Common.Models.Search;
+using Application.Infrastructure.Authorization.Requirements;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Application.Services.API.Controllers;
 
@@ -12,15 +14,23 @@ namespace Application.Services.API.Controllers;
 /// API controller for venue operations
 /// </summary>
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/venues")]
 public class VenuesController : ControllerBase
 {
     private readonly IVenueService _venueService;
+    private readonly IPermissionService _permissionService;
+    private readonly IAuthorizationService _authorizationService;
     private readonly ILogger<VenuesController> _logger;
 
-    public VenuesController(IVenueService venueService, ILogger<VenuesController> logger)
+    public VenuesController(
+        IVenueService venueService, 
+        IPermissionService permissionService,
+        IAuthorizationService authorizationService,
+        ILogger<VenuesController> logger)
     {
         _venueService = venueService ?? throw new ArgumentNullException(nameof(venueService));
+        _permissionService = permissionService ?? throw new ArgumentNullException(nameof(permissionService));
+        _authorizationService = authorizationService ?? throw new ArgumentNullException(nameof(authorizationService));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -47,84 +57,6 @@ public class VenuesController : ControllerBase
         if (!result.Success || result.Data == null)
         {
             return NotFound(result);
-        }
-        
-        return Ok(result);
-    }
-
-    /// <summary>
-    /// Create a new venue
-    /// </summary>
-    [HttpPost]
-    [Authorize]
-    public async Task<ActionResult<ApiResponse<Venue>>> CreateVenue([FromBody] CreateVenue createVenue, CancellationToken cancellationToken = default)
-    {
-        _logger.LogInformation("Creating new venue: {VenueName}", createVenue.Name);
-        
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
-        }
-        
-        var result = await _venueService.CreateVenueAsync(createVenue, cancellationToken);
-        
-        if (!result.Success)
-        {
-            return BadRequest(result);
-        }
-        
-        return CreatedAtAction(
-            nameof(GetVenueById),
-            new { id = result.Data!.Id },
-            result);
-    }
-
-    /// <summary>
-    /// Update an existing venue
-    /// </summary>
-    [HttpPut("{id}")]
-    [Authorize]
-    public async Task<ActionResult<ApiResponse<Venue?>>> UpdateVenue(long id, [FromBody] UpdateVenue updateVenue, CancellationToken cancellationToken = default)
-    {
-        _logger.LogInformation("Updating venue with ID: {VenueId}", id);
-        
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
-        }
-        
-        var result = await _venueService.UpdateVenueAsync(id, updateVenue, cancellationToken);
-        
-        if (!result.Success)
-        {
-            if (result.Message?.Contains("not found") == true)
-            {
-                return NotFound(result);
-            }
-            return BadRequest(result);
-        }
-        
-        return Ok(result);
-    }
-
-    /// <summary>
-    /// Delete a venue
-    /// </summary>
-    [HttpDelete("{id}")]
-    [Authorize]
-    public async Task<ActionResult<ApiResponse<bool>>> DeleteVenue(long id, CancellationToken cancellationToken = default)
-    {
-        _logger.LogInformation("Deleting venue with ID: {VenueId}", id);
-        
-        var result = await _venueService.DeleteVenueAsync(id, cancellationToken);
-        
-        if (!result.Success)
-        {
-            if (result.Message?.Contains("not found") == true)
-            {
-                return NotFound(result);
-            }
-            return BadRequest(result);
         }
         
         return Ok(result);
