@@ -6,7 +6,7 @@
         <div class="flex items-center justify-between">
           <div class="flex items-center">
             <button
-              @click="$router.go(-1)"
+              @click="$router.push('/backoffice')"
               class="mr-4 p-2 text-gray-400 hover:text-gray-600"
             >
               <ChevronLeftIcon class="h-5 w-5" />
