@@ -30,21 +30,9 @@ useApiAuth()
             </router-link>
           </div>
           
-          <!-- Desktop Auth Component -->
-          <div class="hidden md:flex items-center">
+          <!-- Auth Component -->
+          <div class="flex items-center space-x-2 md:space-x-0">
             <Auth />
-          </div>
-          
-          <!-- Mobile menu button -->
-          <div class="md:hidden flex items-center space-x-2">
-            <Auth />
-            <button
-              @click="mobileMenuOpen = !mobileMenuOpen"
-              class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100"
-            >
-              <Bars3Icon v-if="!mobileMenuOpen" class="h-6 w-6" />
-              <XMarkIcon v-else class="h-6 w-6" />
-            </button>
           </div>
         </div>
       </div>
