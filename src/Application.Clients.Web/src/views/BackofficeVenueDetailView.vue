@@ -621,8 +621,8 @@ const saveVenue = async () => {
       if (!response.success) {
         throw new Error(response.message || 'Failed to create venue')
       }
-      // Navigate to the new venue's detail page
-      router.replace(`/backoffice/venues/${response.data.id}`)
+      // Navigate back to the backoffice main page instead of the new venue's detail page
+      router.replace('/backoffice')
     } else {
       const response = await apiService.updateVenue(venueId.value!, venueData as UpdateVenueRequest)
       if (!response.success) {
