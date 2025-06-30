@@ -158,15 +158,38 @@
                   <p v-if="errors.endDate" class="mt-1 text-sm text-red-600">{{ errors.endDate }}</p>
                 </div>
 
+                <!-- All Day Special Checkbox -->
+                <div class="col-span-2">
+                  <div class="flex items-center">
+                    <input
+                      v-model="isAllDay"
+                      id="isAllDay"
+                      type="checkbox"
+                      class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+                      @change="handleAllDayChange"
+                    />
+                    <label for="isAllDay" class="ml-2 block text-sm text-gray-900">
+                      All Day Special
+                    </label>
+                  </div>
+                  <p class="mt-1 text-sm text-gray-500">Check this if the special runs all day (no specific start/end times)</p>
+                </div>
+
                 <div>
-                  <label for="startTime" class="block text-sm font-medium text-gray-700">Start Time *</label>
+                  <label for="startTime" class="block text-sm font-medium text-gray-700">
+                    Start Time {{ !isAllDay ? '*' : '' }}
+                  </label>
                   <input
                     v-model="form.startTime"
                     type="time"
                     id="startTime"
-                    required
+                    :required="!isAllDay"
+                    :disabled="isAllDay"
                     class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 sm:text-sm"
-                    :class="{ 'border-red-300': errors.startTime }"
+                    :class="{ 
+                      'border-red-300': errors.startTime, 
+                      'bg-gray-100 cursor-not-allowed': isAllDay 
+                    }"
                   />
                   <p v-if="errors.startTime" class="mt-1 text-sm text-red-600">{{ errors.startTime }}</p>
                 </div>
@@ -177,8 +200,12 @@
                     v-model="form.endTime"
                     type="time"
                     id="endTime"
+                    :disabled="isAllDay"
                     class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 sm:text-sm"
-                    :class="{ 'border-red-300': errors.endTime }"
+                    :class="{ 
+                      'border-red-300': errors.endTime,
+                      'bg-gray-100 cursor-not-allowed': isAllDay 
+                    }"
                   />
                   <p v-if="errors.endTime" class="mt-1 text-sm text-red-600">{{ errors.endTime }}</p>
                 </div>
@@ -260,6 +287,8 @@ const form = ref<CreateSpecialRequest>({
   isActive: true
 })
 
+const isAllDay = ref(false)
+
 const errors = ref<Record<string, string>>({})
 
 // Computed
@@ -268,6 +297,21 @@ const venueId = computed(() => {
 })
 
 // Methods
+const handleAllDayChange = () => {
+  if (isAllDay.value) {
+    // Set all day times (00:00 to 23:59)
+    form.value.startTime = '00:00'
+    form.value.endTime = '23:59'
+    // Clear any time-related errors
+    errors.value.startTime = ''
+    errors.value.endTime = ''
+  } else {
+    // Reset to default business hours when unchecked
+    form.value.startTime = '17:00'
+    form.value.endTime = ''
+  }
+}
+
 const loadVenue = async () => {
   try {
     const response = await apiService.getVenue(venueId.value)
@@ -319,7 +363,7 @@ const validateForm = (): boolean => {
     errors.value.startDate = 'Start date is required'
   }
 
-  if (!form.value.startTime) {
+  if (!form.value.startTime && !isAllDay.value) {
     errors.value.startTime = 'Start time is required'
   }
 
@@ -327,7 +371,7 @@ const validateForm = (): boolean => {
     errors.value.endDate = 'End date must be after start date'
   }
 
-  if (form.value.endTime && form.value.startTime && form.value.endTime <= form.value.startTime) {
+  if (form.value.endTime && form.value.startTime && form.value.endTime <= form.value.startTime && !isAllDay.value) {
     errors.value.endTime = 'End time must be after start time'
   }
 
