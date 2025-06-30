@@ -77,6 +77,29 @@ public class VenueService : IVenueService
                 return ApiResponse<Venue>.ErrorResult($"Venue category with ID {createVenue.CategoryId} not found.");
             }
 
+            // Auto-geocode address if coordinates are not provided
+            if (!createVenue.Latitude.HasValue || !createVenue.Longitude.HasValue)
+            {
+                var addressParts = new List<string>();
+                if (!string.IsNullOrEmpty(createVenue.StreetAddress)) addressParts.Add(createVenue.StreetAddress);
+                if (!string.IsNullOrEmpty(createVenue.SecondaryAddress)) addressParts.Add(createVenue.SecondaryAddress);
+                if (!string.IsNullOrEmpty(createVenue.Locality)) addressParts.Add(createVenue.Locality);
+                if (!string.IsNullOrEmpty(createVenue.Region)) addressParts.Add(createVenue.Region);
+                if (!string.IsNullOrEmpty(createVenue.PostalCode)) addressParts.Add(createVenue.PostalCode);
+                if (!string.IsNullOrEmpty(createVenue.Country)) addressParts.Add(createVenue.Country);
+
+                var address = string.Join(", ", addressParts);
+                if (!string.IsNullOrEmpty(address))
+                {
+                    var geocodeResult = await _azureMapsService.GeocodeAddressAsync(address, cancellationToken);
+                    if (geocodeResult != null)
+                    {
+                        createVenue.Latitude = geocodeResult.Latitude;
+                        createVenue.Longitude = geocodeResult.Longitude;
+                    }
+                }
+            }
+
             var venue = MapToVenueEntity(createVenue);
             var createdVenue = await _venueRepository.AddAsync(venue, cancellationToken);
             await _venueRepository.SaveChangesAsync(cancellationToken);
@@ -107,6 +130,37 @@ public class VenueService : IVenueService
             if (category == null)
             {
                 return ApiResponse<Venue?>.ErrorResult($"Venue category with ID {updateVenue.CategoryId} not found.");
+            }
+
+            // Check if address changed and re-geocode if necessary
+            var addressChanged = existingVenue.StreetAddress != updateVenue.StreetAddress ||
+                               existingVenue.SecondaryAddress != updateVenue.SecondaryAddress ||
+                               existingVenue.Locality != updateVenue.Locality ||
+                               existingVenue.Region != updateVenue.Region ||
+                               existingVenue.PostalCode != updateVenue.PostalCode ||
+                               existingVenue.Country != updateVenue.Country;
+
+            // Auto-geocode address if coordinates are not provided or address changed
+            if (addressChanged && (!updateVenue.Latitude.HasValue || !updateVenue.Longitude.HasValue))
+            {
+                var addressParts = new List<string>();
+                if (!string.IsNullOrEmpty(updateVenue.StreetAddress)) addressParts.Add(updateVenue.StreetAddress);
+                if (!string.IsNullOrEmpty(updateVenue.SecondaryAddress)) addressParts.Add(updateVenue.SecondaryAddress);
+                if (!string.IsNullOrEmpty(updateVenue.Locality)) addressParts.Add(updateVenue.Locality);
+                if (!string.IsNullOrEmpty(updateVenue.Region)) addressParts.Add(updateVenue.Region);
+                if (!string.IsNullOrEmpty(updateVenue.PostalCode)) addressParts.Add(updateVenue.PostalCode);
+                if (!string.IsNullOrEmpty(updateVenue.Country)) addressParts.Add(updateVenue.Country);
+
+                var address = string.Join(", ", addressParts);
+                if (!string.IsNullOrEmpty(address))
+                {
+                    var geocodeResult = await _azureMapsService.GeocodeAddressAsync(address, cancellationToken);
+                    if (geocodeResult != null)
+                    {
+                        updateVenue.Latitude = geocodeResult.Latitude;
+                        updateVenue.Longitude = geocodeResult.Longitude;
+                    }
+                }
             }
 
             UpdateVenueEntityAsync(existingVenue, updateVenue);
