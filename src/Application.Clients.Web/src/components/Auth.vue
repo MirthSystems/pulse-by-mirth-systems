@@ -63,11 +63,11 @@ const syncUserWithBackend = async () => {
         emailVerified: auth0User.value.email_verified || false
       }
       
-      console.log('Syncing user with backend:', userInfo)
+      console.debug('Syncing user with backend:', userInfo)
       const response = await apiService.syncUser(userInfo)
       
       if (response.success) {
-        console.log('User synced successfully:', response.data)
+        console.debug('User synced successfully:', response.data)
       } else {
         console.error('Failed to sync user:', response)
       }
@@ -84,7 +84,7 @@ const updateAccessToken = async () => {
       const token = await getAccessTokenSilently()
       apiService.setAccessToken(token)
       authStore.setAccessToken(token)
-      console.log('Access token updated, hasToken:', !!token, 'tokenStart:', token?.substring(0, 20) + '...')
+      console.debug('Access token updated, hasToken:', !!token, 'tokenStart:', token?.substring(0, 20) + '...')
       
       // Sync user with backend after setting token
       await syncUserWithBackend()

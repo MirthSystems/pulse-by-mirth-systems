@@ -454,7 +454,7 @@ const loadData = async () => {
 }
 
 const sendInvitation = async () => {
-  console.log('Sending invitation:', inviteForm.value)
+  console.debug('Sending invitation:', inviteForm.value)
   sendingInvite.value = true
   try {
     // Set the venue ID and sender email
@@ -466,11 +466,11 @@ const sendInvitation = async () => {
       return
     }
     
-    console.log('Sending invitation with venueId and senderEmail:', inviteForm.value)
+    console.debug('Sending invitation with venueId and senderEmail:', inviteForm.value)
     const response = await apiService.sendInvitation(inviteForm.value)
-    console.log('Invitation response:', response)
+    console.debug('Invitation response:', response)
     if (response.success) {
-      console.log('Invitation sent successfully')
+      console.debug('Invitation sent successfully')
       // Reset form and close modal
       inviteForm.value = {
         email: '',
