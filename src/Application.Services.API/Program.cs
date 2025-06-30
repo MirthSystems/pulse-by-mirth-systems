@@ -86,28 +86,30 @@ public class Program
             {
                 var corsSection = builder.Configuration.GetSection("CORS");
                 var allowedOrigins = corsSection.GetSection("AllowedOrigins")
-                    .Get<string[]>() ?? new string[0];
+                    .Get<string[]>() ?? Array.Empty<string>();
                 var allowedMethods = corsSection.GetSection("AllowedMethods")
-                    .Get<string[]>() ?? new[] { "GET", "POST", "PUT", "DELETE", "OPTIONS" };
+                    .Get<string[]>() ?? new[] { "GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH" };
                 var allowedHeaders = corsSection.GetSection("AllowedHeaders")
-                    .Get<string[]>() ?? new[] { "*" };
+                    .Get<string[]>() ?? new[] { "Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin" };
                 var allowCredentials = corsSection.GetValue<bool>("AllowCredentials", true);
 
                 if (allowedOrigins.Length > 0)
                 {
-                    policy.WithOrigins(allowedOrigins);
+                    policy.WithOrigins(allowedOrigins)
+                          .WithMethods(allowedMethods)
+                          .WithHeaders(allowedHeaders);
+                    
+                    if (allowCredentials)
+                    {
+                        policy.AllowCredentials();
+                    }
                 }
                 else
                 {
-                    policy.AllowAnyOrigin();
-                }
-
-                policy.WithMethods(allowedMethods)
-                      .WithHeaders(allowedHeaders);
-
-                if (allowCredentials && allowedOrigins.Length > 0)
-                {
-                    policy.AllowCredentials();
+                    // Fallback for development - never use in production
+                    policy.AllowAnyOrigin()
+                          .WithMethods(allowedMethods)
+                          .WithHeaders(allowedHeaders);
                 }
             });
         });
@@ -165,6 +167,12 @@ public class Program
         }
 
         app.UseHttpsRedirection();
+
+        // Add CORS debugging in development
+        if (app.Environment.IsDevelopment())
+        {
+            app.UseCorsDebugging();
+        }
 
         app.UseCors("AllowedOrigins");
         app.UseAuthentication();
