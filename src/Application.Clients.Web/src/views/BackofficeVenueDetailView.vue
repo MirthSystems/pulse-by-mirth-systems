@@ -248,83 +248,17 @@
             <p class="mt-1 text-sm text-gray-500">Get started by creating your first special.</p>
           </div>
           
-          <div v-else class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-              <thead class="bg-gray-50">
-                <tr>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Special
-                  </th>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Category
-                  </th>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Schedule
-                  </th>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th scope="col" class="relative px-6 py-3">
-                    <span class="sr-only">Actions</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody class="bg-white divide-y divide-gray-200">
-                <tr v-for="special in specials" :key="special.id">
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <div>
-                      <div class="text-sm font-medium text-gray-900">{{ special.title }}</div>
-                      <div class="text-sm text-gray-500">{{ special.description || 'No description' }}</div>
-                    </div>
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="flex items-center">
-                      <span class="text-lg mr-2">{{ special.categoryIcon }}</span>
-                      <span class="text-sm text-gray-900">{{ special.categoryName }}</span>
-                    </div>
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <div>
-                      {{ special.startDate }} {{ special.startTime }}
-                      <span v-if="special.endTime"> - {{ special.endTime }}</span>
-                    </div>
-                    <div v-if="special.isRecurring" class="text-xs text-blue-600">
-                      Recurring
-                    </div>
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <span 
-                      :class="[
-                        'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
-                        special.isActive 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-red-100 text-red-800'
-                      ]"
-                    >
-                      {{ special.isActive ? 'Active' : 'Inactive' }}
-                    </span>
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <div class="flex items-center justify-end space-x-2">
-                      <router-link
-                        :to="`/backoffice/venues/${venueId}/specials/${special.id}`"
-                        class="text-blue-600 hover:text-blue-900 p-1"
-                        title="View/Edit special"
-                      >
-                        <PencilIcon class="h-4 w-4" />
-                      </router-link>
-                      <button
-                        @click="confirmDeleteSpecial(special)"
-                        class="text-red-600 hover:text-red-900 p-1"
-                        title="Delete special"
-                      >
-                        <TrashIcon class="h-4 w-4" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+          <div v-else class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <BackofficeSpecialCard 
+                v-for="special in specials" 
+                :key="special.id"
+                :special="special"
+                @edit="editSpecial"
+                @delete="confirmDeleteSpecial"
+                class="hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200"
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -356,6 +290,7 @@ import {
 } from '@heroicons/vue/24/outline'
 import BusinessHoursEditor from '../components/common/BusinessHoursEditor.vue'
 import VenueAddressForm from '../components/VenueAddressForm.vue'
+import BackofficeSpecialCard from '../components/BackofficeSpecialCard.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -624,6 +559,10 @@ const saveVenue = async () => {
 }
 
 // Special management methods
+const editSpecial = (special: SpecialSummary) => {
+  router.push(`/backoffice/venues/${venueId.value}/specials/${special.id}`)
+}
+
 const confirmDeleteSpecial = (special: SpecialSummary) => {
   router.push({
     path: '/confirm',
