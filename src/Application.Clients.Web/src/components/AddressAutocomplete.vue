@@ -268,8 +268,23 @@ const getCurrentLocation = async () => {
       emit('coordinates-updated', latitude, longitude)
     } catch (reverseGeocodeError) {
       console.error('Error reverse geocoding:', reverseGeocodeError)
-      // Fallback to coordinates
-      inputValue.value = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`
+      // Fallback to coordinates only - don't try to display them as address
+      inputValue.value = `Current Location (${latitude.toFixed(4)}, ${longitude.toFixed(4)})`
+      
+      // Create a minimal GeocodeResult for coordinates-only mode
+      const geocodeResult: GeocodeResult = {
+        formattedAddress: inputValue.value,
+        latitude,
+        longitude,
+        street: '',
+        city: '',
+        region: '',
+        postalCode: '',
+        country: '',
+        confidence: 0.8 // Lower confidence since we don't have address data
+      }
+      
+      emit('location-selected', geocodeResult)
       emit('coordinates-updated', latitude, longitude)
     }
   } catch (error) {
