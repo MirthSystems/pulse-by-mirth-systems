@@ -53,13 +53,6 @@ public class BackofficeController : ControllerBase
     [HttpGet("venues")]
     public async Task<ActionResult<ApiResponse<IEnumerable<VenueSummary>>>> GetMyVenues(CancellationToken cancellationToken = default)
     {
-        // Check backoffice access
-        var authResult = await _authorizationService.AuthorizeAsync(User, null, new BackofficeAccessRequirement());
-        if (!authResult.Succeeded)
-        {
-            return Forbid();
-        }
-
         var userSub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userSub))
         {
@@ -114,13 +107,6 @@ public class BackofficeController : ControllerBase
     [HttpGet("specials")]
     public async Task<ActionResult<ApiResponse<IEnumerable<SpecialSummary>>>> GetMySpecials(CancellationToken cancellationToken = default)
     {
-        // Check backoffice access
-        var authResult = await _authorizationService.AuthorizeAsync(User, null, new BackofficeAccessRequirement());
-        if (!authResult.Succeeded)
-        {
-            return Forbid();
-        }
-
         var userSub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userSub))
         {
@@ -524,13 +510,6 @@ public class BackofficeController : ControllerBase
     [HttpGet("my-permissions")]
     public async Task<ActionResult<ApiResponse<IEnumerable<VenuePermissionSummary>>>> GetMyPermissions(CancellationToken cancellationToken = default)
     {
-        // Check backoffice access
-        var authResult = await _authorizationService.AuthorizeAsync(User, null, new BackofficeAccessRequirement());
-        if (!authResult.Succeeded)
-        {
-            return Forbid();
-        }
-
         var userSub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userSub))
         {
@@ -812,13 +791,6 @@ public class BackofficeController : ControllerBase
         [FromQuery] string? email = null,
         CancellationToken cancellationToken = default)
     {
-        // Check backoffice access first
-        var authResult = await _authorizationService.AuthorizeAsync(User, null, new BackofficeAccessRequirement());
-        if (!authResult.Succeeded)
-        {
-            return Forbid();
-        }
-
         var userSub = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userSub))
         {
