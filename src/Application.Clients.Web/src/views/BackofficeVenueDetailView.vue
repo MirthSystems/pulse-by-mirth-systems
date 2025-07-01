@@ -325,6 +325,8 @@ const form = ref<CreateVenueRequest>({
   region: '',
   postalCode: '',
   country: 'United States',
+  latitude: undefined,
+  longitude: undefined,
   phoneNumber: '',
   email: '',
   website: '',
@@ -389,6 +391,8 @@ const loadVenue = async () => {
         region: venue.value.region,
         postalCode: venue.value.postalCode,
         country: venue.value.country,
+        latitude: venue.value.latitude,
+        longitude: venue.value.longitude,
         phoneNumber: venue.value.phoneNumber || '',
         email: venue.value.email || '',
         website: venue.value.website || '',
@@ -447,7 +451,12 @@ const onAddressGeocoded = (result: GeocodeResult) => {
   errors.value.postalCode = ''
   errors.value.country = ''
   
+  // SAVE THE COORDINATES TO THE FORM!
+  form.value.latitude = result.latitude
+  form.value.longitude = result.longitude
+  
   console.log('Address geocoded successfully:', result)
+  console.log('Saved coordinates to form:', { latitude: form.value.latitude, longitude: form.value.longitude })
 }
 
 const startEditing = () => {
