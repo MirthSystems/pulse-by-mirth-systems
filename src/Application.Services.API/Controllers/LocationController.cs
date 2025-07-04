@@ -1,6 +1,8 @@
+using Application.Common.Constants;
 using Application.Common.Interfaces.Services;
 using Application.Common.Models;
 using Application.Common.Models.Location;
+using Application.Services.API.Controllers.Base;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Application.Services.API.Controllers;
@@ -9,128 +11,139 @@ namespace Application.Services.API.Controllers;
 /// API controller for location-based operations including geocoding and address search
 /// </summary>
 [ApiController]
-[Route("api/location")]
-public class LocationController : ControllerBase
+public class LocationController : BaseApiController
 {
     private readonly IAzureMapsService _azureMapsService;
-    private readonly ILogger<LocationController> _logger;
 
     public LocationController(IAzureMapsService azureMapsService, ILogger<LocationController> logger)
+        : base(logger)
     {
         _azureMapsService = azureMapsService ?? throw new ArgumentNullException(nameof(azureMapsService));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     /// <summary>
     /// Search for address suggestions using Azure Maps
     /// </summary>
-    [HttpGet("search")]
+    [HttpGet(ApiRoutes.Location.Search)]
     public async Task<ActionResult<ApiResponse<IEnumerable<GeocodeResult>>>> SearchAddresses(
         [FromQuery] string query,
         CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Searching addresses with query: {Query}", query);
+        LogActionStart(nameof(SearchAddresses), new { Query = query });
         
         if (string.IsNullOrWhiteSpace(query) || query.Length < 3)
         {
+            LogActionComplete(nameof(SearchAddresses), false, "Query too short");
             return BadRequest(ApiResponse<IEnumerable<GeocodeResult>>.ErrorResult("Query must be at least 3 characters long"));
         }
 
         try
         {
             var results = await _azureMapsService.SearchAddressAsync(query, cancellationToken);
+            LogActionComplete(nameof(SearchAddresses), true);
             return Ok(ApiResponse<IEnumerable<GeocodeResult>>.SuccessResult(results));
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error searching addresses with query: {Query}", query);
-            return StatusCode(500, ApiResponse<IEnumerable<GeocodeResult>>.ErrorResult($"Error searching addresses: {ex.Message}"));
+            LogError(ex, nameof(SearchAddresses), new { Query = query });
+            return InternalServerError<IEnumerable<GeocodeResult>>();
         }
     }
 
     /// <summary>
     /// Geocode a single address to coordinates
     /// </summary>
-    [HttpPost("geocode")]
+    [HttpPost(ApiRoutes.Location.Geocode)]
     public async Task<ActionResult<ApiResponse<GeocodeResult?>>> GeocodeAddress(
         [FromBody] GeocodeRequest request,
         CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Geocoding address: {Address}", request.Address);
+        LogActionStart(nameof(GeocodeAddress), request);
+        
+        // Validate model state
+        var modelValidation = ValidateModelState();
+        if (modelValidation != null) return modelValidation;
         
         if (string.IsNullOrWhiteSpace(request.Address))
         {
+            LogActionComplete(nameof(GeocodeAddress), false, "Address required");
             return BadRequest(ApiResponse<GeocodeResult?>.ErrorResult("Address is required"));
         }
 
         try
         {
             var result = await _azureMapsService.GeocodeAddressAsync(request.Address, cancellationToken);
+            LogActionComplete(nameof(GeocodeAddress), true);
             return Ok(ApiResponse<GeocodeResult?>.SuccessResult(result));
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error geocoding address: {Address}", request.Address);
-            return StatusCode(500, ApiResponse<GeocodeResult?>.ErrorResult($"Error geocoding address: {ex.Message}"));
+            LogError(ex, nameof(GeocodeAddress), request);
+            return InternalServerError<GeocodeResult?>();
         }
     }
 
     /// <summary>
     /// Reverse geocode coordinates to address information
     /// </summary>
-    [HttpPost("reverse-geocode")]
+    [HttpPost(ApiRoutes.Location.ReverseGeocode)]
     public async Task<ActionResult<ApiResponse<ReverseGeocodeResult?>>> ReverseGeocode(
         [FromQuery] double latitude,
         [FromQuery] double longitude,
         CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Reverse geocoding coordinates: {Latitude}, {Longitude}", latitude, longitude);
+        LogActionStart(nameof(ReverseGeocode), new { Latitude = latitude, Longitude = longitude });
         
         try
         {
             var result = await _azureMapsService.ReverseGeocodeAsync(latitude, longitude, cancellationToken);
+            LogActionComplete(nameof(ReverseGeocode), true);
             return Ok(ApiResponse<ReverseGeocodeResult?>.SuccessResult(result));
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error reverse geocoding coordinates: {Latitude}, {Longitude}", latitude, longitude);
-            return StatusCode(500, ApiResponse<ReverseGeocodeResult?>.ErrorResult($"Error reverse geocoding: {ex.Message}"));
+            LogError(ex, nameof(ReverseGeocode), new { Latitude = latitude, Longitude = longitude });
+            return InternalServerError<ReverseGeocodeResult?>();
         }
     }
 
     /// <summary>
     /// Get timezone information for coordinates
     /// </summary>
-    [HttpGet("timezone")]
+    [HttpGet(ApiRoutes.Location.Timezone)]
     public async Task<ActionResult<ApiResponse<TimeZoneInfo?>>> GetTimeZone(
         [FromQuery] double latitude,
         [FromQuery] double longitude,
         CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Getting timezone for coordinates: {Latitude}, {Longitude}", latitude, longitude);
+        LogActionStart(nameof(GetTimeZone), new { Latitude = latitude, Longitude = longitude });
         
         try
         {
             var result = await _azureMapsService.GetTimeZoneAsync(latitude, longitude, cancellationToken);
+            LogActionComplete(nameof(GetTimeZone), true);
             return Ok(ApiResponse<TimeZoneInfo?>.SuccessResult(result));
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting timezone for coordinates: {Latitude}, {Longitude}", latitude, longitude);
-            return StatusCode(500, ApiResponse<TimeZoneInfo?>.ErrorResult($"Error getting timezone: {ex.Message}"));
+            LogError(ex, nameof(GetTimeZone), new { Latitude = latitude, Longitude = longitude });
+            return InternalServerError<TimeZoneInfo?>();
         }
     }
 
     /// <summary>
     /// Validate and geocode a complete address from components
     /// </summary>
-    [HttpPost("validate-address")]
+    [HttpPost(ApiRoutes.Location.ValidateAddress)]
     public async Task<ActionResult<ApiResponse<GeocodeResult?>>> ValidateAddress(
         [FromBody] ValidateAddressRequest request,
         CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Validating address: {StreetAddress}, {Locality}, {Region}, {PostalCode}", 
-            request.StreetAddress, request.Locality, request.Region, request.PostalCode);
+        LogActionStart(nameof(ValidateAddress), request);
+        
+        // Validate model state
+        var modelValidation = ValidateModelState();
+        if (modelValidation != null) return modelValidation;
         
         try
         {
@@ -147,6 +160,7 @@ public class LocationController : ControllerBase
             
             if (string.IsNullOrWhiteSpace(fullAddress))
             {
+                LogActionComplete(nameof(ValidateAddress), false, "No address components provided");
                 return BadRequest(ApiResponse<GeocodeResult?>.ErrorResult("At least one address component is required"));
             }
 
@@ -154,16 +168,17 @@ public class LocationController : ControllerBase
             
             if (result == null)
             {
+                LogActionComplete(nameof(ValidateAddress), false, "Address could not be geocoded");
                 return Ok(ApiResponse<GeocodeResult?>.ErrorResult("Address could not be validated or geocoded"));
             }
 
+            LogActionComplete(nameof(ValidateAddress), true);
             return Ok(ApiResponse<GeocodeResult?>.SuccessResult(result));
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error validating address: {StreetAddress}, {Locality}, {Region}, {PostalCode}", 
-                request.StreetAddress, request.Locality, request.Region, request.PostalCode);
-            return StatusCode(500, ApiResponse<GeocodeResult?>.ErrorResult($"Error validating address: {ex.Message}"));
+            LogError(ex, nameof(ValidateAddress), request);
+            return InternalServerError<GeocodeResult?>();
         }
     }
 }
