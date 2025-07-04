@@ -19,12 +19,20 @@ public static class UserContextHelper
     }
 
     /// <summary>
-    /// Gets the user's email from claims
+    /// Gets the user's email from claims using comprehensive claim lookup
     /// </summary>
-    public static string? GetUserEmail(ClaimsPrincipal user)
+    public static string? GetUserEmail(ClaimsPrincipal user, string? audience = null)
     {
-        return user.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ??
-               user.FindFirst(Application.Common.Constants.ClaimTypes.Email)?.Value;
+        // Construct audience-namespaced email claim if audience is provided
+        var audienceEmailClaim = !string.IsNullOrEmpty(audience) ? $"{audience}/email" : null;
+        
+        // Try common email claim types, including the audience-namespaced claim
+        return user.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value 
+               ?? user.FindFirst("email")?.Value
+               ?? user.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress")?.Value
+               ?? user.FindFirst("https://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress")?.Value
+               ?? (audienceEmailClaim != null ? user.FindFirst(audienceEmailClaim)?.Value : null)
+               ?? user.Claims.FirstOrDefault(c => c.Type.EndsWith("/email"))?.Value;
     }
 
     /// <summary>

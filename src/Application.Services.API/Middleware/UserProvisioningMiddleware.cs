@@ -1,4 +1,5 @@
 using Application.Common.Interfaces.Services;
+using Application.Common.Utilities;
 using System.Security.Claims;
 
 namespace Application.Services.API.Middleware;
@@ -18,7 +19,7 @@ public class UserProvisioningMiddleware
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public async Task InvokeAsync(HttpContext context, IPermissionService permissionService)
+    public async Task InvokeAsync(HttpContext context, IPermissionService permissionService, IConfiguration configuration)
     {
         // Only process authenticated requests
         if (context.User.Identity?.IsAuthenticated == true)
@@ -28,10 +29,9 @@ public class UserProvisioningMiddleware
                 var userSub = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 if (!string.IsNullOrEmpty(userSub))
                 {
-                    // Try to get email from multiple claim sources
-                    var userEmail = context.User.FindFirst(ClaimTypes.Email)?.Value 
-                                   ?? context.User.FindFirst("email")?.Value 
-                                   ?? context.User.FindFirst("https://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress")?.Value;
+                    // Use centralized email claim extraction with audience support
+                    var audience = configuration["Auth0:Audience"];
+                    var userEmail = UserContextHelper.GetUserEmail(context.User, audience);
 
                     if (!string.IsNullOrEmpty(userEmail))
                     {

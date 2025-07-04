@@ -156,16 +156,9 @@ public class VenuePermissionController : BaseApiController
             }
             else
             {
-                // Get audience from configuration and construct the namespaced email claim
+                // Get audience from configuration for comprehensive email claim lookup
                 var audience = _configuration["Auth0:Audience"];
-                var audienceEmailClaim = !string.IsNullOrEmpty(audience) ? $"{audience}/email" : null;
-                
-                // Try common email claim types, including the audience-namespaced claim
-                userEmail = User.FindFirst(SystemClaimTypes.Email)?.Value 
-                         ?? User.FindFirst("email")?.Value
-                         ?? User.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress")?.Value
-                         ?? (audienceEmailClaim != null ? User.FindFirst(audienceEmailClaim)?.Value : null)
-                         ?? User.Claims.FirstOrDefault(c => c.Type.EndsWith("/email"))?.Value;
+                userEmail = UserContextHelper.GetUserEmail(User, audience);
             }
             
             if (string.IsNullOrEmpty(userEmail))
@@ -414,10 +407,9 @@ public class VenuePermissionController : BaseApiController
 
         try
         {
-            // Try to get email from claims first, then database
-            var userEmail = User.FindFirst(SystemClaimTypes.Email)?.Value 
-                           ?? User.FindFirst("email")?.Value 
-                           ?? User.FindFirst("https://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress")?.Value;
+            // Use centralized email claim extraction with audience support
+            var audience = _configuration["Auth0:Audience"];
+            var userEmail = UserContextHelper.GetUserEmail(User, audience);
             
             if (string.IsNullOrEmpty(userEmail))
             {
@@ -470,10 +462,9 @@ public class VenuePermissionController : BaseApiController
 
         try
         {
-            // Try to get email from claims first, then database
-            var userEmail = User.FindFirst(SystemClaimTypes.Email)?.Value 
-                           ?? User.FindFirst("email")?.Value 
-                           ?? User.FindFirst("https://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress")?.Value;
+            // Use centralized email claim extraction with audience support
+            var audience = _configuration["Auth0:Audience"];
+            var userEmail = UserContextHelper.GetUserEmail(User, audience);
             
             if (string.IsNullOrEmpty(userEmail))
             {
