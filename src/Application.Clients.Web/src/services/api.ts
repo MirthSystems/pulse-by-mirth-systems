@@ -221,7 +221,7 @@ class ApiService {
   }
 
   async getVenuePermissions(venueId: number): Promise<ApiResponse<UserVenuePermission[]>> {
-    return this.request<UserVenuePermission[]>(`/api/permissions/venues/${venueId}`)
+    return this.request<UserVenuePermission[]>(`/api/venues/${venueId}/permissions`)
   }
 
   async updateUserPermission(
@@ -257,7 +257,7 @@ class ApiService {
   }
 
   async getVenueInvitations(venueId: number): Promise<ApiResponse<VenueInvitationResponse[]>> {
-    return this.request<VenueInvitationResponse[]>(`/api/invitations/venues/${venueId}`)
+    return this.request<VenueInvitationResponse[]>(`/api/venues/${venueId}/invitations`)
   }
 
   async getMyInvitations(email?: string): Promise<ApiResponse<VenueInvitationResponse[]>> {

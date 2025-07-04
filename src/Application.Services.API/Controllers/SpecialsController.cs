@@ -81,7 +81,7 @@ public class SpecialsController : BaseApiController
     /// <summary>
     /// Create a new special
     /// </summary>
-    [HttpPost]
+    [HttpPost(ApiRoutes.Specials.Base)]
     public async Task<ActionResult<ApiResponse<Special>>> CreateSpecial([FromBody] CreateSpecial createSpecial, CancellationToken cancellationToken = default)
     {
         LogActionStart(nameof(CreateSpecial), createSpecial);

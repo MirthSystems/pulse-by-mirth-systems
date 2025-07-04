@@ -20,16 +20,19 @@ public class VenuePermissionController : BaseApiController
 {
     private readonly IPermissionService _permissionService;
     private readonly IVenuePermissionTypeService _permissionTypeService;
+    private readonly IConfiguration _configuration;
 
     public VenuePermissionController(
         IPermissionService permissionService,
         IVenuePermissionTypeService permissionTypeService,
+        IConfiguration configuration,
         IAuthorizationService authorizationService,
         ILogger<VenuePermissionController> logger)
         : base(logger, authorizationService)
     {
         _permissionService = permissionService ?? throw new ArgumentNullException(nameof(permissionService));
         _permissionTypeService = permissionTypeService ?? throw new ArgumentNullException(nameof(permissionTypeService));
+        _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
     }
 
     /// <summary>
@@ -112,8 +115,8 @@ public class VenuePermissionController : BaseApiController
                 VenueName = invitation.Venue?.Name ?? "",
                 InvitedByUserId = invitation.InvitedByUserId,
                 InvitedByUserEmail = invitation.InvitedByUser?.Email ?? "",
-                InvitedAt = DateTime.UtcNow, // Placeholder since entity structure may vary
-                ExpiresAt = DateTime.UtcNow.AddDays(7), // Default 7 days
+                InvitedAt = invitation.InvitedAt.ToDateTimeUtc(),
+                ExpiresAt = invitation.ExpiresAt.ToDateTimeUtc(),
                 IsActive = invitation.IsActive,
                 Notes = invitation.Notes
             };
@@ -131,19 +134,44 @@ public class VenuePermissionController : BaseApiController
     /// <summary>
     /// Get current user's pending invitations
     /// </summary>
+    /// <param name="email">Optional email parameter to override JWT claim lookup</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>User's pending invitations</returns>
     [HttpGet(ApiRoutes.Invitations.GetMine)]
     public async Task<ActionResult<ApiResponse<IEnumerable<VenueInvitationResponse>>>> GetMyInvitations(
+        [FromQuery] string? email = null,
         CancellationToken cancellationToken = default)
     {
         LogActionStart(nameof(GetMyInvitations));
         
         try
         {
-            var userEmail = User.FindFirst(SystemClaimTypes.Email)?.Value ?? User.FindFirst("email")?.Value;
+            string? userEmail = null;
+            
+            // If email is provided as query parameter, use it (for frontend compatibility)
+            if (!string.IsNullOrWhiteSpace(email))
+            {
+                userEmail = email;
+                _logger.LogInformation("Using email from query parameter: {Email}", email);
+            }
+            else
+            {
+                // Get audience from configuration and construct the namespaced email claim
+                var audience = _configuration["Auth0:Audience"];
+                var audienceEmailClaim = !string.IsNullOrEmpty(audience) ? $"{audience}/email" : null;
+                
+                // Try common email claim types, including the audience-namespaced claim
+                userEmail = User.FindFirst(SystemClaimTypes.Email)?.Value 
+                         ?? User.FindFirst("email")?.Value
+                         ?? User.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress")?.Value
+                         ?? (audienceEmailClaim != null ? User.FindFirst(audienceEmailClaim)?.Value : null)
+                         ?? User.Claims.FirstOrDefault(c => c.Type.EndsWith("/email"))?.Value;
+            }
+            
             if (string.IsNullOrEmpty(userEmail))
             {
+                _logger.LogWarning("User email not found in query parameter or claims. Available claims: {Claims}", 
+                    string.Join(", ", User.Claims.Select(c => $"{c.Type}={c.Value}")));
                 return Unauthorized(ApiResponse<IEnumerable<VenueInvitationResponse>>.ErrorResult("User email not found"));
             }
 
@@ -156,8 +184,8 @@ public class VenuePermissionController : BaseApiController
                 VenueName = i.Venue?.Name ?? "",
                 InvitedByUserId = i.InvitedByUserId,
                 InvitedByUserEmail = i.InvitedByUser?.Email ?? "",
-                InvitedAt = DateTime.UtcNow, // Placeholder
-                ExpiresAt = DateTime.UtcNow.AddDays(7), // Placeholder
+                InvitedAt = i.InvitedAt.ToDateTimeUtc(),
+                ExpiresAt = i.ExpiresAt.ToDateTimeUtc(),
                 IsActive = i.IsActive,
                 Notes = i.Notes
             });

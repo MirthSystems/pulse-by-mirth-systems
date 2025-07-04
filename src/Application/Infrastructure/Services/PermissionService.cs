@@ -131,7 +131,7 @@ public class PermissionService : IPermissionService
                 UserId = p.UserId,
                 VenueId = p.VenueId,
                 VenueName = p.Venue.Name,
-                Permission = p.Name,
+                Name = p.Name,
                 GrantedByUserId = p.GrantedByUserId,
                 GrantedByName = p.GrantedByUser.Email,
                 GrantedAt = p.GrantedAt.ToDateTimeUtc(),
