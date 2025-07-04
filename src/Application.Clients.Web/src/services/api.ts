@@ -157,92 +157,92 @@ class ApiService {
     )
   }
 
-  // Backoffice API methods - All management operations
+  // Management API methods - All management operations
   
   // Get venues user has access to manage
   async getMyVenues(): Promise<ApiResponse<VenueSummary[]>> {
-    return this.request<VenueSummary[]>('/api/backoffice/venues')
+    return this.request<VenueSummary[]>('/api/venues/my')
   }
 
   // Get specials user has access to manage  
   async getMySpecials(): Promise<ApiResponse<SpecialSummary[]>> {
-    return this.request<SpecialSummary[]>('/api/backoffice/specials')
+    return this.request<SpecialSummary[]>('/api/specials/my')
   }
 
-  // Venue Management - moved to backoffice
+  // Venue Management
   async createVenue(venue: CreateVenueRequest): Promise<ApiResponse<Venue>> {
-    return this.request<Venue>('/api/backoffice/venues', {
+    return this.request<Venue>('/api/venues', {
       method: 'POST',
       body: JSON.stringify(venue),
     })
   }
 
   async updateVenue(id: number, venue: UpdateVenueRequest): Promise<ApiResponse<Venue>> {
-    return this.request<Venue>(`/api/backoffice/venues/${id}`, {
+    return this.request<Venue>(`/api/venues/${id}`, {
       method: 'PUT',
       body: JSON.stringify(venue),
     })
   }
 
   async deleteVenue(id: number): Promise<ApiResponse<boolean>> {
-    return this.request<boolean>(`/api/backoffice/venues/${id}`, {
+    return this.request<boolean>(`/api/venues/${id}`, {
       method: 'DELETE',
     })
   }
 
-  // Special Management - moved to backoffice
+  // Special Management
   async createSpecial(venueId: number, special: CreateSpecialRequest): Promise<ApiResponse<Special>> {
-    return this.request<Special>(`/api/backoffice/venues/${venueId}/specials`, {
+    return this.request<Special>('/api/specials', {
       method: 'POST',
-      body: JSON.stringify(special),
+      body: JSON.stringify({ ...special, venueId }),
     })
   }
 
   async updateSpecial(id: number, special: UpdateSpecialRequest): Promise<ApiResponse<Special>> {
-    return this.request<Special>(`/api/backoffice/specials/${id}`, {
+    return this.request<Special>(`/api/specials/${id}`, {
       method: 'PUT',
       body: JSON.stringify(special),
     })
   }
 
   async deleteSpecial(id: number): Promise<ApiResponse<boolean>> {
-    return this.request<boolean>(`/api/backoffice/specials/${id}`, {
+    return this.request<boolean>(`/api/specials/${id}`, {
       method: 'DELETE',
     })
   }
 
   // Permission Management
   async getMyPermissions(): Promise<ApiResponse<UserVenuePermission[]>> {
-    return this.request<UserVenuePermission[]>('/api/backoffice/my-permissions')
+    return this.request<UserVenuePermission[]>('/api/permissions/my')
   }
 
   async getUserPermissions(userId: number): Promise<ApiResponse<UserVenuePermission[]>> {
-    return this.request<UserVenuePermission[]>(`/api/backoffice/users/${userId}/permissions`)
+    return this.request<UserVenuePermission[]>(`/api/permissions/users/${userId}`)
   }
 
   async getVenuePermissions(venueId: number): Promise<ApiResponse<UserVenuePermission[]>> {
-    return this.request<UserVenuePermission[]>(`/api/backoffice/venues/${venueId}/permissions`)
+    return this.request<UserVenuePermission[]>(`/api/permissions/venues/${venueId}`)
   }
 
   async updateUserPermission(
     permissionId: number, 
     permission: UpdatePermissionRequest
   ): Promise<ApiResponse<UserVenuePermission>> {
-    return this.request<UserVenuePermission>(`/api/backoffice/permissions/${permissionId}`, {
+    return this.request<UserVenuePermission>(`/api/permissions/${permissionId}`, {
       method: 'PUT',
       body: JSON.stringify(permission),
     })
   }
 
   async revokeUserPermission(permissionId: number): Promise<ApiResponse<boolean>> {
-    return this.request<boolean>(`/api/backoffice/permissions/${permissionId}`, {
+    return this.request<boolean>(`/api/permissions/${permissionId}`, {
       method: 'DELETE',
     })
   }
 
   // Invitation Management
   async sendInvitation(invitation: CreateInvitationRequest): Promise<ApiResponse<VenueInvitationResponse>> {
-    return this.request<VenueInvitationResponse>('/api/backoffice/invitations', {
+    return this.request<VenueInvitationResponse>('/api/invitations', {
       method: 'POST',
       body: JSON.stringify(invitation),
     })
@@ -250,35 +250,35 @@ class ApiService {
 
   // User management
   async syncUser(userInfo: any): Promise<ApiResponse<any>> {
-    return this.request<any>('/api/backoffice/sync-user', {
+    return this.request<any>('/api/users/sync', {
       method: 'POST',
       body: JSON.stringify(userInfo),
     })
   }
 
   async getVenueInvitations(venueId: number): Promise<ApiResponse<VenueInvitationResponse[]>> {
-    return this.request<VenueInvitationResponse[]>(`/api/backoffice/venues/${venueId}/invitations`)
+    return this.request<VenueInvitationResponse[]>(`/api/invitations/venues/${venueId}`)
   }
 
   async getMyInvitations(email?: string): Promise<ApiResponse<VenueInvitationResponse[]>> {
     const params = email ? `?email=${encodeURIComponent(email)}` : ''
-    return this.request<VenueInvitationResponse[]>(`/api/backoffice/my-invitations${params}`)
+    return this.request<VenueInvitationResponse[]>(`/api/invitations/my${params}`)
   }
 
   async acceptInvitation(invitationId: number): Promise<ApiResponse<boolean>> {
-    return this.request<boolean>(`/api/backoffice/invitations/${invitationId}/accept`, {
+    return this.request<boolean>(`/api/invitations/${invitationId}/accept`, {
       method: 'POST',
     })
   }
 
   async declineInvitation(invitationId: number): Promise<ApiResponse<boolean>> {
-    return this.request<boolean>(`/api/backoffice/invitations/${invitationId}/decline`, {
+    return this.request<boolean>(`/api/invitations/${invitationId}/decline`, {
       method: 'POST',
     })
   }
 
   async cancelInvitation(invitationId: number): Promise<ApiResponse<boolean>> {
-    return this.request<boolean>(`/api/backoffice/invitations/${invitationId}`, {
+    return this.request<boolean>(`/api/invitations/${invitationId}`, {
       method: 'DELETE',
     })
   }
@@ -356,7 +356,7 @@ class ApiService {
   }
 
   async getPermissionTypes(): Promise<ApiResponse<PermissionTypeResponse[]>> {
-    return this.request<PermissionTypeResponse[]>('/api/backoffice/permission-types')
+    return this.request<PermissionTypeResponse[]>('/api/permissions/types')
   }
 }
 
