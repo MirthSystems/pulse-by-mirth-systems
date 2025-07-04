@@ -7,7 +7,7 @@ namespace Application.Common.Utilities;
 /// Utility for validating and normalizing search parameters
 /// Ensures consistent validation across all search endpoints
 /// </summary>
-public static class SearchParameterHelper
+public static class SearchParameterUtils
 {
     /// <summary>
     /// Validates venue search parameters

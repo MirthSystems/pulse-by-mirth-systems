@@ -8,7 +8,7 @@ namespace Application.Common.Utilities;
 /// Clean permission validation helper without MVC dependencies
 /// Contains only business logic for permission checking
 /// </summary>
-public static class CleanPermissionHelper
+public static class PermissionUtils
 {
     /// <summary>
     /// Checks if user has venue access (system admin, content manager, or venue-specific permission)
@@ -39,8 +39,8 @@ public static class CleanPermissionHelper
         string userSub,
         CancellationToken cancellationToken = default)
     {
-        var isSystemAdmin = UserContextHelper.IsSystemAdmin(user);
-        var isContentManager = UserContextHelper.IsContentManager(user);
+        var isSystemAdmin = UserContextUtils.IsSystemAdmin(user);
+        var isContentManager = UserContextUtils.IsContentManager(user);
         
         return await permissionService.GetUserAccessibleVenueIdsAsync(
             userSub, isSystemAdmin, isContentManager, cancellationToken);
@@ -51,7 +51,7 @@ public static class CleanPermissionHelper
     /// </summary>
     public static bool HasSystemPermissions(ClaimsPrincipal user)
     {
-        return UserContextHelper.IsSystemAdmin(user) || UserContextHelper.IsContentManager(user);
+        return UserContextUtils.IsSystemAdmin(user) || UserContextUtils.IsContentManager(user);
     }
 
     /// <summary>

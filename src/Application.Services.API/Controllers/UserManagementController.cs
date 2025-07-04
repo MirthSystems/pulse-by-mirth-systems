@@ -101,7 +101,7 @@ public class UserManagementController : BaseApiController
         
         try
         {
-            var userSub = UserContextHelper.GetUserSub(User);
+            var userSub = UserContextUtils.GetUserSub(User);
             if (string.IsNullOrEmpty(userSub))
             {
                 return Unauthorized(ApiResponse<UserInfoResponse>.ErrorResult("User not authenticated"));

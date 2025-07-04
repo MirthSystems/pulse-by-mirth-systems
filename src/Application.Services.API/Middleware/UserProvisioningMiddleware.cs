@@ -31,7 +31,7 @@ public class UserProvisioningMiddleware
                 {
                     // Use centralized email claim extraction with audience support
                     var audience = configuration["Auth0:Audience"];
-                    var userEmail = UserContextHelper.GetUserEmail(context.User, audience);
+                    var userEmail = UserContextUtils.GetUserEmail(context.User, audience);
 
                     if (!string.IsNullOrEmpty(userEmail))
                     {

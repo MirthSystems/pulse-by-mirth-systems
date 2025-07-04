@@ -18,7 +18,7 @@ public static class ApiPermissionHelper
         string userSub,
         CancellationToken cancellationToken = default)
     {
-        return await CleanPermissionHelper.GetAccessibleVenueIdsAsync(
+        return await PermissionUtils.GetAccessibleVenueIdsAsync(
             permissionService, user, userSub, cancellationToken);
     }
 
@@ -32,7 +32,7 @@ public static class ApiPermissionHelper
         long venueId,
         CancellationToken cancellationToken = default)
     {
-        return await CleanPermissionHelper.HasVenueAccessAsync(
+        return await PermissionUtils.HasVenueAccessAsync(
             permissionService, user, userSub, venueId, cancellationToken);
     }
 
@@ -41,7 +41,7 @@ public static class ApiPermissionHelper
     /// </summary>
     public static bool HasSystemPermissions(ClaimsPrincipal user)
     {
-        return CleanPermissionHelper.HasSystemPermissions(user);
+        return PermissionUtils.HasSystemPermissions(user);
     }
 
     /// <summary>
@@ -49,6 +49,6 @@ public static class ApiPermissionHelper
     /// </summary>
     public static string? GetUserSub(ClaimsPrincipal user)
     {
-        return UserContextHelper.GetUserSub(user);
+        return UserContextUtils.GetUserSub(user);
     }
 }

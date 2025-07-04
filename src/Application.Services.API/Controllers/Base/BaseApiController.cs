@@ -113,7 +113,7 @@ public abstract class BaseApiController : ControllerBase
     /// </summary>
     protected void LogActionStart(string actionName, object? parameters = null)
     {
-        var userSub = UserContextHelper.GetUserSub(User);
+        var userSub = UserContextUtils.GetUserSub(User);
         var paramInfo = parameters != null ? $" with parameters: {System.Text.Json.JsonSerializer.Serialize(parameters)}" : "";
         
         _logger.LogInformation("Starting {ActionName} for user {UserSub}{ParameterInfo}", 
@@ -125,7 +125,7 @@ public abstract class BaseApiController : ControllerBase
     /// </summary>
     protected void LogActionComplete(string actionName, bool success, object? result = null)
     {
-        var userSub = UserContextHelper.GetUserSub(User);
+        var userSub = UserContextUtils.GetUserSub(User);
         var status = success ? "completed successfully" : "failed";
         
         _logger.LogInformation("Action {ActionName} for user {UserSub} {Status}", 
@@ -137,7 +137,7 @@ public abstract class BaseApiController : ControllerBase
     /// </summary>
     protected void LogError(Exception ex, string actionName, object? context = null)
     {
-        var userSub = UserContextHelper.GetUserSub(User);
+        var userSub = UserContextUtils.GetUserSub(User);
         var contextInfo = context != null ? System.Text.Json.JsonSerializer.Serialize(context) : "No additional context";
         
         _logger.LogError(ex, "Error in {ActionName} for user {UserSub}. Context: {Context}", 

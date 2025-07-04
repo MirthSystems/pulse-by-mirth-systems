@@ -47,7 +47,7 @@ public class VenuePermissionController : BaseApiController
         
         try
         {
-            var userSub = UserContextHelper.GetUserSub(User);
+            var userSub = UserContextUtils.GetUserSub(User);
             if (string.IsNullOrEmpty(userSub))
             {
                 return Unauthorized(ApiResponse<IEnumerable<VenuePermissionSummary>>.ErrorResult("User not authenticated"));
@@ -80,7 +80,7 @@ public class VenuePermissionController : BaseApiController
         
         try
         {
-            var userSub = UserContextHelper.GetUserSub(User);
+            var userSub = UserContextUtils.GetUserSub(User);
             if (string.IsNullOrEmpty(userSub))
             {
                 return Unauthorized(ApiResponse<VenueInvitationResponse>.ErrorResult("User not authenticated"));
@@ -91,7 +91,7 @@ public class VenuePermissionController : BaseApiController
             if (validationResult != null) return validationResult;
 
             // Check if user has system permissions or venue access
-            if (!CleanPermissionHelper.HasSystemPermissions(User))
+            if (!PermissionUtils.HasSystemPermissions(User))
             {
                 var hasVenueAccess = await _permissionService.HasVenuePermissionAsync(userSub, request.VenueId, cancellationToken);
                 if (!hasVenueAccess)
@@ -158,7 +158,7 @@ public class VenuePermissionController : BaseApiController
             {
                 // Get audience from configuration for comprehensive email claim lookup
                 var audience = _configuration["Auth0:Audience"];
-                userEmail = UserContextHelper.GetUserEmail(User, audience);
+                userEmail = UserContextUtils.GetUserEmail(User, audience);
             }
             
             if (string.IsNullOrEmpty(userEmail))
@@ -399,7 +399,7 @@ public class VenuePermissionController : BaseApiController
     {
         LogActionStart(nameof(AcceptInvitation), new { invitationId });
         
-        var userSub = UserContextHelper.GetUserSub(User);
+        var userSub = UserContextUtils.GetUserSub(User);
         if (string.IsNullOrEmpty(userSub))
         {
             return Unauthorized();
@@ -409,7 +409,7 @@ public class VenuePermissionController : BaseApiController
         {
             // Use centralized email claim extraction with audience support
             var audience = _configuration["Auth0:Audience"];
-            var userEmail = UserContextHelper.GetUserEmail(User, audience);
+            var userEmail = UserContextUtils.GetUserEmail(User, audience);
             
             if (string.IsNullOrEmpty(userEmail))
             {
@@ -454,7 +454,7 @@ public class VenuePermissionController : BaseApiController
     {
         LogActionStart(nameof(DeclineInvitation), new { invitationId });
         
-        var userSub = UserContextHelper.GetUserSub(User);
+        var userSub = UserContextUtils.GetUserSub(User);
         if (string.IsNullOrEmpty(userSub))
         {
             return Unauthorized();
@@ -464,7 +464,7 @@ public class VenuePermissionController : BaseApiController
         {
             // Use centralized email claim extraction with audience support
             var audience = _configuration["Auth0:Audience"];
-            var userEmail = UserContextHelper.GetUserEmail(User, audience);
+            var userEmail = UserContextUtils.GetUserEmail(User, audience);
             
             if (string.IsNullOrEmpty(userEmail))
             {

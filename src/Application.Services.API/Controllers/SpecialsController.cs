@@ -407,7 +407,7 @@ public class SpecialsController : BaseApiController
         try
         {
             // Get accessible venue IDs for the user
-            var venueIds = await CleanPermissionHelper.GetAccessibleVenueIdsAsync(
+            var venueIds = await PermissionUtils.GetAccessibleVenueIdsAsync(
                 _permissionService, User, userSub!, cancellationToken);
 
             // Get specials for accessible venues
@@ -459,7 +459,7 @@ public class SpecialsController : BaseApiController
             createSpecial.VenueId = venueId;
 
             // Check venue access permissions for the special's venue
-            var hasAccess = await CleanPermissionHelper.HasVenueAccessAsync(
+            var hasAccess = await PermissionUtils.HasVenueAccessAsync(
                 _permissionService, User, userSub!, createSpecial.VenueId, cancellationToken);
             
             if (!hasAccess)
@@ -519,7 +519,7 @@ public class SpecialsController : BaseApiController
             }
 
             // Check venue access permissions
-            var hasAccess = await CleanPermissionHelper.HasVenueAccessAsync(
+            var hasAccess = await PermissionUtils.HasVenueAccessAsync(
                 _permissionService, User, userSub!, specialResult.Data.VenueId, cancellationToken);
             
             if (!hasAccess)
@@ -574,7 +574,7 @@ public class SpecialsController : BaseApiController
             }
 
             // Check venue access permissions
-            var hasAccess = await CleanPermissionHelper.HasVenueAccessAsync(
+            var hasAccess = await PermissionUtils.HasVenueAccessAsync(
                 _permissionService, User, userSub!, specialResult.Data.VenueId, cancellationToken);
             
             if (!hasAccess)

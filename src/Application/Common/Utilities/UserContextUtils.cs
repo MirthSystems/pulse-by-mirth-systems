@@ -7,7 +7,7 @@ namespace Application.Common.Utilities;
 /// <summary>
 /// Utility class for extracting user information from HTTP context
 /// </summary>
-public static class UserContextHelper
+public static class UserContextUtils
 {
     /// <summary>
     /// Gets the user's subject identifier from claims

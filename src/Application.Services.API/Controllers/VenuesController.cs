@@ -385,7 +385,7 @@ public class VenuesController : BaseApiController
         try
         {
             // Get accessible venue IDs for the user
-            var venueIds = await CleanPermissionHelper.GetAccessibleVenueIdsAsync(
+            var venueIds = await PermissionUtils.GetAccessibleVenueIdsAsync(
                 _permissionService, User, userSub!, cancellationToken);
 
             // Get venue details for accessible venues
@@ -448,7 +448,7 @@ public class VenuesController : BaseApiController
         try
         {
             // Validate venue creation permissions (admin/content manager only)
-            if (!CleanPermissionHelper.CanCreateVenues(User))
+            if (!PermissionUtils.CanCreateVenues(User))
             {
                 LogError(new UnauthorizedAccessException("User attempted to create venue without proper permissions"), 
                     nameof(CreateVenue), new { UserSub = userSub });
@@ -498,7 +498,7 @@ public class VenuesController : BaseApiController
         try
         {
             // Check venue access permissions
-            var hasAccess = await CleanPermissionHelper.HasVenueAccessAsync(
+            var hasAccess = await PermissionUtils.HasVenueAccessAsync(
                 _permissionService, User, userSub!, id, cancellationToken);
             
             if (!hasAccess)
@@ -546,7 +546,7 @@ public class VenuesController : BaseApiController
         try
         {
             // Check venue access permissions
-            var hasAccess = await CleanPermissionHelper.HasVenueAccessAsync(
+            var hasAccess = await PermissionUtils.HasVenueAccessAsync(
                 _permissionService, User, userSub!, id, cancellationToken);
             
             if (!hasAccess)

@@ -58,7 +58,7 @@ public class Program
                         {
                             // Auth0 might send email in different claim types - use comprehensive lookup
                             var audience = builder.Configuration["Auth0:Audience"];
-                            var emailValue = UserContextHelper.GetUserEmail(context.Principal!, audience);
+                            var emailValue = UserContextUtils.GetUserEmail(context.Principal!, audience);
                             
                             if (!string.IsNullOrEmpty(emailValue) && !claimsIdentity.HasClaim(System.Security.Claims.ClaimTypes.Email, emailValue))
                             {
