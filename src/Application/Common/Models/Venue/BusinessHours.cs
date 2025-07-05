@@ -8,8 +8,8 @@ public class BusinessHours
     public long Id { get; set; }
     public long VenueId { get; set; }
     public byte DayOfWeekId { get; set; }
-    public string DayOfWeekName { get; set; } = string.Empty;
-    public string DayOfWeekShortName { get; set; } = string.Empty;
+    public required string DayOfWeekName { get; set; }
+    public required string DayOfWeekShortName { get; set; }
     public string? OpenTime { get; set; }  // Format: "HH:mm"
     public string? CloseTime { get; set; } // Format: "HH:mm"
     public bool IsClosed { get; set; }

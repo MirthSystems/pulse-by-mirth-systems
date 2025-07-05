@@ -8,6 +8,7 @@ using Application.Domain.Helpers;
 using NetTopologySuite.Geometries;
 using NodaTime;
 using NodaTime.Text;
+using NodaTime.TimeZones;
 
 namespace Application.Infrastructure.Services;
 
@@ -334,15 +335,6 @@ public class SpecialService : ISpecialService
     {
         try
         {
-            // Parse date and time, use defaults if not provided
-            var searchDate = !string.IsNullOrEmpty(searchRequest.Date) 
-                ? LocalDatePattern.Iso.Parse(searchRequest.Date).GetValueOrThrow()
-                : _clock.GetCurrentInstant().InUtc().Date;
-            
-            var searchTime = !string.IsNullOrEmpty(searchRequest.Time) 
-                ? LocalTimePattern.CreateWithInvariantCulture("HH:mm").Parse(searchRequest.Time).GetValueOrThrow()
-                : _clock.GetCurrentInstant().InUtc().TimeOfDay;
-
             // Resolve location coordinates if address is provided
             double? resolvedLat = searchRequest.Latitude;
             double? resolvedLng = searchRequest.Longitude;
@@ -356,6 +348,29 @@ public class SpecialService : ISpecialService
                     resolvedLng = geocodeResult.Longitude;
                 }
             }
+
+            // Get timezone for the search location to ensure accurate time-based special filtering
+            DateTimeZone searchTimeZone = DateTimeZone.Utc; // Default to UTC
+            if (resolvedLat.HasValue && resolvedLng.HasValue)
+            {
+                var timeZoneInfo = await _azureMapsService.GetTimeZoneAsync(resolvedLat.Value, resolvedLng.Value, cancellationToken);
+                if (timeZoneInfo != null)
+                {
+                    // Convert .NET TimeZoneInfo to NodaTime DateTimeZone
+                    searchTimeZone = DateTimeZoneProviders.Bcl.GetZoneOrNull(timeZoneInfo.Id) ?? DateTimeZone.Utc;
+                }
+            }
+
+            // Parse date and time using the search location's timezone
+            var currentInstantInSearchZone = _clock.GetCurrentInstant().InZone(searchTimeZone);
+            
+            var searchDate = !string.IsNullOrEmpty(searchRequest.Date) 
+                ? LocalDatePattern.Iso.Parse(searchRequest.Date).GetValueOrThrow()
+                : currentInstantInSearchZone.Date;
+            
+            var searchTime = !string.IsNullOrEmpty(searchRequest.Time) 
+                ? LocalTimePattern.CreateWithInvariantCulture("HH:mm").Parse(searchRequest.Time).GetValueOrThrow()
+                : currentInstantInSearchZone.TimeOfDay;
 
             // Get venues with active specials in the area
             var venuesWithSpecials = await GetVenuesWithSpecialsInArea(

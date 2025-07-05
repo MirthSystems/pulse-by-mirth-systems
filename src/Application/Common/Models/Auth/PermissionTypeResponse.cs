@@ -5,7 +5,7 @@ namespace Application.Common.Models.Auth;
 /// </summary>
 public class PermissionTypeResponse
 {
-    public string Value { get; set; } = null!;
-    public string DisplayName { get; set; } = null!;
+    public required string Value { get; set; }
+    public required string DisplayName { get; set; }
     public string[] Hierarchy { get; set; } = Array.Empty<string>();
 }

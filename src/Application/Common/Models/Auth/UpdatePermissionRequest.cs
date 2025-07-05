@@ -9,7 +9,7 @@ public class UpdatePermissionRequest
 {
     [Required]
     [MaxLength(100)]
-    public string Permission { get; set; } = string.Empty;
+    public required string Permission { get; set; }
 
     [MaxLength(500)]
     public string? Notes { get; set; }

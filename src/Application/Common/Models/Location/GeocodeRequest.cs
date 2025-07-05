@@ -13,7 +13,7 @@ public class GeocodeRequest
     [Required]
     [MinLength(3, ErrorMessage = "Address must be at least 3 characters long")]
     [MaxLength(500, ErrorMessage = "Address cannot exceed 500 characters")]
-    public string Address { get; set; } = string.Empty;
+    public required string Address { get; set; }
     
     /// <summary>
     /// Optional city to improve geocoding accuracy

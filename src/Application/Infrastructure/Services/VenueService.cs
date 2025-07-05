@@ -101,6 +101,23 @@ public class VenueService : IVenueService
             }
 
             var venue = MapToVenueEntity(createVenue);
+            
+            // Get timezone for the venue location if coordinates are available
+            if (createVenue.Latitude.HasValue && createVenue.Longitude.HasValue)
+            {
+                var timeZone = await _azureMapsService.GetTimeZoneAsync(
+                    createVenue.Latitude.Value, 
+                    createVenue.Longitude.Value, 
+                    cancellationToken);
+                
+                if (timeZone == null)
+                {
+                    return ApiResponse<Venue>.ErrorResult("Failed to retrieve timezone information for the venue location. Please verify the coordinates are valid.");
+                }
+                
+                venue.TimeZoneId = timeZone.Id;
+            }
+            
             var createdVenue = await _venueRepository.AddAsync(venue, cancellationToken);
             await _venueRepository.SaveChangesAsync(cancellationToken);
 
@@ -163,7 +180,34 @@ public class VenueService : IVenueService
                 }
             }
 
+            // Check if coordinates have changed and update timezone if needed
+            var coordinatesChanged = addressChanged || 
+                                   (updateVenue.Latitude.HasValue && existingVenue.Location?.Y != updateVenue.Latitude.Value) ||
+                                   (updateVenue.Longitude.HasValue && existingVenue.Location?.X != updateVenue.Longitude.Value);
+
+            string? newTimeZoneId = null;
+            if (coordinatesChanged && updateVenue.Latitude.HasValue && updateVenue.Longitude.HasValue)
+            {
+                var timeZone = await _azureMapsService.GetTimeZoneAsync(
+                    updateVenue.Latitude.Value, 
+                    updateVenue.Longitude.Value, 
+                    cancellationToken);
+                
+                if (timeZone == null)
+                {
+                    return ApiResponse<Venue?>.ErrorResult("Failed to retrieve timezone information for the updated venue location. Please verify the coordinates are valid.");
+                }
+                
+                newTimeZoneId = timeZone.Id;
+            }
+
             UpdateVenueEntityAsync(existingVenue, updateVenue);
+            
+            // Update timezone if we got a new one
+            if (newTimeZoneId != null)
+            {
+                existingVenue.TimeZoneId = newTimeZoneId;
+            }
             await _venueRepository.UpdateAsync(existingVenue, cancellationToken);
             await _venueRepository.SaveChangesAsync(cancellationToken);
 

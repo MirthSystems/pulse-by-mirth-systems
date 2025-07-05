@@ -48,10 +48,10 @@ public class AzureMapsService : IAzureMapsService
                     Longitude = feature.Geometry.Coordinates[0],
                     Street = addressProps?.AddressLine ?? string.Empty,
                     City = addressProps?.Locality ?? string.Empty,
-                    Region = addressProps?.AdminDistricts?.FirstOrDefault()?.Name ?? string.Empty,
+                    Region = addressProps?.AdminDistricts[0]?.Name ?? string.Empty,
                     PostalCode = addressProps?.PostalCode ?? string.Empty,
                     Country = addressProps?.CountryRegion?.Name ?? string.Empty,
-                    Confidence = 0.95 // High confidence placeholder since Azure Maps doesn't provide this
+                    Confidence = ConvertConfidenceToDouble(feature.Properties?.Confidence)
                 };
             }
             
@@ -80,7 +80,7 @@ public class AzureMapsService : IAzureMapsService
                     FormattedAddress = addressProps?.FormattedAddress ?? string.Empty,
                     Street = addressProps?.AddressLine ?? string.Empty,
                     City = addressProps?.Locality ?? string.Empty,
-                    Region = addressProps?.AdminDistricts?.FirstOrDefault()?.Name ?? string.Empty,
+                    Region = addressProps?.AdminDistricts[0]?.Name ?? string.Empty,
                     PostalCode = addressProps?.PostalCode ?? string.Empty,
                     Country = addressProps?.CountryRegion?.Name ?? string.Empty,
                     Neighborhood = addressProps?.Neighborhood ?? string.Empty
@@ -224,5 +224,18 @@ public class AzureMapsService : IAzureMapsService
         {
             return Enumerable.Empty<GeocodeResult>();
         }
+    }
+
+    private static double ConvertConfidenceToDouble(Azure.Maps.Search.Models.ConfidenceEnum? confidence)
+    {
+        if (!confidence.HasValue) return 0.0;
+        
+        return confidence.Value.ToString() switch
+        {
+            "High" => 0.9,
+            "Medium" => 0.7, 
+            "Low" => 0.5,
+            _ => 0.0
+        };
     }
 }

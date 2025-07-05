@@ -165,7 +165,6 @@ export interface GeocodeResult {
 export interface ReverseGeocodeResult {
   formattedAddress: string;
   street: string;
-  streetNumber: string;
   city: string;
   region: string;
   postalCode: string;

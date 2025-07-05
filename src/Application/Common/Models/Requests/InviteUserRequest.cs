@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Application.Common.Models.Requests;
 
 /// <summary>
@@ -5,8 +7,13 @@ namespace Application.Common.Models.Requests;
 /// </summary>
 public class InviteUserRequest
 {
-    public string Email { get; set; } = null!;
-    public string Permission { get; set; } = null!;
+    [Required]
+    [EmailAddress]
+    public required string Email { get; set; }
+    
+    [Required]
+    public required string Permission { get; set; }
+    
     public string? Notes { get; set; }
     public int ExpirationDays { get; set; } = 7;
 }
