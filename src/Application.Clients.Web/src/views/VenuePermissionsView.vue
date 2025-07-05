@@ -3,48 +3,51 @@
     <!-- Header -->
     <div class="bg-white shadow">
       <div class="px-4 sm:px-6 lg:px-8 py-6">
-        <div class="flex items-center justify-between">
-          <div>
+        <div class="flex flex-col space-y-4 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
+          <div class="min-w-0 flex-1">
             <nav class="flex mb-4" aria-label="Breadcrumb">
-              <ol class="flex items-center space-x-2">
+              <ol class="flex items-center space-x-2 text-sm">
                 <li>
-                  <router-link to="/backoffice" class="text-gray-400 hover:text-gray-500">
+                  <router-link to="/backoffice" class="text-gray-400 hover:text-gray-500 truncate">
                     Backoffice
                   </router-link>
                 </li>
                 <li class="flex items-center">
-                  <ChevronRightIcon class="h-4 w-4 text-gray-400 mx-2" />
+                  <ChevronRightIcon class="h-4 w-4 text-gray-400 mx-2 flex-shrink-0" />
                   <router-link 
                     :to="`/backoffice/venues/${venueId}`" 
-                    class="text-gray-400 hover:text-gray-500"
+                    class="text-gray-400 hover:text-gray-500 truncate"
                   >
                     {{ venue?.name || 'Venue' }}
                   </router-link>
                 </li>
                 <li class="flex items-center">
-                  <ChevronRightIcon class="h-4 w-4 text-gray-400 mx-2" />
-                  <span class="text-gray-900">Permissions</span>
+                  <ChevronRightIcon class="h-4 w-4 text-gray-400 mx-2 flex-shrink-0" />
+                  <span class="text-gray-900 truncate">Permissions</span>
                 </li>
               </ol>
             </nav>
-            <h1 class="text-2xl font-bold text-gray-900">Venue Permissions</h1>
+            <h1 class="text-xl sm:text-2xl font-bold text-gray-900 truncate">Venue Permissions</h1>
             <p class="mt-1 text-sm text-gray-500">
               Manage who can access and modify this venue
             </p>
           </div>
-          <button
-            @click="showInviteModal = true"
-            class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
-          >
-            <UserPlusIcon class="-ml-1 mr-2 h-4 w-4" />
-            Invite User
-          </button>
+          <div class="flex justify-end lg:justify-start">
+            <button
+              @click="showInviteModal = true"
+              class="inline-flex items-center px-3 py-2 lg:px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 w-full sm:w-auto justify-center"
+            >
+              <UserPlusIcon class="-ml-1 mr-2 h-4 w-4" />
+              <span class="lg:hidden">Invite</span>
+              <span class="hidden lg:inline">Invite User</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- Content -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <!-- Active Permissions -->
       <div class="bg-white shadow rounded-lg mb-6">
         <div class="px-6 py-4 border-b border-gray-200">
@@ -76,44 +79,46 @@
           <div 
             v-for="permission in permissions" 
             :key="permission.id"
-            class="px-6 py-4 flex items-center justify-between"
+            class="px-4 sm:px-6 py-4"
           >
-            <div class="flex items-center space-x-4">
-              <div class="h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
-                <UserIcon class="h-5 w-5 text-blue-600" />
+            <div class="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+              <div class="flex items-center space-x-3 min-w-0 flex-1">
+                <div class="h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <UserIcon class="h-5 w-5 text-blue-600" />
+                </div>
+                <div class="min-w-0 flex-1">
+                  <p class="text-sm font-medium text-gray-900 truncate">{{ getUserEmail(permission) }}</p>
+                  <p class="text-sm font-semibold text-blue-600">
+                    {{ getPermissionLabel(permission.name) }}
+                  </p>
+                  <p class="text-xs text-gray-500">
+                    Granted {{ formatDate(permission.grantedAt) }}
+                  </p>
+                </div>
               </div>
-              <div>
-                <p class="text-sm font-medium text-gray-900">{{ getUserEmail(permission) }}</p>
-                <p class="text-sm font-semibold text-blue-600">
-                  {{ getPermissionLabel(permission.name) }}
-                </p>
-                <p class="text-xs text-gray-500">
-                  Granted {{ formatDate(permission.grantedAt) }}
-                </p>
-              </div>
-            </div>
-            <div class="flex items-center space-x-2">
-              <span 
-                :class="[
-                  'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
-                  permission.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                ]"
-              >
-                {{ permission.isActive ? 'Active' : 'Inactive' }}
-              </span>
-              <div class="flex space-x-1">
-                <button
-                  @click="editPermission(permission)"
-                  class="p-1 text-gray-400 hover:text-gray-500"
+              <div class="flex items-center justify-between sm:justify-end space-x-3">
+                <span 
+                  :class="[
+                    'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
+                    permission.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                  ]"
                 >
-                  <PencilIcon class="h-4 w-4" />
-                </button>
-                <button
-                  @click="confirmRevokePermission(permission)"
-                  class="p-1 text-red-400 hover:text-red-500"
-                >
-                  <TrashIcon class="h-4 w-4" />
-                </button>
+                  {{ permission.isActive ? 'Active' : 'Inactive' }}
+                </span>
+                <div class="flex space-x-2">
+                  <button
+                    @click="editPermission(permission)"
+                    class="p-2 text-gray-400 hover:text-gray-500 rounded-md hover:bg-gray-100"
+                  >
+                    <PencilIcon class="h-4 w-4" />
+                  </button>
+                  <button
+                    @click="confirmRevokePermission(permission)"
+                    class="p-2 text-red-400 hover:text-red-500 rounded-md hover:bg-red-50"
+                  >
+                    <TrashIcon class="h-4 w-4" />
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -139,29 +144,33 @@
           <div 
             v-for="invitation in invitations" 
             :key="invitation.id"
-            class="px-6 py-4 flex items-center justify-between"
+            class="px-4 sm:px-6 py-4"
           >
-            <div class="flex items-center space-x-4">
-              <div class="h-10 w-10 bg-yellow-100 rounded-full flex items-center justify-center">
-                <EnvelopeIcon class="h-5 w-5 text-yellow-600" />
+            <div class="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+              <div class="flex items-center space-x-3 min-w-0 flex-1">
+                <div class="h-10 w-10 bg-yellow-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <EnvelopeIcon class="h-5 w-5 text-yellow-600" />
+                </div>
+                <div class="min-w-0 flex-1">
+                  <p class="text-sm font-medium text-gray-900 truncate">{{ invitation.email }}</p>
+                  <p class="text-sm text-gray-500">
+                    {{ getPermissionLabel(invitation.name) }} • 
+                    Invited {{ formatDate(invitation.invitedAt) }}
+                  </p>
+                  <p class="text-xs text-gray-400">
+                    Expires {{ formatDate(invitation.expiresAt) }}
+                  </p>
+                </div>
               </div>
-              <div>
-                <p class="text-sm font-medium text-gray-900">{{ invitation.email }}</p>
-                <p class="text-sm text-gray-500">
-                  {{ getPermissionLabel(invitation.name) }} • 
-                  Invited {{ formatDate(invitation.invitedAt) }}
-                </p>
-                <p class="text-xs text-gray-400">
-                  Expires {{ formatDate(invitation.expiresAt) }}
-                </p>
+              <div class="flex justify-end">
+                <button
+                  @click="cancelInvitation(invitation)"
+                  class="p-2 text-red-400 hover:text-red-500 rounded-md hover:bg-red-50"
+                >
+                  <XMarkIcon class="h-5 w-5" />
+                </button>
               </div>
             </div>
-            <button
-              @click="cancelInvitation(invitation)"
-              class="text-red-400 hover:text-red-500"
-            >
-              <XMarkIcon class="h-5 w-5" />
-            </button>
           </div>
         </div>
       </div>
@@ -169,7 +178,7 @@
 
     <!-- Invite User Modal -->
     <div v-if="showInviteModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-      <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+      <div class="relative top-4 mx-4 p-4 border max-w-md w-full shadow-lg rounded-md bg-white sm:mx-auto">
         <div class="mt-3">
           <h3 class="text-lg font-medium text-gray-900 mb-4">Invite User</h3>
           
@@ -214,18 +223,18 @@
               ></textarea>
             </div>
             
-            <div class="flex justify-end space-x-3">
+            <div class="flex flex-col-reverse sm:flex-row sm:justify-end space-y-2 space-y-reverse sm:space-y-0 sm:space-x-3">
               <button
                 type="button"
                 @click="showInviteModal = false"
-                class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                class="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 :disabled="sendingInvite"
-                class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 disabled:opacity-50"
+                class="w-full sm:w-auto px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 disabled:opacity-50"
               >
                 {{ sendingInvite ? 'Sending...' : 'Send Invitation' }}
               </button>
@@ -237,12 +246,12 @@
 
     <!-- Edit Permission Modal -->
     <div v-if="showEditModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-      <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+      <div class="relative top-4 mx-4 p-4 border max-w-md w-full shadow-lg rounded-md bg-white sm:mx-auto">
         <div class="flex justify-between items-center mb-4">
           <h3 class="text-lg font-medium">Edit Permission</h3>
           <button
             @click="showEditModal = false"
-            class="text-gray-400 hover:text-gray-500"
+            class="text-gray-400 hover:text-gray-500 p-1"
           >
             <XMarkIcon class="h-5 w-5" />
           </button>
@@ -285,18 +294,18 @@
             ></textarea>
           </div>
           
-          <div class="flex justify-end space-x-3">
+          <div class="flex flex-col-reverse sm:flex-row sm:justify-end space-y-2 space-y-reverse sm:space-y-0 sm:space-x-3">
             <button
               type="button"
               @click="showEditModal = false"
-              class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+              class="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
             >
               Cancel
             </button>
             <button
               type="submit"
               :disabled="updatingPermission"
-              class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 disabled:opacity-50"
+              class="w-full sm:w-auto px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 disabled:opacity-50"
             >
               {{ updatingPermission ? 'Updating...' : 'Update Permission' }}
             </button>

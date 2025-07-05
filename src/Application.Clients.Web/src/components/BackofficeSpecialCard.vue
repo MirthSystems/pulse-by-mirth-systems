@@ -1,17 +1,17 @@
 <template>
   <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 border-l-4 relative"
        :class="getBorderColor(special.categoryName)">
-    <div class="p-4">
-      <div class="flex items-start justify-between mb-3">
-        <div class="flex items-center space-x-3">
-          <span class="text-2xl">{{ special.categoryIcon }}</span>
-          <div>
-            <h3 class="text-base font-bold text-gray-900">{{ special.title }}</h3>
-            <p class="text-sm text-gray-600">{{ special.categoryName }}</p>
+    <div class="p-3 sm:p-4 pb-12 sm:pb-4">
+      <div class="flex flex-col space-y-3 sm:flex-row sm:items-start sm:justify-between sm:space-y-0 mb-3">
+        <div class="flex items-center space-x-3 min-w-0 flex-1">
+          <span class="text-xl sm:text-2xl flex-shrink-0">{{ special.categoryIcon }}</span>
+          <div class="min-w-0 flex-1">
+            <h3 class="text-sm sm:text-base font-bold text-gray-900 break-words">{{ special.title }}</h3>
+            <p class="text-xs sm:text-sm text-gray-600">{{ special.categoryName }}</p>
           </div>
         </div>
         
-        <div class="flex flex-col items-end space-y-1">
+        <div class="flex items-center justify-between sm:flex-col sm:items-end sm:space-y-1">
           <span 
             class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
             :class="getStatusClass(special)"
@@ -24,20 +24,20 @@
         </div>
       </div>
       
-      <p class="text-gray-700 text-sm mb-3 line-clamp-2">{{ special.description || 'No description' }}</p>
+      <p class="text-gray-700 text-xs sm:text-sm mb-3 break-words">{{ special.description || 'No description' }}</p>
       
-      <div class="grid grid-cols-1 gap-3 text-sm mb-4">
+      <div class="space-y-2 text-xs sm:text-sm">
         <div>
           <span class="font-medium text-gray-700">Schedule:</span>
-          <div class="text-gray-600">
-            <div class="text-xs">
+          <div class="text-gray-600 mt-1">
+            <div class="break-words">
               {{ special.startDate }} {{ special.startTime }}
               <span v-if="special.endTime"> - {{ special.endTime }}</span>
             </div>
-            <div v-if="special.isRecurring" class="text-xs text-blue-600">
+            <div v-if="special.isRecurring" class="text-blue-600 mt-1">
               {{ formatCronSchedule(special.cronSchedule || '') }}
             </div>
-            <div v-if="special.endDate && !special.isRecurring" class="text-xs text-gray-500">
+            <div v-if="special.endDate && !special.isRecurring" class="text-gray-500 mt-1">
               Ends {{ formatDate(special.endDate) }}
             </div>
           </div>
@@ -45,21 +45,21 @@
       </div>
     </div>
     
-    <!-- Action buttons fixed to bottom right -->
-    <div class="absolute bottom-3 right-3 flex items-center space-x-2">
+    <!-- Action buttons -->
+    <div class="absolute bottom-2 right-2 sm:bottom-3 sm:right-3 flex items-center space-x-1 sm:space-x-2">
       <button
         @click="$emit('edit', special)"
-        class="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-full transition-colors"
+        class="p-1.5 sm:p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-full transition-colors"
         title="Edit special"
       >
-        <PencilIcon class="h-4 w-4" />
+        <PencilIcon class="h-3 w-3 sm:h-4 sm:w-4" />
       </button>
       <button
         @click="$emit('delete', special)"
-        class="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-full transition-colors"
+        class="p-1.5 sm:p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-full transition-colors"
         title="Delete special"
       >
-        <TrashIcon class="h-4 w-4" />
+        <TrashIcon class="h-3 w-3 sm:h-4 sm:w-4" />
       </button>
     </div>
   </div>

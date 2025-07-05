@@ -2,18 +2,18 @@
   <div class="min-h-screen bg-gray-50">
     <!-- Header -->
     <div class="bg-white shadow">
-      <div class="px-4 sm:px-6 lg:px-8 py-6">
-        <div class="flex items-center justify-between">
+      <div class="px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+        <div class="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
           <div class="flex items-center">
             <button
               @click="$router.go(-1)"
-              class="mr-4 p-2 text-gray-400 hover:text-gray-600"
+              class="mr-3 sm:mr-4 p-2 text-gray-400 hover:text-gray-600 flex-shrink-0"
             >
               <ChevronLeftIcon class="h-5 w-5" />
             </button>
-            <div>
-              <h1 class="text-2xl font-bold text-gray-900">Profile Settings</h1>
-              <p class="mt-1 text-sm text-gray-500">
+            <div class="min-w-0">
+              <h1 class="text-xl sm:text-2xl font-bold text-gray-900 break-words">Profile Settings</h1>
+              <p class="mt-1 text-sm text-gray-500 break-words">
                 View and manage your profile information
               </p>
             </div>
@@ -23,7 +23,7 @@
     </div>
 
     <!-- Content -->
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
       <div v-if="loading" class="flex items-center justify-center py-12">
         <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
         <span class="ml-2 text-gray-600">Loading profile...</span>
@@ -41,62 +41,62 @@
 
       <div v-else class="space-y-6">
         <!-- Profile Information -->
-        <div class="bg-white shadow rounded-lg">
-          <div class="px-6 py-4 border-b border-gray-200">
-            <h3 class="text-lg leading-6 font-medium text-gray-900">Profile Information</h3>
-            <p class="mt-1 text-sm text-gray-500">Your account details from the authentication token</p>
+        <div class="bg-white shadow rounded-lg overflow-hidden">
+          <div class="px-4 sm:px-6 py-4 border-b border-gray-200">
+            <h3 class="text-base sm:text-lg leading-6 font-medium text-gray-900 break-words">Profile Information</h3>
+            <p class="mt-1 text-sm text-gray-500 break-words">Your account details from the authentication token</p>
           </div>
           
-          <div class="p-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="p-4 sm:p-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
               <!-- Profile Picture -->
-              <div class="md:col-span-2 flex items-center space-x-6">
-                <div class="flex-shrink-0">
+              <div class="lg:col-span-2 flex flex-col space-y-4 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-6">
+                <div class="flex-shrink-0 self-center sm:self-start">
                   <img 
                     v-if="userProfile?.picture" 
                     :src="userProfile.picture" 
                     :alt="userProfile.name || 'Profile picture'"
-                    class="h-20 w-20 rounded-full object-cover"
+                    class="h-16 w-16 sm:h-20 sm:w-20 rounded-full object-cover"
                   />
                   <div 
                     v-else 
-                    class="h-20 w-20 rounded-full bg-gray-300 flex items-center justify-center"
+                    class="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-gray-300 flex items-center justify-center"
                   >
-                    <UserIcon class="h-10 w-10 text-gray-500" />
+                    <UserIcon class="h-8 w-8 sm:h-10 sm:w-10 text-gray-500" />
                   </div>
                 </div>
-                <div>
-                  <h3 class="text-lg font-medium text-gray-900">{{ userProfile?.name || 'No name available' }}</h3>
-                  <p class="text-sm text-gray-500">{{ userProfile?.email || 'No email available' }}</p>
+                <div class="text-center sm:text-left min-w-0 flex-1">
+                  <h3 class="text-base sm:text-lg font-medium text-gray-900 break-words">{{ userProfile?.name || 'No name available' }}</h3>
+                  <p class="text-sm text-gray-500 break-words">{{ userProfile?.email || 'No email available' }}</p>
                 </div>
               </div>
 
               <!-- Name -->
-              <div>
+              <div class="lg:col-span-1">
                 <label class="block text-sm font-medium text-gray-700">Full Name</label>
-                <div class="mt-1 text-sm text-gray-900 bg-gray-50 border border-gray-300 rounded-md px-3 py-2">
+                <div class="mt-1 text-sm text-gray-900 bg-gray-50 border border-gray-300 rounded-md px-3 py-2 break-words min-h-[2.5rem] flex items-center">
                   {{ userProfile?.name || 'Not available' }}
                 </div>
               </div>
 
               <!-- Email -->
-              <div>
+              <div class="lg:col-span-1">
                 <label class="block text-sm font-medium text-gray-700">Email Address</label>
-                <div class="mt-1 text-sm text-gray-900 bg-gray-50 border border-gray-300 rounded-md px-3 py-2">
+                <div class="mt-1 text-sm text-gray-900 bg-gray-50 border border-gray-300 rounded-md px-3 py-2 break-words min-h-[2.5rem] flex items-center">
                   {{ userProfile?.email || 'Not available' }}
                 </div>
               </div>
 
               <!-- Nickname -->
-              <div>
+              <div class="lg:col-span-1">
                 <label class="block text-sm font-medium text-gray-700">Nickname</label>
-                <div class="mt-1 text-sm text-gray-900 bg-gray-50 border border-gray-300 rounded-md px-3 py-2">
+                <div class="mt-1 text-sm text-gray-900 bg-gray-50 border border-gray-300 rounded-md px-3 py-2 break-words min-h-[2.5rem] flex items-center">
                   {{ userProfile?.nickname || 'Not available' }}
                 </div>
               </div>
 
               <!-- Email Verified -->
-              <div>
+              <div class="lg:col-span-1">
                 <label class="block text-sm font-medium text-gray-700">Email Verified</label>
                 <div class="mt-1 flex items-center">
                   <span 
@@ -111,17 +111,17 @@
               </div>
 
               <!-- Last Updated -->
-              <div>
+              <div class="lg:col-span-1">
                 <label class="block text-sm font-medium text-gray-700">Last Updated</label>
-                <div class="mt-1 text-sm text-gray-900 bg-gray-50 border border-gray-300 rounded-md px-3 py-2">
+                <div class="mt-1 text-sm text-gray-900 bg-gray-50 border border-gray-300 rounded-md px-3 py-2 break-words min-h-[2.5rem] flex items-center">
                   {{ formatDate(userProfile?.updated_at) || 'Not available' }}
                 </div>
               </div>
 
               <!-- User ID -->
-              <div>
+              <div class="lg:col-span-2">
                 <label class="block text-sm font-medium text-gray-700">User ID</label>
-                <div class="mt-1 text-sm text-gray-900 bg-gray-50 border border-gray-300 rounded-md px-3 py-2 font-mono">
+                <div class="mt-1 text-xs sm:text-sm text-gray-900 bg-gray-50 border border-gray-300 rounded-md px-3 py-2 font-mono break-all min-h-[2.5rem] flex items-center">
                   {{ userProfile?.sub || 'Not available' }}
                 </div>
               </div>
@@ -130,60 +130,60 @@
         </div>
 
         <!-- Token Information -->
-        <div class="bg-white shadow rounded-lg">
-          <div class="px-6 py-4 border-b border-gray-200">
-            <h3 class="text-lg leading-6 font-medium text-gray-900">Authentication Details</h3>
-            <p class="mt-1 text-sm text-gray-500">Information about your current session</p>
+        <div class="bg-white shadow rounded-lg overflow-hidden">
+          <div class="px-4 sm:px-6 py-4 border-b border-gray-200">
+            <h3 class="text-base sm:text-lg leading-6 font-medium text-gray-900 break-words">Authentication Details</h3>
+            <p class="mt-1 text-sm text-gray-500 break-words">Information about your current session</p>
           </div>
           
-          <div class="p-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="p-4 sm:p-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
               <!-- Token Issued -->
-              <div>
+              <div class="lg:col-span-1">
                 <label class="block text-sm font-medium text-gray-700">Token Issued</label>
-                <div class="mt-1 text-sm text-gray-900 bg-gray-50 border border-gray-300 rounded-md px-3 py-2">
+                <div class="mt-1 text-sm text-gray-900 bg-gray-50 border border-gray-300 rounded-md px-3 py-2 break-words min-h-[2.5rem] flex items-center">
                   {{ formatDate(tokenInfo?.iat) || 'Not available' }}
                 </div>
               </div>
 
               <!-- Token Expires -->
-              <div>
+              <div class="lg:col-span-1">
                 <label class="block text-sm font-medium text-gray-700">Token Expires</label>
-                <div class="mt-1 text-sm text-gray-900 bg-gray-50 border border-gray-300 rounded-md px-3 py-2">
+                <div class="mt-1 text-sm text-gray-900 bg-gray-50 border border-gray-300 rounded-md px-3 py-2 break-words min-h-[2.5rem] flex items-center">
                   {{ formatDate(tokenInfo?.exp) || 'Not available' }}
                 </div>
               </div>
 
               <!-- Issuer -->
-              <div>
+              <div class="lg:col-span-2">
                 <label class="block text-sm font-medium text-gray-700">Issuer</label>
-                <div class="mt-1 text-sm text-gray-900 bg-gray-50 border border-gray-300 rounded-md px-3 py-2">
+                <div class="mt-1 text-sm text-gray-900 bg-gray-50 border border-gray-300 rounded-md px-3 py-2 break-words min-h-[2.5rem] flex items-center">
                   {{ tokenInfo?.iss || 'Not available' }}
                 </div>
               </div>
 
               <!-- Audience -->
-              <div>
+              <div class="lg:col-span-2">
                 <label class="block text-sm font-medium text-gray-700">Audience</label>
-                <div class="mt-1 text-sm text-gray-900 bg-gray-50 border border-gray-300 rounded-md px-3 py-2">
+                <div class="mt-1 text-sm text-gray-900 bg-gray-50 border border-gray-300 rounded-md px-3 py-2 break-words min-h-[2.5rem] flex items-center">
                   {{ Array.isArray(tokenInfo?.aud) ? tokenInfo.aud.join(', ') : tokenInfo?.aud || 'Not available' }}
                 </div>
               </div>
 
               <!-- Permissions -->
-              <div class="md:col-span-2">
+              <div class="lg:col-span-2">
                 <label class="block text-sm font-medium text-gray-700">Permissions</label>
                 <div class="mt-1">
                   <div v-if="tokenInfo?.permissions && tokenInfo.permissions.length > 0" class="flex flex-wrap gap-2">
                     <span 
                       v-for="permission in tokenInfo.permissions" 
                       :key="permission"
-                      class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                      class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 break-words"
                     >
                       {{ permission }}
                     </span>
                   </div>
-                  <div v-else class="text-sm text-gray-500 bg-gray-50 border border-gray-300 rounded-md px-3 py-2">
+                  <div v-else class="text-sm text-gray-500 bg-gray-50 border border-gray-300 rounded-md px-3 py-2 min-h-[2.5rem] flex items-center">
                     No specific permissions assigned
                   </div>
                 </div>
@@ -193,29 +193,29 @@
         </div>
 
         <!-- Actions -->
-        <div class="bg-white shadow rounded-lg">
-          <div class="px-6 py-4 border-b border-gray-200">
-            <h3 class="text-lg leading-6 font-medium text-gray-900">Account Actions</h3>
-            <p class="mt-1 text-sm text-gray-500">Manage your account and session</p>
+        <div class="bg-white shadow rounded-lg overflow-hidden">
+          <div class="px-4 sm:px-6 py-4 border-b border-gray-200">
+            <h3 class="text-base sm:text-lg leading-6 font-medium text-gray-900 break-words">Account Actions</h3>
+            <p class="mt-1 text-sm text-gray-500 break-words">Manage your account and session</p>
           </div>
           
-          <div class="p-6">
-            <div class="flex flex-col sm:flex-row gap-4">
+          <div class="p-4 sm:p-6">
+            <div class="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-4">
               <button
                 @click="refreshToken"
                 :disabled="refreshing"
-                class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+                class="inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 w-full sm:w-auto"
               >
-                <ArrowPathIcon class="-ml-1 mr-2 h-4 w-4" />
-                {{ refreshing ? 'Refreshing...' : 'Refresh Token' }}
+                <ArrowPathIcon class="-ml-1 mr-2 h-4 w-4 flex-shrink-0" />
+                <span class="break-words">{{ refreshing ? 'Refreshing...' : 'Refresh Token' }}</span>
               </button>
               
               <button
                 @click="signOut"
-                class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                class="inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 w-full sm:w-auto"
               >
-                <ArrowRightOnRectangleIcon class="-ml-1 mr-2 h-4 w-4" />
-                Sign Out
+                <ArrowRightOnRectangleIcon class="-ml-1 mr-2 h-4 w-4 flex-shrink-0" />
+                <span class="break-words">Sign Out</span>
               </button>
             </div>
           </div>

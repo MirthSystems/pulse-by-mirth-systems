@@ -1,55 +1,64 @@
 <template>
-  <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 border-l-4 cursor-pointer"
+  <div class="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 border cursor-pointer overflow-hidden group relative"
        :class="getBorderColor(special.categoryName)"
        @click="$emit('view-details', special.id)">
+    
+    <!-- Main Content -->
     <div class="p-4">
+      <!-- Header Row -->
       <div class="flex items-start justify-between mb-3">
-        <div class="flex items-center space-x-3">
-          <span class="text-2xl">{{ special.categoryIcon }}</span>
-          <div>
-            <h3 class="text-base font-bold text-gray-900">{{ special.title }}</h3>
-            <p class="text-sm text-gray-600">{{ special.venueName }}</p>
-          </div>
-        </div>
+        <!-- Icon -->
+        <span class="text-xl flex-shrink-0">{{ special.categoryIcon }}</span>
         
-        <div class="flex flex-col items-end space-y-1">
-          <span 
-            class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
-            :class="getStatusClass(special)"
-          >
-            {{ getStatusText(special) }}
-          </span>
-          <span v-if="special.distanceInMeters" class="text-xs text-gray-500">
-            {{ formatDistance(special.distanceInMeters) }}
+        <!-- Status Badge -->
+        <span 
+          class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium flex-shrink-0"
+          :class="getStatusClass(special)"
+        >
+          {{ getStatusText(special) }}
+        </span>
+      </div>
+
+      <!-- Title -->
+      <div class="mb-3">
+        <h3 class="font-medium text-gray-900 text-sm">{{ special.title }}</h3>
+      </div>
+
+      <!-- Description -->
+      <p class="text-gray-600 text-xs leading-relaxed mb-3">{{ special.description }}</p>
+
+      <!-- Schedule Info - Compact -->
+      <div class="flex items-center justify-between text-sm">
+        <!-- Time -->
+        <div class="flex items-center gap-1 text-gray-800">
+          <span>⏰</span>
+          <span class="font-semibold">{{ formatTime(special.startTime) }} - {{ special.endTime ? formatTime(special.endTime) : 'Late' }}</span>
+        </div>
+
+        <!-- Type (only for one-time) -->
+        <div v-if="!special.isRecurring" class="flex items-center gap-1">
+          <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
+            One-time
           </span>
         </div>
       </div>
-      
-      <p class="text-gray-700 text-sm mb-3 line-clamp-2">{{ special.description }}</p>
-      
-      <div class="grid grid-cols-2 gap-3 text-sm">
-        <div>
-          <span class="font-medium text-gray-700">When:</span>
-          <div class="text-gray-600">
-            <!-- For one-time specials, show the date -->
-            <div v-if="!special.isRecurring" class="text-xs">{{ formatDate(special.startDate) }}</div>
-            <!-- For recurring specials, show the recurring pattern -->
-            <div v-else-if="special.cronSchedule" class="text-xs">{{ formatCronSchedule(special.cronSchedule) }}</div>
-            <div class="text-xs">{{ special.startTime }} - {{ special.endTime || 'Late' }}</div>
-          </div>
-        </div>
-        
-        <div>
-          <span class="font-medium text-gray-700">Type:</span>
-          <div class="text-gray-600">
-            <div class="text-xs">{{ special.isRecurring ? 'Recurring' : 'One-time' }}</div>
-            <div v-if="special.endDate && !special.isRecurring" class="text-xs text-gray-500">
-              Ends {{ formatDate(special.endDate) }}
-            </div>
-          </div>
-        </div>
+
+      <!-- Day Info for Recurring with badge -->
+      <div v-if="special.isRecurring && special.cronSchedule" class="mt-2 flex items-center justify-between">
+        <span class="text-xs text-gray-700 font-medium">{{ formatCronSchedule(special.cronSchedule) }}</span>
+        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
+          Recurring
+        </span>
+      </div>
+
+      <!-- Distance -->
+      <div v-if="special.distanceInMeters" class="mt-2 text-sm text-gray-600">
+        📍 {{ formatDistance(special.distanceInMeters) }}
       </div>
     </div>
+
+    <!-- Category Accent Line -->
+    <div class="absolute top-0 left-0 right-0 h-1 rounded-t-2xl" :class="getAccentColor(special.categoryName)"></div>
   </div>
 </template>
 
@@ -69,23 +78,45 @@ defineEmits<{
 
 function getBorderColor(category: string): string {
   switch (category.toLowerCase()) {
-    case 'food': return 'border-l-orange-500'
-    case 'drink': return 'border-l-blue-500'
-    case 'entertainment': return 'border-l-purple-500'
-    default: return 'border-l-gray-500'
+    case 'food': return 'border-orange-200 hover:border-orange-300'
+    case 'drink': return 'border-blue-200 hover:border-blue-300'
+    case 'entertainment': return 'border-purple-200 hover:border-purple-300'
+    default: return 'border-gray-200 hover:border-gray-300'
+  }
+}
+
+function formatTime(timeString: string): string {
+  if (!timeString) return ''
+  
+  // Parse the time string (assuming format like "16:00")
+  const [hours, minutes] = timeString.split(':').map(Number)
+  
+  // Convert to 12-hour format
+  const period = hours >= 12 ? 'PM' : 'AM'
+  const displayHours = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours
+  
+  return `${displayHours}:${minutes.toString().padStart(2, '0')} ${period}`
+}
+
+function getAccentColor(category: string): string {
+  switch (category.toLowerCase()) {
+    case 'food': return 'bg-orange-400'
+    case 'drink': return 'bg-blue-400'
+    case 'entertainment': return 'bg-purple-400'
+    default: return 'bg-gray-400'
   }
 }
 
 function getStatusClass(special: SpecialSummary): string {
   if (!special.isActive) {
-    return 'bg-gray-100 text-gray-800'
+    return 'bg-gray-100 text-gray-700'
   }
   
   if (isSpecialRunningNow(special)) {
-    return 'bg-green-100 text-green-800'
+    return 'bg-green-100 text-green-700 border border-green-200'
   }
   
-  return 'bg-yellow-100 text-yellow-800'
+  return 'bg-orange-100 text-orange-700 border border-orange-200'
 }
 
 function getStatusText(special: SpecialSummary): string {

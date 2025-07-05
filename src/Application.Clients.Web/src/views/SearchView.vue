@@ -145,17 +145,17 @@ watch(() => route.query, (newQuery) => {
 <template>
   <div class="min-h-screen bg-gray-50">
     <!-- Search Component -->
-    <div class="bg-gradient-to-br from-blue-600 via-purple-600 to-blue-800 py-12">
+    <div class="bg-gradient-to-br from-blue-600 via-purple-600 to-blue-800 pt-6 pb-8 sm:pt-8 sm:pb-12">
       <SearchSpecials />
     </div>
 
     <!-- Content -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
       <!-- Loading State -->
-      <div v-if="isSearching" class="space-y-8">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div v-for="i in 6" :key="i" class="bg-white rounded-lg shadow-md p-6 animate-pulse">
-            <div class="bg-gray-300 h-40 rounded-lg mb-4"></div>
+      <div v-if="isSearching" class="space-y-4 sm:space-y-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          <div v-for="i in 6" :key="i" class="bg-white rounded-xl shadow-md p-4 sm:p-6 animate-pulse">
+            <div class="bg-gray-300 h-32 sm:h-40 rounded-lg mb-4"></div>
             <div class="bg-gray-300 h-4 rounded mb-2"></div>
             <div class="bg-gray-300 h-4 rounded w-2/3"></div>
           </div>
@@ -163,91 +163,87 @@ watch(() => route.query, (newQuery) => {
       </div>
 
       <!-- Welcome State -->
-      <div v-else-if="!hasResults && !isSearching" class="text-center py-16">
-        <StarIcon class="h-16 w-16 text-gray-300 mx-auto mb-4" />
-        <h3 class="text-lg font-medium text-gray-900 mb-2">Find Amazing Specials</h3>
-        <p class="text-gray-600 mb-8 max-w-md mx-auto">
+      <div v-else-if="!hasResults && !isSearching" class="text-center py-12 sm:py-16">
+        <StarIcon class="h-12 w-12 sm:h-16 sm:w-16 text-gray-300 mx-auto mb-4" />
+        <h3 class="text-lg sm:text-xl font-medium text-gray-900 mb-2">Find Amazing Specials</h3>
+        <p class="text-gray-600 mb-8 max-w-md mx-auto text-sm sm:text-base px-4">
           Search for special offers, deals, and promotions at restaurants and venues near you.
         </p>
       </div>
 
       <!-- Results -->
-      <div v-else-if="hasResults" class="space-y-8">
+      <div v-else-if="hasResults" class="space-y-4 sm:space-y-6">
         <!-- Results Header -->
-        <div class="flex items-center justify-between">
-          <div class="flex items-center">
-            <StarIcon class="h-6 w-6 text-red-500 mr-3" />
-            <h2 class="text-2xl font-bold text-gray-900">
-              {{ totalResults }} Specials at {{ venueResults.length }} Venues
-            </h2>
-          </div>
+        <div class="flex items-center justify-center sm:justify-start px-2">
+          <StarIcon class="h-5 w-5 sm:h-6 sm:w-6 text-red-500 mr-2 sm:mr-3 flex-shrink-0" />
+          <h2 class="text-lg sm:text-2xl font-bold text-gray-900 text-center sm:text-left break-words">
+            {{ totalResults }} Specials at {{ venueResults.length }} Venues
+          </h2>
         </div>
         
         <!-- Venues with Categorized Specials -->
-        <div class="space-y-6">
+        <div class="space-y-4 sm:space-y-6">
           <template v-for="venue in venueResults" :key="venue.id || `venue-${Math.random()}`">
             <div 
               v-if="venue"
-              class="bg-white rounded-lg shadow-lg overflow-hidden"
+              class="bg-white rounded-xl sm:rounded-2xl shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-xl hover:scale-[1.02]"
             >
-            <!-- Venue Header -->
-            <div class="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-4">
-              <div class="flex items-center justify-between">
-                <div>
-                  <h3 class="text-lg font-bold">{{ venue.name }}</h3>
-                  <p class="text-blue-100 text-sm mt-1">{{ venue.streetAddress }}, {{ venue.locality }}</p>
-                  <p v-if="venue.distanceInMeters" class="text-blue-100 text-xs mt-1">
-                    {{ (venue.distanceInMeters / 1000).toFixed(1) }} km away
-                  </p>
+              <!-- Venue Header -->
+              <div class="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-3 rounded-t-xl sm:rounded-t-2xl">
+                <div class="flex items-center justify-between">
+                  <div class="min-w-0 flex-1">
+                    <h3 class="text-base font-bold break-words mb-1">{{ venue.name }}</h3>
+                    <div class="flex items-center justify-between text-xs text-blue-100">
+                      <span class="break-words">{{ venue.streetAddress }}, {{ venue.locality }}</span>
+                      <span v-if="venue.distanceInMeters" class="ml-2 flex-shrink-0">
+                        {{ (venue.distanceInMeters / 1000).toFixed(1) }} km
+                      </span>
+                    </div>
+                  </div>
+                  <span class="ml-3 text-lg flex-shrink-0">{{ venue.categoryIcon }}</span>
                 </div>
-                <div class="text-right">
-                  <span class="inline-block bg-white/20 px-2 py-1 rounded-full text-xs font-semibold">
-                    {{ venue.categoryName }} {{ venue.categoryIcon }}
-                  </span>
+              </div>
+
+              <!-- Specials Grid -->
+              <div class="p-3">
+                <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-3">
+                  <!-- Food Specials -->
+                  <template v-if="venue.specials?.food?.length > 0">
+                    <SpecialCard 
+                      v-for="special in venue.specials.food" 
+                      :key="`food-${special.id}`"
+                      :special="special"
+                      class="transform transition-all duration-200 hover:scale-[1.02]"
+                    />
+                  </template>
+
+                  <!-- Drink Specials -->
+                  <template v-if="venue.specials?.drink?.length > 0">
+                    <SpecialCard 
+                      v-for="special in venue.specials.drink" 
+                      :key="`drink-${special.id}`"
+                      :special="special"
+                      class="transform transition-all duration-200 hover:scale-[1.02]"
+                    />
+                  </template>
+
+                  <!-- Entertainment Specials -->
+                  <template v-if="venue.specials?.entertainment?.length > 0">
+                    <SpecialCard 
+                      v-for="special in venue.specials.entertainment" 
+                      :key="`entertainment-${special.id}`"
+                      :special="special"
+                      class="transform transition-all duration-200 hover:scale-[1.02]"
+                    />
+                  </template>
+                </div>
+
+                <!-- No Specials Message -->
+                <div v-if="!venue.specials?.food?.length && !venue.specials?.drink?.length && !venue.specials?.entertainment?.length" 
+                     class="text-center py-4 text-gray-500">
+                  <p class="text-sm">No specials available at this time</p>
                 </div>
               </div>
-            </div>
-
-            <!-- Specials Grid -->
-            <div class="p-4">
-              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <!-- Food Specials -->
-                <template v-if="venue.specials?.food?.length > 0">
-                  <SpecialCard 
-                    v-for="special in venue.specials.food" 
-                    :key="`food-${special.id}`"
-                    :special="special"
-                    class="hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200"
-                  />
-                </template>
-
-                <!-- Drink Specials -->
-                <template v-if="venue.specials?.drink?.length > 0">
-                  <SpecialCard 
-                    v-for="special in venue.specials.drink" 
-                    :key="`drink-${special.id}`"
-                    :special="special"
-                    class="hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200"
-                  />
-                </template>
-
-                <!-- Entertainment Specials -->
-                <template v-if="venue.specials?.entertainment?.length > 0">
-                  <SpecialCard 
-                    v-for="special in venue.specials.entertainment" 
-                    :key="`entertainment-${special.id}`"
-                    :special="special"
-                    class="hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200"
-                  />
-                </template>
-              </div>
-
-              <!-- No Specials Message -->
-              <div v-if="!venue.specials?.food?.length && !venue.specials?.drink?.length && !venue.specials?.entertainment?.length" 
-                   class="text-center py-8 text-gray-500">
-                <p>No specials available at this time</p>
-              </div>
-            </div>
             </div>
           </template>
         </div>

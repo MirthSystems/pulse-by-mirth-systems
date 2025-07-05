@@ -1,41 +1,56 @@
 <template>
   <div class="search-specials">
-    <div class="max-w-3xl mx-auto">
-      <form @submit.prevent="handleSearch" class="space-y-4">
-        <!-- Location and Radius Row -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <!-- Address Autocomplete Input -->
-          <AddressAutocomplete
-            v-model="locationAddress"
-            placeholder="Enter location..."
-            required
-            @location-selected="handleLocationSelected"
-            @coordinates-updated="handleCoordinatesUpdated"
-            class="input-control"
-          />
+    <div class="max-w-4xl mx-auto px-4 sm:px-6">
+      <form @submit.prevent="handleSearch" class="space-y-6">
+        <!-- Main Search Row -->
+        <div class="bg-white rounded-2xl shadow-lg p-6">
+          <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
+            <!-- Address Input with Location Button -->
+            <div class="lg:col-span-2 relative">
+              <AddressAutocomplete
+                v-model="locationAddress"
+                placeholder="Enter location..."
+                required
+                @location-selected="handleLocationSelected"
+                @coordinates-updated="handleCoordinatesUpdated"
+                class="input-control"
+              />
+              <!-- Use My Location Button -->
+              <button
+                type="button"
+                @click="useCurrentLocation"
+                :disabled="isGettingLocation"
+                class="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 text-gray-400 hover:text-blue-600 transition-colors rounded-lg hover:bg-gray-50"
+                title="Use my current location"
+              >
+                <MapIcon v-if="!isGettingLocation" class="h-5 w-5" />
+                <div v-else class="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+              </button>
+            </div>
 
-          <!-- Radius Dropdown -->
-          <select
-            v-model="radius"
-            class="input-control block w-full py-3 px-4 border border-gray-300 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 shadow-sm transition-colors"
-          >
-            <option :value="1000">1 km</option>
-            <option :value="2000">2 km</option>
-            <option :value="5000">5 km</option>
-            <option :value="10000">10 km</option>
-            <option :value="25000">25 km</option>
-          </select>
+            <!-- Radius Dropdown -->
+            <select
+              v-model="radius"
+              class="input-control block w-full py-3 px-4 border border-gray-300 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 shadow-sm transition-colors"
+            >
+              <option :value="1000">1 km</option>
+              <option :value="2000">2 km</option>
+              <option :value="5000">5 km</option>
+              <option :value="10000">10 km</option>
+              <option :value="25000">25 km</option>
+            </select>
 
-          <!-- Search Button -->
-          <button
-            type="submit"
-            :disabled="isSearching || !locationAddress.trim()"
-            class="btn-primary inline-flex items-center justify-center px-6 py-3 border border-blue-600 text-base font-semibold rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md"
-          >
-            <MagnifyingGlassIcon v-if="!isSearching" class="mr-2 h-5 w-5" />
-            <div v-else class="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-            {{ isSearching ? 'Searching...' : 'Search' }}
-          </button>
+            <!-- Search Button -->
+            <button
+              type="submit"
+              :disabled="isSearching || !locationAddress.trim()"
+              class="btn-primary inline-flex items-center justify-center px-6 py-3 border border-blue-600 text-base font-semibold rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md"
+            >
+              <MagnifyingGlassIcon v-if="!isSearching" class="mr-2 h-5 w-5" />
+              <div v-else class="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+              {{ isSearching ? 'Searching...' : 'Search' }}
+            </button>
+          </div>
         </div>
 
         <!-- Optional Filter Expansion -->
@@ -170,7 +185,8 @@ import type { GeocodeResult } from '@/types/api'
 import { 
   MagnifyingGlassIcon, 
   AdjustmentsHorizontalIcon,
-  ChevronDownIcon 
+  ChevronDownIcon,
+  MapIcon
 } from '@heroicons/vue/24/outline'
 
 const router = useRouter()
@@ -192,9 +208,52 @@ const sortBy = ref('distance')
 const sortOrder = ref('asc')
 const showFilters = ref(false)
 const isSearching = ref(false)
+const isGettingLocation = ref(false)
 
 // Categories from store
 const categories = ref<any[]>([])
+
+// Use current location
+const useCurrentLocation = async () => {
+  if (!navigator.geolocation) {
+    alert('Geolocation is not supported by this browser.')
+    return
+  }
+
+  isGettingLocation.value = true
+  
+  try {
+    const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(resolve, reject, {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 60000
+      })
+    })
+    
+    const latitude = position.coords.latitude
+    const longitude = position.coords.longitude
+    
+    currentLatitude.value = latitude
+    currentLongitude.value = longitude
+    
+    // Reverse geocode to get address
+    try {
+      const reverseResponse = await apiService.reverseGeocode(latitude, longitude)
+      if (reverseResponse.success && reverseResponse.data) {
+        locationAddress.value = reverseResponse.data.formattedAddress
+      }
+    } catch (error) {
+      console.error('Error reverse geocoding:', error)
+      locationAddress.value = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`
+    }
+  } catch (error) {
+    console.error('Error getting current location:', error)
+    alert('Unable to get your current location. Please enter an address manually.')
+  } finally {
+    isGettingLocation.value = false
+  }
+}
 
 // Location handling
 const handleLocationSelected = (location: GeocodeResult) => {
