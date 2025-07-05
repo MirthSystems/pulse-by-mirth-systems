@@ -6,6 +6,7 @@ import {
   XMarkIcon
 } from '@heroicons/vue/24/outline'
 import Auth from './components/Auth.vue'
+import PWAPrompt from './components/PWAPrompt.vue'
 import { useApiAuth } from './composables/useApiAuth'
 
 const mobileMenuOpen = ref(false)
@@ -58,6 +59,9 @@ useApiAuth()
         </div>
       </div>
     </footer>
+
+    <!-- PWA Installation and Status Prompts -->
+    <PWAPrompt />
   </div>
 </template>
 
