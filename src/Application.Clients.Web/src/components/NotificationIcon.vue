@@ -1,3 +1,4 @@
+
 <template>
   <div class="relative">
     <button
@@ -27,7 +28,7 @@
     >
       <div
         v-if="isOpen"
-        class="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50"
+        class="absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50 sm:w-80"
       >
         <div class="py-1">
           <!-- Header -->
@@ -52,30 +53,30 @@
             <div
               v-for="invitation in invitations"
               :key="invitation.id"
-              class="px-4 py-3 border-b border-gray-100 last:border-b-0"
+              class="px-3 sm:px-4 py-3 border-b border-gray-100 last:border-b-0"
             >
               <div class="flex items-start space-x-3">
                 <div class="flex-shrink-0">
-                  <BuildingStorefrontIcon class="h-6 w-6 text-blue-500" />
+                  <BuildingStorefrontIcon class="h-5 w-5 sm:h-6 sm:w-6 text-blue-500" />
                 </div>
                 <div class="flex-1 min-w-0">
-                  <p class="text-sm font-medium text-gray-900">
+                  <p class="text-xs sm:text-sm font-medium text-gray-900">
                     Venue Invitation
                   </p>
-                  <p class="text-sm text-gray-600">
+                  <p class="text-xs sm:text-sm text-gray-600 leading-relaxed">
                     You've been invited to join <strong>{{ invitation.venueName }}</strong> 
                     as {{ getPermissionDisplayName(invitation.name) }}
                   </p>
-                  <p class="text-xs text-gray-500 mt-1">
+                  <p class="text-xs text-gray-500 mt-1 leading-relaxed">
                     From {{ invitation.invitedByUserEmail }} • {{ formatDate(invitation.invitedAt) }}
                   </p>
                   
                   <!-- Action Buttons -->
-                  <div class="flex space-x-2 mt-3">
+                  <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 mt-3">
                     <button
                       @click="acceptInvitation(invitation.id)"
                       :disabled="processingInvitation === invitation.id"
-                      class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50"
+                      class="inline-flex items-center justify-center px-3 py-2 border border-transparent text-xs font-medium rounded text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 w-full sm:w-auto"
                     >
                       <CheckIcon class="h-3 w-3 mr-1" />
                       Accept
@@ -83,7 +84,7 @@
                     <button
                       @click="declineInvitation(invitation.id)"
                       :disabled="processingInvitation === invitation.id"
-                      class="inline-flex items-center px-3 py-1 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50"
+                      class="inline-flex items-center justify-center px-3 py-2 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50 w-full sm:w-auto"
                     >
                       <XMarkIcon class="h-3 w-3 mr-1" />
                       Decline

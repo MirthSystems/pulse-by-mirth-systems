@@ -27,9 +27,9 @@
           </ol>
         </nav>
         
-        <div class="flex items-center justify-between">
+        <div class="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
           <div>
-            <h1 class="text-2xl font-bold text-gray-900">Venue Management</h1>
+            <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Venue Management</h1>
             <p class="mt-1 text-sm text-gray-500">
               Manage your venues, edit details, and track specials
             </p>
@@ -37,7 +37,7 @@
           <router-link
             v-if="canCreateVenues"
             to="/backoffice/venues/new"
-            class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            class="inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 w-full sm:w-auto"
           >
             <BuildingStorefrontIcon class="-ml-1 mr-2 h-4 w-4" />
             New Venue
@@ -49,17 +49,17 @@
     <!-- Content -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <!-- Stats Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
         <div class="bg-white overflow-hidden shadow rounded-lg">
-          <div class="p-5">
+          <div class="p-4 sm:p-5">
             <div class="flex items-center">
               <div class="flex-shrink-0">
-                <BuildingStorefrontIcon class="h-6 w-6 text-gray-400" />
+                <BuildingStorefrontIcon class="h-5 w-5 sm:h-6 sm:w-6 text-gray-400" />
               </div>
-              <div class="ml-5 w-0 flex-1">
+              <div class="ml-3 sm:ml-5 w-0 flex-1">
                 <dl>
-                  <dt class="text-sm font-medium text-gray-500 truncate">Total Venues</dt>
-                  <dd class="text-lg font-medium text-gray-900">{{ venues.length }}</dd>
+                  <dt class="text-xs sm:text-sm font-medium text-gray-500 break-words">Total Venues</dt>
+                  <dd class="text-base sm:text-lg font-medium text-gray-900">{{ venues.length }}</dd>
                 </dl>
               </div>
             </div>
@@ -67,15 +67,15 @@
         </div>
         
         <div class="bg-white overflow-hidden shadow rounded-lg">
-          <div class="p-5">
+          <div class="p-4 sm:p-5">
             <div class="flex items-center">
               <div class="flex-shrink-0">
-                <CheckCircleIcon class="h-6 w-6 text-green-400" />
+                <CheckCircleIcon class="h-5 w-5 sm:h-6 sm:w-6 text-green-400" />
               </div>
-              <div class="ml-5 w-0 flex-1">
+              <div class="ml-3 sm:ml-5 w-0 flex-1">
                 <dl>
-                  <dt class="text-sm font-medium text-gray-500 truncate">Active Venues</dt>
-                  <dd class="text-lg font-medium text-gray-900">{{ activeVenues.length }}</dd>
+                  <dt class="text-xs sm:text-sm font-medium text-gray-500 break-words">Active Venues</dt>
+                  <dd class="text-base sm:text-lg font-medium text-gray-900">{{ activeVenues.length }}</dd>
                 </dl>
               </div>
             </div>
@@ -83,15 +83,15 @@
         </div>
         
         <div class="bg-white overflow-hidden shadow rounded-lg">
-          <div class="p-5">
+          <div class="p-4 sm:p-5">
             <div class="flex items-center">
               <div class="flex-shrink-0">
-                <StarIcon class="h-6 w-6 text-yellow-400" />
+                <StarIcon class="h-5 w-5 sm:h-6 sm:w-6 text-yellow-400" />
               </div>
-              <div class="ml-5 w-0 flex-1">
+              <div class="ml-3 sm:ml-5 w-0 flex-1">
                 <dl>
-                  <dt class="text-sm font-medium text-gray-500 truncate">Total Specials</dt>
-                  <dd class="text-lg font-medium text-gray-900">{{ totalSpecials }}</dd>
+                  <dt class="text-xs sm:text-sm font-medium text-gray-500 break-words">Total Specials</dt>
+                  <dd class="text-base sm:text-lg font-medium text-gray-900">{{ totalSpecials }}</dd>
                 </dl>
               </div>
             </div>
@@ -99,15 +99,15 @@
         </div>
         
         <div class="bg-white overflow-hidden shadow rounded-lg">
-          <div class="p-5">
+          <div class="p-4 sm:p-5">
             <div class="flex items-center">
               <div class="flex-shrink-0">
-                <FireIcon class="h-6 w-6 text-red-400" />
+                <FireIcon class="h-5 w-5 sm:h-6 sm:w-6 text-red-400" />
               </div>
-              <div class="ml-5 w-0 flex-1">
+              <div class="ml-3 sm:ml-5 w-0 flex-1">
                 <dl>
-                  <dt class="text-sm font-medium text-gray-500 truncate">Active Specials</dt>
-                  <dd class="text-lg font-medium text-gray-900">{{ activeSpecials }}</dd>
+                  <dt class="text-xs sm:text-sm font-medium text-gray-500 break-words">Active Specials</dt>
+                  <dd class="text-base sm:text-lg font-medium text-gray-900">{{ activeSpecials }}</dd>
                 </dl>
               </div>
             </div>
@@ -117,8 +117,8 @@
 
       <!-- Search and Filters -->
       <div class="bg-white shadow rounded-lg mb-6">
-        <div class="px-6 py-4">
-          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div class="px-4 sm:px-6 py-4">
+          <div class="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0 gap-4">
             <div class="flex-1 max-w-lg">
               <div class="relative">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -133,10 +133,10 @@
               </div>
             </div>
             
-            <div class="flex items-center gap-4">
+            <div class="flex flex-col space-y-3 sm:flex-row sm:items-center sm:space-y-0 gap-3 sm:gap-4">
               <select
                 v-model="selectedCategory"
-                class="block w-40 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                class="block w-full sm:w-40 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               >
                 <option value="">All Categories</option>
                 <option v-for="category in categories" :key="category.id" :value="category.id">
@@ -146,7 +146,7 @@
               
               <select
                 v-model="selectedStatus"
-                class="block w-32 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                class="block w-full sm:w-32 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               >
                 <option value="">All Status</option>
                 <option value="active">Active</option>
@@ -209,27 +209,27 @@
           :key="venue.id"
           class="bg-white rounded-lg shadow hover:shadow-md transition-shadow"
         >
-          <div class="p-6">
-            <div class="flex items-start justify-between">
-              <div class="flex items-center space-x-4 flex-1">
+          <div class="p-4 sm:p-6">
+            <div class="flex flex-col space-y-4 sm:flex-row sm:items-start sm:justify-between sm:space-y-0">
+              <div class="flex items-start space-x-3 sm:space-x-4 flex-1 min-w-0">
                 <div class="flex-shrink-0">
-                  <div class="h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center">
-                    <BuildingStorefrontIcon class="h-6 w-6 text-blue-600" />
+                  <div class="h-10 w-10 sm:h-12 sm:w-12 bg-blue-100 rounded-full flex items-center justify-center">
+                    <BuildingStorefrontIcon class="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
                   </div>
                 </div>
                 <div class="flex-1 min-w-0">
-                  <h3 class="text-lg font-medium text-gray-900">{{ venue.name }}</h3>
-                  <p class="text-sm text-gray-500">{{ venue.categoryName }}</p>
-                  <div class="text-sm text-gray-600 mt-2">
-                    <p>{{ venue.streetAddress }}</p>
-                    <p>{{ venue.locality }}, {{ venue.region }} {{ venue.postalCode }}</p>
+                  <h3 class="text-base sm:text-lg font-medium text-gray-900 break-words">{{ venue.name }}</h3>
+                  <p class="text-sm text-gray-500 break-words">{{ venue.categoryName }}</p>
+                  <div class="text-xs sm:text-sm text-gray-600 mt-2 space-y-1">
+                    <p class="break-words">{{ venue.streetAddress }}</p>
+                    <p class="break-words">{{ venue.locality }}, {{ venue.region }} {{ venue.postalCode }}</p>
                   </div>
                 </div>
               </div>
               
-              <div class="flex flex-col items-end space-y-3 ml-4">
+              <div class="flex flex-row justify-between items-center sm:flex-col sm:items-end sm:space-y-3 sm:ml-4">
                 <!-- Status and Special Count -->
-                <div class="flex flex-col items-end space-y-2">
+                <div class="flex flex-col items-start sm:items-end space-y-2">
                   <span 
                     :class="[
                       'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
@@ -238,8 +238,8 @@
                   >
                     {{ venue.isActive ? 'Active' : 'Inactive' }}
                   </span>
-                  <div class="flex items-center text-sm text-gray-500">
-                    <StarIcon class="h-4 w-4 mr-1" />
+                  <div class="flex items-center text-xs sm:text-sm text-gray-500">
+                    <StarIcon class="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                     <span>{{ venue.activeSpecialsCount }} specials</span>
                   </div>
                 </div>
@@ -248,20 +248,20 @@
                 <div class="flex items-center space-x-2">
                   <button
                     @click="goToVenueDetail(venue.id)"
-                    class="inline-flex items-center px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 transition-colors"
+                    class="inline-flex items-center px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 transition-colors"
                     title="View venue details"
                   >
-                    <ChevronRightIcon class="h-4 w-4 mr-1" />
-                    View
+                    <ChevronRightIcon class="h-3 w-3 sm:h-4 sm:w-4 sm:mr-1" />
+                    <span class="hidden sm:inline">View</span>
                   </button>
                   <button
                     v-if="canDeleteVenues"
                     @click="confirmDeleteVenue(venue)"
-                    class="inline-flex items-center px-3 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-md hover:bg-red-100 transition-colors"
+                    class="inline-flex items-center px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-red-600 bg-red-50 rounded-md hover:bg-red-100 transition-colors"
                     title="Delete venue"
                   >
-                    <TrashIcon class="h-4 w-4 mr-1" />
-                    Delete
+                    <TrashIcon class="h-3 w-3 sm:h-4 sm:w-4 sm:mr-1" />
+                    <span class="hidden sm:inline">Delete</span>
                   </button>
                 </div>
               </div>

@@ -4,14 +4,14 @@
       <!-- Quick Presets -->
       <div v-if="showPresets">
         <label class="block text-sm font-medium text-gray-700 mb-2">Quick Presets</label>
-        <div class="grid grid-cols-2 gap-2">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <button
             v-for="preset in cronPresets"
             :key="preset.value"
             @click="selectPreset(preset.value)"
             :disabled="disabled"
             :class="[
-              'px-3 py-2 text-sm rounded-md border transition-colors',
+              'px-3 py-2 text-sm rounded-md border transition-colors text-left',
               cronExpression === preset.value
                 ? 'bg-blue-100 border-blue-300 text-blue-800'
                 : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50',
@@ -88,7 +88,7 @@
       <!-- Visual Builder (Optional) -->
       <div v-if="showBuilder" class="border-t pt-4">
         <h4 class="text-sm font-medium text-gray-900 mb-3">Visual Builder</h4>
-        <div class="grid grid-cols-5 gap-4 text-sm">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 text-sm">
           <!-- Minute -->
           <div>
             <label class="block text-xs font-medium text-gray-700 mb-1">Minute</label>
@@ -96,7 +96,7 @@
               v-model="cronParts.minute" 
               @change="buildCron" 
               :disabled="disabled"
-              class="w-full text-xs border-gray-300 rounded"
+              class="w-full text-xs border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 min-w-0"
               :class="{ 'bg-gray-50 cursor-not-allowed': disabled }"
             >
               <option value="*">Every minute</option>
@@ -114,7 +114,7 @@
               v-model="cronParts.hour" 
               @change="buildCron" 
               :disabled="disabled"
-              class="w-full text-xs border-gray-300 rounded"
+              class="w-full text-xs border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 min-w-0"
               :class="{ 'bg-gray-50 cursor-not-allowed': disabled }"
             >
               <option value="*">Every hour</option>
@@ -131,7 +131,7 @@
               v-model="cronParts.day" 
               @change="buildCron" 
               :disabled="disabled"
-              class="w-full text-xs border-gray-300 rounded"
+              class="w-full text-xs border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 min-w-0"
               :class="{ 'bg-gray-50 cursor-not-allowed': disabled }"
             >
               <option value="*">Every day</option>
@@ -146,7 +146,7 @@
               v-model="cronParts.month" 
               @change="buildCron" 
               :disabled="disabled"
-              class="w-full text-xs border-gray-300 rounded"
+              class="w-full text-xs border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 min-w-0"
               :class="{ 'bg-gray-50 cursor-not-allowed': disabled }"
             >
               <option value="*">Every month</option>
@@ -163,7 +163,7 @@
               v-model="cronParts.dayOfWeek" 
               @change="buildCron" 
               :disabled="disabled"
-              class="w-full text-xs border-gray-300 rounded"
+              class="w-full text-xs border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 min-w-0"
               :class="{ 'bg-gray-50 cursor-not-allowed': disabled }"
             >
               <option value="*">Every day</option>

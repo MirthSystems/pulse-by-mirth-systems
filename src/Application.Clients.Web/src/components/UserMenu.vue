@@ -20,7 +20,7 @@
     >
       <div
         v-if="isOpen"
-        class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50"
+        class="absolute right-0 mt-2 w-48 max-w-[calc(100vw-2rem)] bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50"
       >
         <div class="py-1">
           <!-- User Info -->

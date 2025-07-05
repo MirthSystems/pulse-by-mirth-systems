@@ -9,57 +9,62 @@
       <div 
         v-for="day in daysOfWeek" 
         :key="day.id"
-        class="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg"
+        class="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 p-4 border border-gray-200 rounded-lg"
       >
-        <!-- Day name -->
-        <div class="w-20 flex-shrink-0">
-          <span class="text-sm font-medium text-gray-900">{{ day.name }}</span>
-        </div>
-        
-        <!-- Closed toggle -->
-        <div class="flex items-center">
-          <input
-            :id="`closed-${day.id}`"
-            v-model="businessHours[day.id - 1].isClosed"
-            type="checkbox"
-            :disabled="disabled"
-            class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
-            @change="onClosedChange(day.id - 1)"
-          />
-          <label :for="`closed-${day.id}`" class="ml-2 block text-sm text-gray-700">
-            Closed
-          </label>
+        <!-- Day name and closed toggle section -->
+        <div class="flex items-center justify-between sm:justify-start sm:space-x-4">
+          <!-- Day name -->
+          <div class="w-20 flex-shrink-0">
+            <span class="text-sm font-medium text-gray-900">{{ day.name }}</span>
+          </div>
+          
+          <!-- Closed toggle -->
+          <div class="flex items-center">
+            <input
+              :id="`closed-${day.id}`"
+              v-model="businessHours[day.id - 1].isClosed"
+              type="checkbox"
+              :disabled="disabled"
+              class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+              @change="onClosedChange(day.id - 1)"
+            />
+            <label :for="`closed-${day.id}`" class="ml-2 block text-sm text-gray-700">
+              Closed
+            </label>
+          </div>
         </div>
         
         <!-- Time inputs -->
-        <div v-if="!businessHours[day.id - 1].isClosed" class="flex items-center space-x-2 flex-1">
-          <div class="flex-1">
-            <label :for="`open-${day.id}`" class="sr-only">Open time for {{ day.name }}</label>
-            <input
-              :id="`open-${day.id}`"
-              v-model="businessHours[day.id - 1].openTime"
-              type="time"
-              :disabled="disabled"
-              class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 sm:text-sm"
-              :class="{ 'bg-gray-50': disabled }"
-            />
-          </div>
-          <span class="text-sm text-gray-500">to</span>
-          <div class="flex-1">
-            <label :for="`close-${day.id}`" class="sr-only">Close time for {{ day.name }}</label>
-            <input
-              :id="`close-${day.id}`"
-              v-model="businessHours[day.id - 1].closeTime"
-              type="time"
-              :disabled="disabled"
-              class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 sm:text-sm"
-              :class="{ 'bg-gray-50': disabled }"
-            />
+        <div v-if="!businessHours[day.id - 1].isClosed" class="w-full sm:flex-1">
+          <div class="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
+            <div class="flex-1">
+              <label :for="`open-${day.id}`" class="block text-xs text-gray-500 mb-1 sm:sr-only">Open</label>
+              <input
+                :id="`open-${day.id}`"
+                v-model="businessHours[day.id - 1].openTime"
+                type="time"
+                :disabled="disabled"
+                class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 text-sm"
+                :class="{ 'bg-gray-50': disabled }"
+              />
+            </div>
+            <span class="text-sm text-gray-500 text-center sm:text-left">to</span>
+            <div class="flex-1">
+              <label :for="`close-${day.id}`" class="block text-xs text-gray-500 mb-1 sm:sr-only">Close</label>
+              <input
+                :id="`close-${day.id}`"
+                v-model="businessHours[day.id - 1].closeTime"
+                type="time"
+                :disabled="disabled"
+                class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 text-sm"
+                :class="{ 'bg-gray-50': disabled }"
+              />
+            </div>
           </div>
         </div>
         
         <!-- Closed message -->
-        <div v-else class="flex-1 text-sm text-gray-500 italic">
+        <div v-else class="sm:flex-1 text-sm text-gray-500 italic">
           Closed all day
         </div>
       </div>
