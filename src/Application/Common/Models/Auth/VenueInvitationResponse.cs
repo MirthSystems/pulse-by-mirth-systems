@@ -6,12 +6,12 @@ namespace Application.Common.Models.Auth;
 public class VenueInvitationResponse
 {
     public long Id { get; set; }
-    public string Email { get; set; } = null!;
+    public required string Email { get; set; }
     public long VenueId { get; set; }
-    public string VenueName { get; set; } = null!;
-    public string Permission { get; set; } = null!;
+    public required string VenueName { get; set; }
+    public required string Permission { get; set; }
     public long InvitedByUserId { get; set; }
-    public string InvitedByUserEmail { get; set; } = null!;
+    public required string InvitedByUserEmail { get; set; }
     public DateTime InvitedAt { get; set; }
     public DateTime ExpiresAt { get; set; }
     public DateTime? AcceptedAt { get; set; }

@@ -11,31 +11,9 @@ const router = createRouter({
       component: HomeView,
     },
     {
-      path: '/venues',
-      name: 'Venues',
-      component: () => import('../views/VenuesView.vue'),
-    },
-    {
-      path: '/venues/:id',
-      name: 'VenueDetail',
-      component: () => import('../views/VenueDetailView.vue'),
-      props: true,
-    },
-    {
-      path: '/specials/:id',
-      name: 'SpecialDetail',
-      component: () => import('../views/SpecialDetailView.vue'),
-      props: true,
-    },
-    {
       path: '/search',
       name: 'Search',
       component: () => import('../views/SearchView.vue'),
-    },
-    {
-      path: '/about',
-      name: 'About',
-      component: () => import('../views/AboutView.vue'),
     },
     {
       path: '/backoffice',

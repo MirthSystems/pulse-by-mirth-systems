@@ -6,8 +6,8 @@ namespace Application.Common.Models.Auth;
 public class UserInfoResponse
 {
     public long Id { get; set; }
-    public string Sub { get; set; } = string.Empty;
-    public string Email { get; set; } = string.Empty;
+    public required string Sub { get; set; }
+    public required string Email { get; set; }
     public string? Name { get; set; }
     public bool IsActive { get; set; }
     public DateTime CreatedAt { get; set; }

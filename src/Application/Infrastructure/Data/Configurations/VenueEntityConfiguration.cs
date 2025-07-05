@@ -51,6 +51,7 @@ public class VenueEntityConfiguration : IEntityTypeConfiguration<VenueEntity>
                 {
                     SRID = 4326
                 },
+                TimeZoneId = "America/New_York",
                 IsActive = true
             },
             // The Brickyard Restaurant & Ale House
@@ -72,6 +73,7 @@ public class VenueEntityConfiguration : IEntityTypeConfiguration<VenueEntity>
                 {
                     SRID = 4326
                 },
+                TimeZoneId = "America/New_York",
                 IsActive = true
             },
             // The Crooked Goose
@@ -93,6 +95,7 @@ public class VenueEntityConfiguration : IEntityTypeConfiguration<VenueEntity>
                 {
                     SRID = 4326
                 },
+                TimeZoneId = "America/New_York",
                 IsActive = true
             }
         );

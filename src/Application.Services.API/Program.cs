@@ -1,6 +1,7 @@
 using Application.Extensions;
 using Application.Infrastructure.Data.Context;
 using Application.Services.API.Middleware;
+using Application.Common.Utilities;
 using Microsoft.EntityFrameworkCore;
 using Npgsql.EntityFrameworkCore.PostgreSQL;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -41,7 +42,7 @@ public class Program
                 options.Audience = builder.Configuration["Auth0:Audience"];
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    NameClaimType = ClaimTypes.NameIdentifier,
+                    NameClaimType = System.Security.Claims.ClaimTypes.NameIdentifier,
                     // Map Auth0 claims to standard claims
                     RoleClaimType = "permissions"
                 };
@@ -55,13 +56,13 @@ public class Program
                         var claimsIdentity = context.Principal?.Identity as ClaimsIdentity;
                         if (claimsIdentity != null)
                         {
-                            // Auth0 might send email in different claim types
-                            var emailClaim = claimsIdentity.FindFirst("email") 
-                                          ?? claimsIdentity.FindFirst("https://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress");
+                            // Auth0 might send email in different claim types - use comprehensive lookup
+                            var audience = builder.Configuration["Auth0:Audience"];
+                            var emailValue = UserContextUtils.GetUserEmail(context.Principal!, audience);
                             
-                            if (emailClaim != null && !claimsIdentity.HasClaim(ClaimTypes.Email, emailClaim.Value))
+                            if (!string.IsNullOrEmpty(emailValue) && !claimsIdentity.HasClaim(System.Security.Claims.ClaimTypes.Email, emailValue))
                             {
-                                claimsIdentity.AddClaim(new Claim(ClaimTypes.Email, emailClaim.Value));
+                                claimsIdentity.AddClaim(new Claim(System.Security.Claims.ClaimTypes.Email, emailValue));
                             }
                             
                             // Ensure name claim mapping
@@ -69,9 +70,9 @@ public class Program
                                          ?? claimsIdentity.FindFirst("nickname")
                                          ?? claimsIdentity.FindFirst("given_name");
                             
-                            if (nameClaim != null && !claimsIdentity.HasClaim(ClaimTypes.Name, nameClaim.Value))
+                            if (nameClaim != null && !claimsIdentity.HasClaim(System.Security.Claims.ClaimTypes.Name, nameClaim.Value))
                             {
-                                claimsIdentity.AddClaim(new Claim(ClaimTypes.Name, nameClaim.Value));
+                                claimsIdentity.AddClaim(new Claim(System.Security.Claims.ClaimTypes.Name, nameClaim.Value));
                             }
                         }
                         return Task.CompletedTask;

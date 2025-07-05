@@ -7,9 +7,9 @@ public class SpecialSummary : SpecialBase
 {
     public long Id { get; set; }
     public long VenueId { get; set; }
-    public string VenueName { get; set; } = string.Empty;
+    public required string VenueName { get; set; }
     public int SpecialCategoryId { get; set; }
-    public string CategoryName { get; set; } = string.Empty;
+    public required string CategoryName { get; set; }
     public string? CategoryIcon { get; set; }
     public double? DistanceInMeters { get; set; }
 }

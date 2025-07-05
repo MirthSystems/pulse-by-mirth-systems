@@ -77,7 +77,13 @@ public class VenueEntity
     public string Country { get; set; } = null!;
 
     [Column("location", TypeName = "geography (point)")]
-    public Point? Location { get; set; }
+    [Required]
+    public Point Location { get; set; } = null!;
+
+    [Column("timezone_id")]
+    [Required]
+    [MaxLength(50)]
+    public string TimeZoneId { get; set; } = null!; // IANA timezone ID (e.g., "America/New_York")
 
     [Column("is_active")]
     [DefaultValue(true)]

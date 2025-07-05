@@ -6,17 +6,17 @@ public class CreateInvitationRequest
 {
     [Required]
     [EmailAddress]
-    public string Email { get; set; } = string.Empty;
+    public required string Email { get; set; }
     
     [Required]
     public long VenueId { get; set; }
     
     [Required]
-    public string Permission { get; set; } = string.Empty;
+    public required string Permission { get; set; }
     
     public string? Notes { get; set; }
     
     [Required]
     [EmailAddress]
-    public string SenderEmail { get; set; } = string.Empty;
+    public required string SenderEmail { get; set; }
 }
