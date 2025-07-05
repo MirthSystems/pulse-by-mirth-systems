@@ -146,6 +146,14 @@ watch(() => route.query, (newQuery) => {
   <div class="min-h-screen bg-gray-50">
     <!-- Search Component -->
     <div class="bg-gradient-to-br from-blue-600 via-purple-600 to-blue-800 pt-6 pb-8 sm:pt-8 sm:pb-12">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 text-center mb-6">
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white">
+          Search
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-400">
+            Specials
+          </span>
+        </h1>
+      </div>
       <SearchSpecials />
     </div>
 
