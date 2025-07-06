@@ -18,7 +18,7 @@
               <!-- Use My Location Button -->
               <button
                 type="button"
-                @click="useCurrentLocation"
+                @click="handleLocationRequest"
                 :disabled="isGettingLocation"
                 class="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 text-gray-400 hover:text-blue-600 transition-colors rounded-lg hover:bg-gray-50"
                 title="Use my current location"
@@ -57,7 +57,7 @@
         <div class="text-center">
           <button
             type="button"
-            @click="showFilters = !showFilters"
+            @click="handleFilterToggle"
             class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 rounded-lg transition-all shadow-sm border border-gray-300"
           >
             <AdjustmentsHorizontalIcon class="mr-2 h-4 w-4" />
@@ -176,9 +176,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useSpecialStore } from '../stores/special'
+import { useAnalytics } from '@/composables/useAnalytics'
 import AddressAutocomplete from './AddressAutocomplete.vue'
 import apiService from '@/services/api'
 import type { GeocodeResult } from '@/types/api'
@@ -192,6 +193,7 @@ import {
 const router = useRouter()
 const route = useRoute()
 const specialStore = useSpecialStore()
+const { trackEvent, trackForm } = useAnalytics()
 
 // Search parameters
 const searchTerm = ref('')
@@ -287,7 +289,18 @@ onMounted(async () => {
   if (query.sortOrder) sortOrder.value = query.sortOrder as string
 })
 
+const handleFilterToggle = () => {
+  showFilters.value = !showFilters.value
+  trackEvent('search_filters_toggle', {
+    action: showFilters.value ? 'show' : 'hide',
+    page: 'special_search'
+  })
+}
+
 const handleSearch = async () => {
+  // Track search form submission
+  trackSearchSubmission()
+  
   // Validate required fields - prioritize coordinates over address
   if (!currentLatitude.value || !currentLongitude.value) {
     if (!locationAddress.value.trim()) {
@@ -336,6 +349,46 @@ const handleSearch = async () => {
   } finally {
     isSearching.value = false
   }
+}
+
+// Location request handler
+const handleLocationRequest = async () => {
+  trackEvent('geolocation_request', {
+    source: 'search_form',
+    page: 'special_search'
+  })
+  
+  await useCurrentLocation()
+  
+  if (currentLatitude.value && currentLongitude.value) {
+    trackEvent('geolocation_success', {
+      source: 'search_form',
+      page: 'special_search'
+    })
+  } else {
+    trackEvent('geolocation_error', {
+      source: 'search_form',
+      page: 'special_search'
+    })
+  }
+}
+
+// Analytics methods
+const trackSearchSubmission = () => {
+  trackForm('submit', 'special_search_form', {
+    success: true,
+    has_search_term: !!searchTerm.value.trim(),
+    has_location: !!locationAddress.value.trim(),
+    has_coordinates: !!(currentLatitude.value && currentLongitude.value),
+    radius: radius.value,
+    has_date_filter: !!date.value,
+    has_time_filter: !!time.value,
+    has_category_filter: !!categoryId.value,
+    currently_running_filter: currentlyRunning.value,
+    sort_by: sortBy.value,
+    sort_order: sortOrder.value,
+    filters_expanded: showFilters.value
+  })
 }
 </script>
 

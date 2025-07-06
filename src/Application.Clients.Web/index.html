@@ -8,7 +8,10 @@
     
     <!-- PWA Meta Tags -->
     <meta name="description" content="Discover and manage venue specials and events">
+    <!-- Theme color for supported browsers (Chrome, Edge, Samsung Internet) -->
     <meta name="theme-color" content="#1f2937">
+    <!-- Fallback for browsers that don't support theme-color -->
+    <meta name="msapplication-navbutton-color" content="#1f2937">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Pulse">
@@ -17,8 +20,17 @@
     <meta name="msapplication-tap-highlight" content="no">
     <meta name="mobile-web-app-capable" content="yes">
     
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="/manifest.webmanifest">
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-360H10VSKC"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-360H10VSKC');
+    </script>
+    
+    <!-- PWA Manifest - Only in production -->
+    <!-- <link rel="manifest" href="/manifest.webmanifest"> -->
     
     <!-- Icons -->
     <link rel="icon" href="/favicon.ico" sizes="any">

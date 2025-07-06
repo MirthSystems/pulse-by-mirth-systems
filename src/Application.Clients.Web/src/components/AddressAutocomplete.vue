@@ -72,6 +72,7 @@
 <script setup lang="ts">
 import { ref, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { MapPinIcon } from '@heroicons/vue/24/outline'
+import { useAnalytics } from '@/composables/useAnalytics'
 import apiService from '@/services/api'
 import type { GeocodeResult } from '@/types/api'
 
@@ -99,6 +100,7 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const emit = defineEmits<Emits>()
+const { trackEvent } = useAnalytics()
 
 // Reactive state
 const addressInput = ref<HTMLInputElement>()
@@ -120,6 +122,21 @@ watch(() => props.modelValue, (newValue) => {
 // Watch for input changes and emit to parent
 watch(inputValue, (newValue) => {
   emit('update:modelValue', newValue)
+})
+
+// Watch for input changes and track search behavior
+watch(inputValue, (newValue) => {
+  if (searchTimeout) {
+    clearTimeout(searchTimeout)
+  }
+  searchTimeout = setTimeout(() => {
+    if (newValue.length > 2) {
+      trackEvent('address_search', {
+        query_length: newValue.length,
+        component: 'address_autocomplete'
+      })
+    }
+  }, 1000) // Debounce to avoid too many events
 })
 
 // Event handlers
@@ -144,6 +161,9 @@ const handleInput = () => {
   searchTimeout = setTimeout(async () => {
     await searchAddresses(query)
   }, 300)
+
+  // Analytics for address search
+  handleSearchInput()
 }
 
 const handleFocus = () => {
@@ -218,6 +238,14 @@ const selectSuggestion = (suggestion: GeocodeResult) => {
   
   emit('location-selected', suggestion)
   emit('coordinates-updated', suggestion.latitude, suggestion.longitude)
+  
+  // Track selection event
+  trackEvent('address_autocomplete_select', {
+    address: suggestion.formattedAddress,
+    latitude: suggestion.latitude,
+    longitude: suggestion.longitude,
+    source: 'suggestion_dropdown'
+  })
 }
 
 // Get current location
@@ -240,6 +268,13 @@ const getCurrentLocation = async () => {
 
     const { latitude, longitude } = position.coords
 
+    // Track successful location acquisition
+    trackEvent('location_success', {
+      source: 'address_autocomplete',
+      accuracy: position.coords.accuracy,
+      timestamp: position.timestamp
+    })
+
     // Reverse geocode to get address
     try {
       const response = await apiService.reverseGeocode(latitude, longitude)
@@ -260,9 +295,19 @@ const getCurrentLocation = async () => {
         }
         
         emit('location-selected', geocodeResult)
+        
+        trackEvent('reverse_geocode_success', {
+          source: 'address_autocomplete',
+          address: response.data.formattedAddress
+        })
       } else {
         // Fallback to coordinates
         inputValue.value = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`
+        
+        trackEvent('reverse_geocode_fallback', {
+          source: 'address_autocomplete',
+          coordinates: `${latitude}, ${longitude}`
+        })
       }
       
       emit('coordinates-updated', latitude, longitude)
@@ -270,6 +315,12 @@ const getCurrentLocation = async () => {
       console.error('Error reverse geocoding:', reverseGeocodeError)
       // Fallback to coordinates only - don't try to display them as address
       inputValue.value = `Current Location (${latitude.toFixed(4)}, ${longitude.toFixed(4)})`
+      
+      trackEvent('reverse_geocode_error', {
+        source: 'address_autocomplete',
+        error: reverseGeocodeError instanceof Error ? reverseGeocodeError.message : 'Unknown error',
+        coordinates: `${latitude}, ${longitude}`
+      })
       
       // Create a minimal GeocodeResult for coordinates-only mode
       const geocodeResult: GeocodeResult = {
@@ -288,6 +339,13 @@ const getCurrentLocation = async () => {
       emit('coordinates-updated', latitude, longitude)
     }
   } catch (error) {
+    console.error('Error getting current location:', error)
+    alert('Unable to get your current location. Please enter an address manually.')
+    
+    trackEvent('location_error', {
+      source: 'address_autocomplete',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    })
     console.error('Error getting location:', error)
     let message = 'Unable to get your location.'
     
@@ -309,6 +367,25 @@ const getCurrentLocation = async () => {
   } finally {
     isGettingLocation.value = false
   }
+}
+
+// Analytics for address search
+const handleSearchInput = () => {
+  if (inputValue.value.length > 2) {
+    trackEvent('address_search', {
+      query_length: inputValue.value.length,
+      component: 'address_autocomplete'
+    })
+  }
+}
+
+// Analytics for current location request
+const handleLocationRequest = () => {
+  trackEvent('location_request', {
+    source: 'address_autocomplete',
+    method: 'current_location'
+  })
+  getCurrentLocation()
 }
 
 // Cleanup

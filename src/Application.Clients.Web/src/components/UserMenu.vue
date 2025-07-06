@@ -42,7 +42,7 @@
           <router-link
             v-if="canAccessBackoffice && !permissionsLoading"
             to="/backoffice"
-            @click="closeMenu"
+            @click="handleBackofficeClick"
             class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
           >
             <BuildingStorefrontIcon class="mr-3 h-4 w-4" />
@@ -73,25 +73,47 @@ import { useAuth0 } from '@auth0/auth0-vue'
 import { BuildingStorefrontIcon, ArrowRightOnRectangleIcon } from '@heroicons/vue/24/outline'
 import { useAuthStore } from '../stores/auth'
 import { usePermissions } from '../composables/usePermissions'
+import { useAnalytics } from '../composables/useAnalytics'
 import UserAvatar from './UserAvatar.vue'
 
 const { logout } = useAuth0()
 const authStore = useAuthStore()
 const { user, displayName } = storeToRefs(authStore)
 const { canAccessBackoffice, permissionsLoading } = usePermissions()
+const { trackEvent } = useAnalytics()
 
 const isOpen = ref(false)
 const menuContainer = ref<HTMLElement>()
 
 const toggleMenu = () => {
   isOpen.value = !isOpen.value
+  
+  // Track menu interaction
+  trackEvent('user_menu_toggle', {
+    action: isOpen.value ? 'open' : 'close',
+    user_id: user.value?.sub
+  })
 }
 
 const closeMenu = () => {
   isOpen.value = false
 }
 
+const handleBackofficeClick = () => {
+  trackEvent('navigation', {
+    destination: 'backoffice',
+    source: 'user_menu',
+    user_id: user.value?.sub
+  })
+  closeMenu()
+}
+
 const handleLogout = () => {
+  trackEvent('logout_initiated', {
+    method: 'user_menu',
+    user_id: user.value?.sub
+  })
+  
   logout({ 
     logoutParams: { 
       returnTo: window.location.origin 

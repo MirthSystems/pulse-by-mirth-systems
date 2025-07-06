@@ -126,6 +126,7 @@
                 </div>
                 <input
                   v-model="searchTerm"
+                  @input="handleSearchInput"
                   type="text"
                   class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                   placeholder="Search venues..."
@@ -136,6 +137,7 @@
             <div class="flex flex-col space-y-3 sm:flex-row sm:items-center sm:space-y-0 gap-3 sm:gap-4">
               <select
                 v-model="selectedCategory"
+                @change="handleCategoryFilter(selectedCategory)"
                 class="block w-full sm:w-40 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               >
                 <option value="">All Categories</option>
@@ -146,6 +148,7 @@
               
               <select
                 v-model="selectedStatus"
+                @change="handleStatusFilter(selectedStatus)"
                 class="block w-full sm:w-32 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               >
                 <option value="">All Status</option>
@@ -247,7 +250,7 @@
                 <!-- Action Buttons -->
                 <div class="flex items-center space-x-2">
                   <button
-                    @click="goToVenueDetail(venue.id)"
+                    @click="handleVenueView(venue)"
                     class="inline-flex items-center px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 transition-colors"
                     title="View venue details"
                   >
@@ -256,7 +259,7 @@
                   </button>
                   <button
                     v-if="canDeleteVenues"
-                    @click="confirmDeleteVenue(venue)"
+                    @click="handleVenueDelete(venue)"
                     class="inline-flex items-center px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-red-600 bg-red-50 rounded-md hover:bg-red-100 transition-colors"
                     title="Delete venue"
                   >
@@ -310,7 +313,7 @@
               <button
                 v-for="page in visiblePages"
                 :key="page"
-                @click="currentPage = page"
+                @click="handlePageChange(page)"
                 :class="[
                   'relative inline-flex items-center px-4 py-2 border text-sm font-medium',
                   page === currentPage
@@ -348,23 +351,29 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { storeToRefs } from 'pinia'
 import { 
   BuildingStorefrontIcon, 
-  StarIcon, 
   CheckCircleIcon,
+  StarIcon,
   FireIcon,
   MagnifyingGlassIcon,
-  ChevronRightIcon,
   ChevronLeftIcon,
-  TrashIcon
+  ChevronRightIcon,
+  TrashIcon,
+  ExclamationTriangleIcon
 } from '@heroicons/vue/24/outline'
-import apiService from '../services/api'
-import Toast from '../components/Toast.vue'
-import { usePermissions } from '../composables/usePermissions'
-import type { VenueSummary, VenueCategory } from '../types/api'
+import { useVenueStore } from '@/stores/venue'
+import { usePermissions } from '@/composables/usePermissions'
+import { useAnalytics } from '@/composables/useAnalytics'
+import { apiService } from '@/services/api'
+import Toast from '@/components/Toast.vue'
+import type { VenueSummary, VenueCategory } from '@/types/api'
 
 const router = useRouter()
 const route = useRoute()
+const venueStore = useVenueStore()
+const { venues, categories, loading, error: storeError } = storeToRefs(venueStore)
 
 // Permissions
 const { 
@@ -373,22 +382,21 @@ const {
   getVenuePermissions 
 } = usePermissions()
 
+const { trackEvent, trackContentView, trackError } = useAnalytics()
+
 // State
-const venues = ref<VenueSummary[]>([])
-const categories = ref<VenueCategory[]>([])
-const loading = ref(true)
 const searchTerm = ref('')
 const selectedCategory = ref<number | ''>('')
-const selectedStatus = ref<'active' | 'inactive' | ''>('')
-
-// Toast notifications
+const selectedStatus = ref<'all' | 'active' | 'inactive'>('all')
+const currentPage = ref(1)
+const pageSize = ref(12)
+const showDeleteDialog = ref(false)
+const venueToDelete = ref<VenueSummary | null>(null)
+const deletingVenue = ref(false)
+const deleteError = ref('')
 const showToast = ref(false)
 const toastMessage = ref('')
-const toastType = ref<'success' | 'error' | 'warning' | 'info'>('info')
-
-// Pagination
-const currentPage = ref(1)
-const pageSize = ref(9)
+const toastType = ref<'success' | 'error'>('success')
 
 // Computed properties
 const activeVenues = computed(() => venues.value.filter(v => v.isActive))
@@ -415,7 +423,7 @@ const filteredVenues = computed(() => {
     filtered = filtered.filter(venue => venue.categoryId === selectedCategory.value)
   }
 
-  if (selectedStatus.value) {
+  if (selectedStatus.value && selectedStatus.value !== 'all') {
     filtered = filtered.filter(venue => 
       selectedStatus.value === 'active' ? venue.isActive : !venue.isActive
     )
@@ -450,18 +458,41 @@ const goToVenueDetail = (venueId: number) => {
 }
 
 const confirmDeleteVenue = (venue: VenueSummary) => {
-  router.push({
-    path: '/confirm',
-    query: {
-      type: 'venue',
-      id: venue.id.toString(),
-      name: venue.name,
-      returnTo: '/backoffice'
-    }
-  })
+  venueToDelete.value = venue
+  showDeleteDialog.value = true
 }
 
-const showToastMessage = (message: string, type: 'success' | 'error' | 'warning' | 'info') => {
+const deleteVenue = async () => {
+  if (!venueToDelete.value) return
+
+  try {
+    deletingVenue.value = true
+    // Use API service directly since store doesn't have deleteVenue method
+    const response = await apiService.deleteVenue(venueToDelete.value.id)
+    if (response.success) {
+      showToastMessage('Venue deleted successfully', 'success')
+      trackEvent('venue_delete', { 
+        venue_id: venueToDelete.value.id,
+        venue_name: venueToDelete.value.name
+      })
+      venueToDelete.value = null
+      showDeleteDialog.value = false
+      await loadVenues()
+    } else {
+      throw new Error(response.message || 'Failed to delete venue')
+    }
+  } catch (error) {
+    console.error('Failed to delete venue:', error)
+    showToastMessage('Failed to delete venue', 'error')
+    trackError('venue_delete_error', error instanceof Error ? error.message : 'Unknown error', {
+      venue_id: venueToDelete.value?.id
+    })
+  } finally {
+    deletingVenue.value = false
+  }
+}
+
+const showToastMessage = (message: string, type: 'success' | 'error') => {
   toastMessage.value = message
   toastType.value = type
   showToast.value = true
@@ -470,12 +501,13 @@ const showToastMessage = (message: string, type: 'success' | 'error' | 'warning'
 const loadVenues = async () => {
   try {
     loading.value = true
-    const response = await apiService.getMyVenues()
-    if (response.data) {
-      venues.value = response.data
-    }
+    await venueStore.fetchVenues()
+    trackContentView('venue_management', venues.value.length.toString(), `Venue Management - ${venues.value.length} venues`)
   } catch (error) {
     console.error('Failed to load venues:', error)
+    trackError('load_venues_error', error instanceof Error ? error.message : 'Unknown error', {
+      context: 'venue_management_page'
+    })
   } finally {
     loading.value = false
   }
@@ -483,25 +515,113 @@ const loadVenues = async () => {
 
 const loadCategories = async () => {
   try {
-    const response = await apiService.getVenueCategories()
-    if (response.data) {
-      categories.value = response.data
-    }
+    await venueStore.fetchVenueCategories()
   } catch (error) {
     console.error('Failed to load categories:', error)
   }
 }
 
-// Watch for search/filter changes
-watch([searchTerm, selectedCategory, selectedStatus], () => {
-  currentPage.value = 1
-})
+// Analytics methods
+const handleSearchInput = () => {
+  // Track search with debounce to avoid too many events
+  if (searchTerm.value.length > 2) {
+    trackEvent('venue_search', {
+      query: searchTerm.value,
+      results_count: filteredVenues.value.length
+    })
+  }
+}
 
-// Load data on mount
+const handleCategoryFilter = (categoryId: number | '') => {
+  selectedCategory.value = categoryId
+  trackEvent('venue_filter', {
+    filter_type: 'category',
+    filter_value: categoryId || 'all',
+    results_count: filteredVenues.value.length
+  })
+}
+
+const handleStatusFilter = (status: 'all' | 'active' | 'inactive') => {
+  selectedStatus.value = status
+  trackEvent('venue_filter', {
+    filter_type: 'status',
+    filter_value: status,
+    results_count: filteredVenues.value.length
+  })
+}
+
+const handlePageChange = (page: number) => {
+  currentPage.value = page
+  trackEvent('venue_pagination', {
+    page: page,
+    total_pages: totalPages.value,
+    venues_per_page: pageSize.value
+  })
+}
+
+const handleVenueView = (venue: VenueSummary) => {
+  trackEvent('venue_view', {
+    venue_id: venue.id,
+    venue_name: venue.name,
+    venue_category: venue.categoryName
+  })
+  router.push(`/backoffice/venues/${venue.id}`)
+}
+
+const handleVenueDelete = (venue: VenueSummary) => {
+  trackEvent('venue_delete_intent', {
+    venue_id: venue.id,
+    venue_name: venue.name
+  })
+  venueToDelete.value = venue
+  showDeleteDialog.value = true
+}
+
+// Lifecycle
 onMounted(async () => {
+  // Track page view
+  trackContentView('venue_management', 'backoffice', 'Venue Management Dashboard')
+  
+  // Load data
   await Promise.all([
     loadVenues(),
     loadCategories()
   ])
+})
+
+// Watch for search term changes (with debounce)
+let searchTimeout: ReturnType<typeof setTimeout>
+watch(searchTerm, (newValue) => {
+  clearTimeout(searchTimeout)
+  searchTimeout = setTimeout(() => {
+    if (newValue.length > 2) {
+      trackEvent('venue_search', {
+        query: newValue,
+        results_count: filteredVenues.value.length
+      })
+    }
+  }, 500)
+})
+
+// Watch for filter changes
+watch(selectedCategory, (newValue) => {
+  trackEvent('venue_filter', {
+    filter_type: 'category',
+    filter_value: newValue || 'all',
+    results_count: filteredVenues.value.length
+  })
+})
+
+watch(selectedStatus, (newValue) => {
+  trackEvent('venue_filter', {
+    filter_type: 'status',
+    filter_value: newValue,
+    results_count: filteredVenues.value.length
+  })
+})
+
+// Watch for search/filter changes
+watch([searchTerm, selectedCategory, selectedStatus], () => {
+  currentPage.value = 1
 })
 </script>

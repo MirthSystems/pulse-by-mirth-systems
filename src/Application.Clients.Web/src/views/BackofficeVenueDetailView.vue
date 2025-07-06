@@ -273,6 +273,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import apiService from '@/services/api'
 import { usePermissions } from '@/composables/usePermissions'
+import { useAnalytics } from '@/composables/useAnalytics'
 import type { 
   Venue,
   VenueCategory, 
@@ -299,6 +300,9 @@ const router = useRouter()
 
 // Permissions
 const { getVenuePermissions } = usePermissions()
+
+// Analytics
+const { trackForm, trackEvent, trackContentView, trackError } = useAnalytics()
 
 // Props
 interface Props {
@@ -463,6 +467,13 @@ const onAddressGeocoded = (result: GeocodeResult) => {
 
 const startEditing = () => {
   isEditing.value = true
+  
+  // Track editing start
+  trackForm('start', 'venue_edit_form', {
+    venue_id: venueId.value,
+    venue_name: venue.value?.name,
+    is_new_venue: isNewVenue.value
+  })
 }
 
 const cancelEditing = () => {
@@ -531,6 +542,14 @@ const validateForm = (): boolean => {
 
 const saveVenue = async () => {
   if (!validateForm()) {
+    // Track form validation failure
+    trackForm('submit', 'venue_form', {
+      success: false,
+      errorMessage: 'Form validation failed',
+      venue_id: venueId.value,
+      is_new_venue: isNewVenue.value,
+      error_fields: Object.keys(errors.value)
+    })
     return
   }
 
@@ -550,6 +569,23 @@ const saveVenue = async () => {
       if (!response.success) {
         throw new Error(response.message || 'Failed to create venue')
       }
+      
+      // Track successful venue creation
+      trackForm('submit', 'venue_create_form', {
+        success: true,
+        venue_id: response.data?.id,
+        venue_name: venueData.name,
+        venue_category: venueData.categoryId
+      })
+      
+      // Track venue management action
+      trackEvent('venue_management', {
+        action: 'create',
+        venue_id: response.data?.id,
+        venue_name: venueData.name,
+        venue_category: venueData.categoryId
+      })
+      
       // Navigate back to the backoffice main page instead of the new venue's detail page
       router.replace('/backoffice')
     } else {
@@ -557,13 +593,46 @@ const saveVenue = async () => {
       if (!response.success) {
         throw new Error(response.message || 'Failed to update venue')
       }
+      
+      // Track successful venue update
+      trackForm('submit', 'venue_edit_form', {
+        success: true,
+        venue_id: venueId.value,
+        venue_name: venueData.name,
+        venue_category: venueData.categoryId
+      })
+      
+      // Track venue management action
+      trackEvent('venue_management', {
+        action: 'edit',
+        venue_id: venueId.value,
+        venue_name: venueData.name,
+        venue_category: venueData.categoryId
+      })
+      
       // Refresh venue data and exit edit mode
       await loadVenue()
       isEditing.value = false
     }
   } catch (error) {
     console.error('Error saving venue:', error)
-    submitError.value = error instanceof Error ? error.message : 'An unexpected error occurred'
+    const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
+    submitError.value = errorMessage
+    
+    // Track form submission error
+    trackForm('submit', isNewVenue.value ? 'venue_create_form' : 'venue_edit_form', {
+      success: false,
+      errorMessage: errorMessage,
+      venue_id: venueId.value,
+      is_new_venue: isNewVenue.value
+    })
+    
+    // Track error
+    trackError('venue_save_error', errorMessage, {
+      venue_id: venueId.value,
+      is_new_venue: isNewVenue.value,
+      form_data: form.value
+    })
   } finally {
     saving.value = false
   }
@@ -571,10 +640,26 @@ const saveVenue = async () => {
 
 // Special management methods
 const editSpecial = (special: SpecialSummary) => {
+  // Track special edit navigation
+  trackEvent('special_management_navigation', {
+    action: 'edit',
+    special_id: special.id,
+    special_title: special.title,
+    venue_id: venueId.value
+  })
+  
   router.push(`/backoffice/venues/${venueId.value}/specials/${special.id}`)
 }
 
 const confirmDeleteSpecial = (special: SpecialSummary) => {
+  // Track special delete intent
+  trackEvent('special_management_navigation', {
+    action: 'delete_confirm',
+    special_id: special.id,
+    special_title: special.title,
+    venue_id: venueId.value
+  })
+  
   router.push({
     path: '/confirm',
     query: {
@@ -606,6 +691,13 @@ watch(() => route.params.id, async (newId, oldId) => {
 })
 
 onMounted(async () => {
+  // Track page view for venue management
+  if (isNewVenue.value) {
+    trackContentView('venue_creation', 'new', 'New Venue Creation')
+  } else {
+    trackContentView('venue_detail', venueId.value?.toString() || 'unknown', venue.value?.name || 'Unknown Venue')
+  }
+  
   await Promise.all([
     loadCategories(),
     loadVenue()
