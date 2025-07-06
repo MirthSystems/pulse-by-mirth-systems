@@ -4,13 +4,7 @@
     <div class="bg-white shadow">
       <div class="px-4 sm:px-6 lg:px-8 py-6">
         <div class="flex flex-col space-y-4 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
-import { ref, computed, watch, onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import { ChevronLeftIcon, ExclamationTriangleIcon } from '@heroicons/vue/24/outline'
-import CronScheduler from '@/components/common/CronScheduler.vue'
-import { apiService } from '@/services/api'
-import { useAnalytics } from '@/composables/useAnalytics'
-import type { VenueSummary, SpecialCategory, CreateSpecialRequest } from '@/types/api'    <div class="flex items-center">
+          <div class="flex items-center">
             <button
               @click="goBack"
               class="mr-4 p-2 text-gray-400 hover:text-gray-600"
