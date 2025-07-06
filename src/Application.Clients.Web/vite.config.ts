@@ -12,6 +12,7 @@ export default defineConfig({
     vueDevTools(),
     VitePWA({
       registerType: 'autoUpdate',
+      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'safari-pinned-tab.svg'],
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,json,vue,ts,jsx,tsx}'],
         runtimeCaching: [
@@ -51,18 +52,17 @@ export default defineConfig({
           },
         ],
       },
-      includeAssets: ['favicon.ico', 'pwa-64x64.png', 'pwa-192x192.png', 'pwa-512x512.png', 'maskable-icon-512x512.png'],
       manifest: {
-        name: 'Pulse - Venue & Specials Manager',
+        name: 'Pulse - Specials Finder',
         short_name: 'Pulse',
-        description: 'Discover and manage venue specials and events near you',
+        description: 'Discover venue specials and events near you',
         theme_color: '#1f2937',
         background_color: '#ffffff',
         display: 'standalone',
         orientation: 'portrait-primary',
         scope: '/',
-        start_url: '/?utm_source=pwa',
-        id: '/?utm_source=pwa',
+        start_url: '/',
+        id: 'com.mirth.pulse',
         lang: 'en-US',
         dir: 'ltr',
         icons: [
@@ -89,53 +89,19 @@ export default defineConfig({
             purpose: 'maskable'
           }
         ],
-        categories: ['lifestyle', 'food', 'entertainment', 'business'],
-        screenshots: [
-          {
-            src: '/screenshots/mobile-screenshot-1.png',
-            sizes: '640x1136',
-            type: 'image/png',
-            form_factor: 'narrow'
-          },
-          {
-            src: '/screenshots/desktop-screenshot-1.png',
-            sizes: '1280x800',
-            type: 'image/png',
-            form_factor: 'wide'
-          }
-        ],
+        categories: ['lifestyle', 'food', 'entertainment'],
         shortcuts: [
           {
             name: 'Find Specials',
             short_name: 'Specials',
             description: 'Browse current venue specials near you',
-            url: '/specials?utm_source=pwa_shortcut',
-            icons: [{ src: 'pwa-192x192.png', sizes: '192x192' }]
-          },
-          {
-            name: 'Find Venues',
-            short_name: 'Venues',
-            description: 'Discover nearby venues and restaurants',
-            url: '/venues?utm_source=pwa_shortcut',
-            icons: [{ src: 'pwa-192x192.png', sizes: '192x192' }]
-          },
-          {
-            name: 'My Account',
-            short_name: 'Account',
-            description: 'Manage your profile and preferences',
-            url: '/profile?utm_source=pwa_shortcut',
+            url: '/search',
             icons: [{ src: 'pwa-192x192.png', sizes: '192x192' }]
           }
-        ],
-        related_applications: [],
-        prefer_related_applications: false,
-        edge_side_panel: {
-          preferred_width: 400
-        }
+        ]
       },
       devOptions: {
-        enabled: true,
-        type: 'module',
+        enabled: false
       }
     })
   ],

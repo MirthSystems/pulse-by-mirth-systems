@@ -1,5 +1,8 @@
 // Import type definitions for better TypeScript support
 
+// PWA Install prompt
+let deferredPrompt: any = null
+
 export function setupPWA() {
   // Register service worker
   if ('serviceWorker' in navigator && import.meta.env.PROD) {
@@ -14,9 +17,8 @@ export function setupPWA() {
             newWorker.addEventListener('statechange', () => {
               if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                 // New content available, please refresh!
-                if (confirm('New version available! Click OK to refresh.')) {
-                  window.location.reload()
-                }
+                const event = new CustomEvent('pwa-update-available')
+                window.dispatchEvent(event)
               }
             })
           }
@@ -38,11 +40,9 @@ export function setupPWA() {
   }
 }
 
-// PWA Install prompt
-let deferredPrompt: any = null
-
 export function setupInstallPrompt() {
   window.addEventListener('beforeinstallprompt', (e) => {
+    console.log('PWA install prompt available')
     // Prevent Chrome 67 and earlier from automatically showing the prompt
     e.preventDefault()
     // Stash the event so it can be triggered later
@@ -57,6 +57,15 @@ export function setupInstallPrompt() {
     hideInstallButton()
     deferredPrompt = null
   })
+
+  // For iOS devices, show manual install instructions
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
+  if (isIOS && !isPWA()) {
+    // Delay showing iOS instructions to not overwhelm users immediately
+    setTimeout(() => {
+      showInstallButton()
+    }, 3000)
+  }
 }
 
 function showInstallButton() {
