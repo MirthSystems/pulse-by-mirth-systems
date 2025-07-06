@@ -6,6 +6,8 @@ import { createAuth0 } from '@auth0/auth0-vue'
 
 import App from './App.vue'
 import router from './router'
+import { setupPWA, setupInstallPrompt, setupNetworkDetection } from './utils/pwa'
+import { capacitorService } from './utils/capacitor'
 
 const app = createApp(App)
 
@@ -26,4 +28,23 @@ app.use(createPinia())
 app.use(createAuth0(auth0Config))
 app.use(router)
 
+// Initialize PWA features
+async function initializeApp() {
+  try {
+    // Setup PWA features
+    setupPWA()
+    setupInstallPrompt()
+    setupNetworkDetection()
+    
+    // Initialize native platform features
+    await capacitorService.initialize()
+    
+    console.log('App initialization complete')
+  } catch (error) {
+    console.error('Error during app initialization:', error)
+  }
+}
+
+// Mount app and initialize features
 app.mount('#app')
+initializeApp()
