@@ -356,6 +356,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuth0 } from '@auth0/auth0-vue'
+import { useAnalytics } from '@/composables/useAnalytics'
 import {
   ChevronRightIcon,
   UserIcon,
@@ -378,6 +379,9 @@ const props = defineProps<Props>()
 const route = useRoute()
 const router = useRouter()
 const { user } = useAuth0()
+
+// Analytics
+const { trackForm, trackEvent, trackContentView, trackError } = useAnalytics()
 
 // State
 const venue = ref<VenueSummary | null>(null)
@@ -465,6 +469,13 @@ const loadData = async () => {
 const sendInvitation = async () => {
   console.debug('Sending invitation:', inviteForm.value)
   sendingInvite.value = true
+  
+  // Track form start for invitation
+  trackForm('start', 'venue_invitation_form', {
+    venue_id: venueId.value,
+    permission_level: inviteForm.value.permission
+  })
+  
   try {
     // Set the venue ID and sender email
     inviteForm.value.venueId = venueId.value
@@ -480,6 +491,23 @@ const sendInvitation = async () => {
     console.debug('Invitation response:', response)
     if (response.success) {
       console.debug('Invitation sent successfully')
+      
+      // Track successful invitation
+      trackForm('submit', 'venue_invitation_form', {
+        success: true,
+        venue_id: venueId.value,
+        target_email: inviteForm.value.email,
+        permission_level: inviteForm.value.permission
+      })
+      
+      // Track user permission change
+      trackEvent('user_permission_change', {
+        action: 'invite_sent',
+        venue_id: venueId.value,
+        target_email: inviteForm.value.email,
+        permission_level: inviteForm.value.permission
+      })
+      
       // Reset form and close modal
       inviteForm.value = {
         email: '',
@@ -497,6 +525,15 @@ const sendInvitation = async () => {
       showToast.value = true
     } else {
       console.error('Invitation failed:', response)
+      
+      // Track invitation failure
+      trackForm('submit', 'venue_invitation_form', {
+        success: false,
+        errorMessage: response.message || 'Failed to send invitation',
+        venue_id: venueId.value,
+        target_email: inviteForm.value.email
+      })
+      
       // Show error toast
       toastMessage.value = 'Failed to send invitation. Please try again.'
       toastType.value = 'error'
@@ -504,6 +541,22 @@ const sendInvitation = async () => {
     }
   } catch (error) {
     console.error('Error sending invitation:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    
+    // Track invitation error
+    trackForm('submit', 'venue_invitation_form', {
+      success: false,
+      errorMessage: errorMessage,
+      venue_id: venueId.value,
+      target_email: inviteForm.value.email
+    })
+    
+    trackError('invitation_send_error', errorMessage, {
+      venue_id: venueId.value,
+      target_email: inviteForm.value.email,
+      form_data: inviteForm.value
+    })
+    
     // Show error toast
     toastMessage.value = 'Error sending invitation. Please try again.'
     toastType.value = 'error'
@@ -514,6 +567,14 @@ const sendInvitation = async () => {
 }
 
 const cancelInvitation = (invitation: VenueInvitation) => {
+  // Track invitation cancellation intent
+  trackEvent('user_permission_change', {
+    action: 'cancel_invitation_intent',
+    venue_id: venueId.value,
+    target_email: invitation.email,
+    invitation_id: invitation.id
+  })
+  
   router.push({
     path: '/confirm',
     query: {
@@ -526,6 +587,15 @@ const cancelInvitation = (invitation: VenueInvitation) => {
 }
 
 const editPermission = (permission: UserVenuePermission) => {
+  // Track permission edit intent
+  trackEvent('user_permission_change', {
+    action: 'edit_permission_intent',
+    venue_id: venueId.value,
+    user_email: permission.userEmail,
+    current_permission: permission.name,
+    permission_id: permission.id
+  })
+  
   editForm.value = {
     permissionId: permission.id,
     permission: permission.name,
@@ -536,6 +606,15 @@ const editPermission = (permission: UserVenuePermission) => {
 }
 
 const confirmRevokePermission = (permission: UserVenuePermission) => {
+  // Track permission revocation intent
+  trackEvent('user_permission_change', {
+    action: 'revoke_permission_intent',
+    venue_id: venueId.value,
+    user_email: permission.userEmail,
+    permission_level: permission.name,
+    permission_id: permission.id
+  })
+  
   router.push({
     path: '/confirm',
     query: {

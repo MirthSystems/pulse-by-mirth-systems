@@ -14,6 +14,43 @@ export default defineConfig({
       registerType: 'prompt',
       selfDestroying: false,
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'safari-pinned-tab.svg'],
+      manifest: {
+        name: 'Pulse - Venue & Specials Manager',
+        short_name: 'Pulse',
+        description: 'Discover and manage venue specials and events',
+        theme_color: '#1f2937',
+        background_color: '#ffffff',
+        display: 'standalone',
+        orientation: 'portrait',
+        scope: '/',
+        start_url: '/',
+        icons: [
+          {
+            src: '/pwa-192x192.png',
+            sizes: '192x192',
+            type: 'image/png'
+          },
+          {
+            src: '/pwa-512x512.png', 
+            sizes: '512x512',
+            type: 'image/png'
+          },
+          {
+            src: '/pwa-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any'
+          },
+          {
+            src: '/maskable-icon-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable'
+          }
+        ],
+        categories: ['business', 'food', 'lifestyle'],
+        lang: 'en'
+      },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,json,vue,ts,jsx,tsx}'],
         runtimeCaching: [
@@ -53,57 +90,10 @@ export default defineConfig({
           },
         ],
       },
-      manifest: {
-        name: 'Pulse - Specials Finder',
-        short_name: 'Pulse',
-        description: 'Discover venue specials and events near you',
-        theme_color: '#1f2937',
-        background_color: '#ffffff',
-        display: 'standalone',
-        orientation: 'portrait-primary',
-        scope: '/',
-        start_url: '/',
-        id: 'com.mirth.pulse',
-        lang: 'en-US',
-        dir: 'ltr',
-        prefer_related_applications: false,
-        icons: [
-          {
-            src: 'pwa-64x64.png',
-            sizes: '64x64',
-            type: 'image/png'
-          },
-          {
-            src: 'pwa-192x192.png',
-            sizes: '192x192',
-            type: 'image/png'
-          },
-          {
-            src: 'pwa-512x512.png',
-            sizes: '512x512',
-            type: 'image/png',
-            purpose: 'any'
-          },
-          {
-            src: 'maskable-icon-512x512.png',
-            sizes: '512x512',
-            type: 'image/png',
-            purpose: 'maskable'
-          }
-        ],
-        categories: ['lifestyle', 'food', 'entertainment'],
-        shortcuts: [
-          {
-            name: 'Find Specials',
-            short_name: 'Specials',
-            description: 'Browse current venue specials near you',
-            url: '/search',
-            icons: [{ src: 'pwa-192x192.png', sizes: '192x192' }]
-          }
-        ]
-      },
       devOptions: {
-        enabled: false
+        enabled: true,
+        suppressWarnings: true,
+        type: 'module'
       },
       injectRegister: 'script-defer'
     })
@@ -116,5 +106,9 @@ export default defineConfig({
   server: {
     host: true,
     port: parseInt(process.env.PORT ?? "5173"),
+    hmr: {
+      port: 5174,
+      host: 'localhost'
+    }
   }
 })

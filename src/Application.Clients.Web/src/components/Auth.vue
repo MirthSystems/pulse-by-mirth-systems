@@ -10,6 +10,7 @@
     <button
       v-else-if="!isAuthenticated"
       @click="handleLogin"
+      v-track-click="'sign_in_button'"
       class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
     >
       <UserIcon class="mr-2 h-4 w-4" />
@@ -33,6 +34,7 @@ import { useAuthStore } from '../stores/auth'
 import UserProfileDropdown from '../components/UserProfileDropdown.vue'
 import NotificationIcon from '../components/NotificationIcon.vue'
 import apiService from '../services/api'
+import analyticsService from '../services/analytics'
 
 const { 
   loginWithRedirect, 
@@ -47,6 +49,7 @@ const authStore = useAuthStore()
 const { isAuthenticated, isLoading } = storeToRefs(authStore)
 
 const handleLogin = () => {
+  analyticsService.track('login_initiated', { method: 'auth0' })
   loginWithRedirect()
 }
 
@@ -118,10 +121,22 @@ watch(auth0IsAuthenticated, async (authenticated) => {
   if (authenticated && auth0User.value) {
     authStore.setUser(auth0User.value)
     await updateAccessToken()
+    
+    // Track successful login
+    analyticsService.trackLogin('auth0', auth0User.value.sub)
+    analyticsService.identify(auth0User.value.sub || '', {
+      email: auth0User.value.email,
+      name: auth0User.value.name,
+      email_verified: auth0User.value.email_verified,
+      picture: auth0User.value.picture
+    })
   } else {
     authStore.setUser(null)
     apiService.setAccessToken(null)
     authStore.setAccessToken(null)
+    
+    // Reset analytics on logout
+    analyticsService.reset()
   }
 })
 

@@ -297,6 +297,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { ChevronLeftIcon, ExclamationTriangleIcon, PencilIcon } from '@heroicons/vue/24/outline'
 import CronScheduler from '@/components/common/CronScheduler.vue'
 import { apiService } from '@/services/api'
+import { useAnalytics } from '@/composables/useAnalytics'
 import type { VenueSummary, SpecialCategory, SpecialSummary, UpdateSpecialRequest } from '@/types/api'
 
 interface Props {
@@ -307,6 +308,9 @@ interface Props {
 const props = defineProps<Props>()
 const router = useRouter()
 const route = useRoute()
+
+// Analytics
+const { trackForm, trackEvent, trackContentView, trackError } = useAnalytics()
 
 // State
 const venue = ref<VenueSummary | null>(null)
@@ -425,6 +429,13 @@ const goBack = () => {
 
 const startEditing = () => {
   isEditing.value = true
+  
+  // Track special editing start
+  trackForm('start', 'special_edit_form', {
+    special_id: specialId.value,
+    special_title: special.value?.title,
+    venue_id: venueId.value
+  })
 }
 
 const cancelEditing = () => {
@@ -497,6 +508,14 @@ const validateForm = (): boolean => {
 
 const saveSpecial = async () => {
   if (!validateForm()) {
+    // Track form validation failure
+    trackForm('submit', 'special_edit_form', {
+      success: false,
+      errorMessage: 'Form validation failed',
+      special_id: specialId.value,
+      venue_id: venueId.value,
+      error_fields: Object.keys(errors.value)
+    })
     return
   }
 
@@ -515,12 +534,50 @@ const saveSpecial = async () => {
       throw new Error(response.message || 'Failed to update special')
     }
     
+    // Track successful special update
+    trackForm('submit', 'special_edit_form', {
+      success: true,
+      special_id: specialId.value,
+      special_title: specialData.title,
+      venue_id: venueId.value,
+      special_category: specialData.specialCategoryId,
+      is_recurring: specialData.isRecurring,
+      is_active: specialData.isActive
+    })
+    
+    // Track special management action
+    trackEvent('special_management', {
+      action: 'edit',
+      special_id: specialId.value,
+      special_title: specialData.title,
+      venue_id: venueId.value,
+      special_category: specialData.specialCategoryId,
+      is_recurring: specialData.isRecurring,
+      is_active: specialData.isActive
+    })
+    
     // Refresh special data and exit edit mode
     await loadSpecial()
     isEditing.value = false
   } catch (error) {
     console.error('Error saving special:', error)
-    submitError.value = error instanceof Error ? error.message : 'An unexpected error occurred'
+    const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
+    submitError.value = errorMessage
+    
+    // Track form submission error
+    trackForm('submit', 'special_edit_form', {
+      success: false,
+      errorMessage: errorMessage,
+      special_id: specialId.value,
+      venue_id: venueId.value
+    })
+    
+    // Track error
+    trackError('special_save_error', errorMessage, {
+      special_id: specialId.value,
+      venue_id: venueId.value,
+      form_data: form.value
+    })
   } finally {
     saving.value = false
   }
@@ -532,6 +589,9 @@ watch(() => [route.params.venueId, route.params.specialId], () => {
 }, { immediate: true })
 
 onMounted(async () => {
+  // Track special detail page view
+  trackContentView('special_detail', specialId.value.toString(), special.value?.title || 'Special Edit')
+  
   await Promise.all([
     loadVenue(),
     loadCategories()

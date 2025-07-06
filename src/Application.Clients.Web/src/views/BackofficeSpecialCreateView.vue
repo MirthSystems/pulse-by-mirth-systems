@@ -4,7 +4,13 @@
     <div class="bg-white shadow">
       <div class="px-4 sm:px-6 lg:px-8 py-6">
         <div class="flex flex-col space-y-4 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
-          <div class="flex items-center">
+import { ref, computed, watch, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { ChevronLeftIcon, ExclamationTriangleIcon } from '@heroicons/vue/24/outline'
+import CronScheduler from '@/components/common/CronScheduler.vue'
+import { apiService } from '@/services/api'
+import { useAnalytics } from '@/composables/useAnalytics'
+import type { VenueSummary, SpecialCategory, CreateSpecialRequest } from '@/types/api'    <div class="flex items-center">
             <button
               @click="goBack"
               class="mr-4 p-2 text-gray-400 hover:text-gray-600"
@@ -260,6 +266,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { ChevronLeftIcon, ExclamationTriangleIcon } from '@heroicons/vue/24/outline'
 import CronScheduler from '@/components/common/CronScheduler.vue'
 import { apiService } from '@/services/api'
+import { useAnalytics } from '@/composables/useAnalytics'
 import type { VenueSummary, SpecialCategory, CreateSpecialRequest } from '@/types/api'
 
 interface Props {
@@ -269,6 +276,9 @@ interface Props {
 const props = defineProps<Props>()
 const router = useRouter()
 const route = useRoute()
+
+// Analytics
+const { trackForm, trackEvent, trackContentView, trackError } = useAnalytics()
 
 // State
 const venue = ref<VenueSummary | null>(null)
@@ -388,6 +398,13 @@ const validateForm = (): boolean => {
 
 const createSpecial = async () => {
   if (!validateForm()) {
+    // Track form validation failure
+    trackForm('submit', 'special_create_form', {
+      success: false,
+      errorMessage: 'Form validation failed',
+      venue_id: venueId.value,
+      error_fields: Object.keys(errors.value)
+    })
     return
   }
 
@@ -407,17 +424,61 @@ const createSpecial = async () => {
       throw new Error(response.message || 'Failed to create special')
     }
     
+    // Track successful special creation
+    trackForm('submit', 'special_create_form', {
+      success: true,
+      special_id: response.data?.id,
+      special_title: specialData.title,
+      venue_id: venueId.value,
+      special_category: specialData.specialCategoryId,
+      is_recurring: specialData.isRecurring,
+      is_active: specialData.isActive
+    })
+    
+    // Track special management action
+    trackEvent('special_management', {
+      action: 'create',
+      special_id: response.data?.id,
+      special_title: specialData.title,
+      venue_id: venueId.value,
+      special_category: specialData.specialCategoryId,
+      is_recurring: specialData.isRecurring,
+      is_active: specialData.isActive
+    })
+    
     // Navigate back to the venue detail page instead of the new special's detail page
     router.replace(`/backoffice/venues/${venueId.value}`)
   } catch (error) {
     console.error('Error creating special:', error)
-    submitError.value = error instanceof Error ? error.message : 'An unexpected error occurred'
+    const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
+    submitError.value = errorMessage
+    
+    // Track form submission error
+    trackForm('submit', 'special_create_form', {
+      success: false,
+      errorMessage: errorMessage,
+      venue_id: venueId.value
+    })
+    
+    // Track error
+    trackError('special_create_error', errorMessage, {
+      venue_id: venueId.value,
+      form_data: form.value
+    })
   } finally {
     saving.value = false
   }
 }
 
 onMounted(async () => {
+  // Track special creation page view
+  trackContentView('special_creation', venueId.value.toString(), 'New Special Creation')
+  
+  // Track form start
+  trackForm('start', 'special_create_form', {
+    venue_id: venueId.value
+  })
+  
   // Set venue ID and default values
   form.value.venueId = venueId.value
   form.value.startDate = new Date().toISOString().split('T')[0]
