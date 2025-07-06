@@ -92,16 +92,35 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import { XMarkIcon, ExclamationTriangleIcon } from '@heroicons/vue/24/outline'
-import { installPWA, isPWA } from '@/utils/pwa'
+import { installPWA, isPWA, dismissInstallPrompt, isIOSDevice } from '@/utils/pwa'
 
 const showInstallPrompt = ref(false)
 const installing = ref(false)
 const isOnline = ref(navigator.onLine)
 const updateAvailable = ref(false)
 
+// Detect iOS
+const isIOS = isIOSDevice()
+
 // Event listeners
 const handleInstallAvailable = () => {
-  if (!isPWA()) {
+  // Only show our custom prompt for non-iOS devices and if not already installed
+  if (!isPWA() && !isIOS) {
+    // Check if user previously dismissed it recently
+    const dismissed = localStorage.getItem('pwa-install-dismissed')
+    const sessionDismissed = sessionStorage.getItem('pwa-dismiss-session')
+    
+    if (sessionDismissed === 'true') {
+      return // Don't show again this session
+    }
+    
+    if (dismissed) {
+      const dismissedTime = parseInt(dismissed)
+      const oneWeekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000)
+      if (dismissedTime > oneWeekAgo) {
+        return // Don't show if dismissed within the last week
+      }
+    }
     showInstallPrompt.value = true
   }
 }
@@ -134,8 +153,8 @@ const installApp = async () => {
 
 const dismissPrompt = () => {
   showInstallPrompt.value = false
-  // Remember user dismissed it (you might want to store this in localStorage)
-  localStorage.setItem('pwa-install-dismissed', 'true')
+  // Use the centralized dismissal function
+  dismissInstallPrompt()
 }
 
 const reloadApp = () => {
@@ -143,23 +162,24 @@ const reloadApp = () => {
 }
 
 onMounted(() => {
-  // Check if user previously dismissed install prompt
-  const dismissed = localStorage.getItem('pwa-install-dismissed')
-  if (dismissed) {
-    showInstallPrompt.value = false
+  // Only set up install prompts for non-iOS devices
+  // iOS devices should use Safari's native "Add to Home Screen" feature
+  if (!isIOS) {
+    window.addEventListener('pwa-install-available', handleInstallAvailable)
+    window.addEventListener('pwa-install-completed', handleInstallCompleted)
   }
-
-  // Add event listeners
-  window.addEventListener('pwa-install-available', handleInstallAvailable)
-  window.addEventListener('pwa-install-completed', handleInstallCompleted)
+  
+  // Network and update listeners work for all platforms
   window.addEventListener('network-status-changed', handleNetworkChange as EventListener)
   window.addEventListener('pwa-update-available', handleUpdateAvailable)
 })
 
 onUnmounted(() => {
-  // Remove event listeners
-  window.removeEventListener('pwa-install-available', handleInstallAvailable)
-  window.removeEventListener('pwa-install-completed', handleInstallCompleted)
+  // Remove event listeners - only remove the ones we actually added
+  if (!isIOS) {
+    window.removeEventListener('pwa-install-available', handleInstallAvailable)
+    window.removeEventListener('pwa-install-completed', handleInstallCompleted)
+  }
   window.removeEventListener('network-status-changed', handleNetworkChange as EventListener)
   window.removeEventListener('pwa-update-available', handleUpdateAvailable)
 })

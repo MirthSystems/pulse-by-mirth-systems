@@ -11,7 +11,8 @@ export default defineConfig({
     vue(),
     vueDevTools(),
     VitePWA({
-      registerType: 'autoUpdate',
+      registerType: 'prompt',
+      selfDestroying: false,
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'safari-pinned-tab.svg'],
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,json,vue,ts,jsx,tsx}'],
@@ -65,6 +66,7 @@ export default defineConfig({
         id: 'com.mirth.pulse',
         lang: 'en-US',
         dir: 'ltr',
+        prefer_related_applications: false,
         icons: [
           {
             src: 'pwa-64x64.png',
@@ -102,7 +104,8 @@ export default defineConfig({
       },
       devOptions: {
         enabled: false
-      }
+      },
+      injectRegister: 'script-defer'
     })
   ],
   resolve: {

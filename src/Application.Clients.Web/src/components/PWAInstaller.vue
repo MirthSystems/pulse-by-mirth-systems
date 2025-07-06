@@ -71,7 +71,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
-import { installPWA } from '@/utils/pwa'
+import { installPWA, dismissInstallPrompt, isPWA } from '@/utils/pwa'
 import { usePlatform } from '@/composables/useNative'
 
 const showInstallButton = ref(false)
@@ -101,22 +101,31 @@ const installApp = async () => {
 
 const dismissInstall = () => {
   showInstallButton.value = false
-  // Store dismissal in localStorage
-  localStorage.setItem('pwa-install-dismissed', Date.now().toString())
+  // Use centralized dismissal function
+  dismissInstallPrompt()
 }
 
 const handleInstallAvailable = () => {
-  // Check if user previously dismissed
-  const dismissed = localStorage.getItem('pwa-install-dismissed')
-  if (dismissed) {
-    const dismissedTime = parseInt(dismissed)
-    const oneWeekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000)
-    if (dismissedTime > oneWeekAgo) {
-      return // Don't show if dismissed within the last week
+  // Only show for non-iOS devices when using web platform
+  if (isWeb && !isIOS && !isPWA()) {
+    // Check session dismissal first
+    const sessionDismissed = sessionStorage.getItem('pwa-dismiss-session')
+    if (sessionDismissed === 'true') {
+      return // Don't show again this session
     }
-  }
 
-  showInstallButton.value = true
+    // Check if user previously dismissed
+    const dismissed = localStorage.getItem('pwa-install-dismissed')
+    if (dismissed) {
+      const dismissedTime = parseInt(dismissed)
+      const oneWeekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000)
+      if (dismissedTime > oneWeekAgo) {
+        return // Don't show if dismissed within the last week
+      }
+    }
+
+    showInstallButton.value = true
+  }
 }
 
 const handleInstallCompleted = () => {
@@ -124,14 +133,16 @@ const handleInstallCompleted = () => {
 }
 
 onMounted(() => {
-  if (isWeb) {
+  // Only set up install events for web platform and non-iOS devices
+  if (isWeb && !isIOS) {
     window.addEventListener('pwa-install-available', handleInstallAvailable)
     window.addEventListener('pwa-install-completed', handleInstallCompleted)
   }
 })
 
 onUnmounted(() => {
-  if (isWeb) {
+  // Only remove listeners we actually added
+  if (isWeb && !isIOS) {
     window.removeEventListener('pwa-install-available', handleInstallAvailable)
     window.removeEventListener('pwa-install-completed', handleInstallCompleted)
   }
