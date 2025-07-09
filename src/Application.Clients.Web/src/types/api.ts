@@ -127,6 +127,7 @@ export interface EnhancedSpecialSearch {
   latitude?: number;
   longitude?: number;
   radiusInMeters?: number;
+  categoryId?: number;
   date?: string;
   time?: string;
   activeOnly?: boolean;

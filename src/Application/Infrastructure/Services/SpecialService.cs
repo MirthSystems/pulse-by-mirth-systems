@@ -380,6 +380,7 @@ public class SpecialService : ISpecialService
                 searchDate,
                 searchTime,
                 searchRequest.SearchTerm,
+                searchRequest.CategoryId,
                 searchRequest.ActiveOnly,
                 searchRequest.CurrentlyRunning,
                 cancellationToken);
@@ -451,6 +452,7 @@ public class SpecialService : ISpecialService
         LocalDate searchDate,
         LocalTime searchTime,
         string? searchTerm,
+        int? categoryId,
         bool activeOnly,
         bool currentlyRunning,
         CancellationToken cancellationToken)
@@ -518,6 +520,12 @@ public class SpecialService : ISpecialService
                         return s.StartDate >= currentDate;
                     }
                 });
+            }
+
+            // Apply category filter if specified
+            if (categoryId.HasValue)
+            {
+                specials = specials.Where(s => s.SpecialCategoryId == categoryId.Value);
             }
 
             if (!specials.Any() && activeOnly && currentlyRunning)

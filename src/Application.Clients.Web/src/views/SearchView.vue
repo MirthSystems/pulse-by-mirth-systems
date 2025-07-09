@@ -84,6 +84,7 @@ const handleSearch = async (params: any) => {
       latitude: latitude,
       longitude: longitude,
       radiusInMeters: params.radius || 5000,
+      categoryId: params.categoryId || undefined,
       date: searchDate,
       time: searchTime,
       activeOnly: true,
