@@ -390,10 +390,6 @@ const selectedCategory = ref<number | ''>('')
 const selectedStatus = ref<'all' | 'active' | 'inactive'>('all')
 const currentPage = ref(1)
 const pageSize = ref(12)
-const showDeleteDialog = ref(false)
-const venueToDelete = ref<VenueSummary | null>(null)
-const deletingVenue = ref(false)
-const deleteError = ref('')
 const showToast = ref(false)
 const toastMessage = ref('')
 const toastType = ref<'success' | 'error'>('success')
@@ -455,41 +451,6 @@ const visiblePages = computed(() => {
 // Methods
 const goToVenueDetail = (venueId: number) => {
   router.push(`/backoffice/venues/${venueId}`)
-}
-
-const confirmDeleteVenue = (venue: VenueSummary) => {
-  venueToDelete.value = venue
-  showDeleteDialog.value = true
-}
-
-const deleteVenue = async () => {
-  if (!venueToDelete.value) return
-
-  try {
-    deletingVenue.value = true
-    // Use API service directly since store doesn't have deleteVenue method
-    const response = await apiService.deleteVenue(venueToDelete.value.id)
-    if (response.success) {
-      showToastMessage('Venue deleted successfully', 'success')
-      trackEvent('venue_delete', { 
-        venue_id: venueToDelete.value.id,
-        venue_name: venueToDelete.value.name
-      })
-      venueToDelete.value = null
-      showDeleteDialog.value = false
-      await loadVenues()
-    } else {
-      throw new Error(response.message || 'Failed to delete venue')
-    }
-  } catch (error) {
-    console.error('Failed to delete venue:', error)
-    showToastMessage('Failed to delete venue', 'error')
-    trackError('venue_delete_error', error instanceof Error ? error.message : 'Unknown error', {
-      venue_id: venueToDelete.value?.id
-    })
-  } finally {
-    deletingVenue.value = false
-  }
 }
 
 const showToastMessage = (message: string, type: 'success' | 'error') => {
@@ -573,14 +534,34 @@ const handleVenueDelete = (venue: VenueSummary) => {
     venue_id: venue.id,
     venue_name: venue.name
   })
-  venueToDelete.value = venue
-  showDeleteDialog.value = true
+  
+  // Navigate to confirm delete page
+  router.push({
+    path: '/confirm',
+    query: {
+      type: 'venue',
+      id: venue.id.toString(),
+      name: venue.name,
+      returnTo: '/backoffice'
+    }
+  })
 }
 
 // Lifecycle
 onMounted(async () => {
   // Track page view
   trackContentView('venue_management', 'backoffice', 'Venue Management Dashboard')
+  
+  // Handle success/error messages from redirects (e.g., after venue deletion)
+  if (route.query.success === 'true' && route.query.message) {
+    showToastMessage(route.query.message as string, 'success')
+    // Clean up the query parameters
+    router.replace({ path: route.path })
+  } else if (route.query.error === 'true' && route.query.message) {
+    showToastMessage(route.query.message as string, 'error')
+    // Clean up the query parameters
+    router.replace({ path: route.path })
+  }
   
   // Load data
   await Promise.all([
