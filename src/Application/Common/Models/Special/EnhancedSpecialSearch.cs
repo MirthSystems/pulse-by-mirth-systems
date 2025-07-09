@@ -15,6 +15,7 @@ public class EnhancedSpecialSearch
     public double? Latitude { get; set; }
     public double? Longitude { get; set; }
     public double? RadiusInMeters { get; set; } = 5000; // Default 5km
+    public int? CategoryId { get; set; } // Filter by special category
     public string? Date { get; set; } // Format: "yyyy-MM-dd", defaults to today
     public string? Time { get; set; } // Format: "HH:mm", defaults to current time
     public bool ActiveOnly { get; set; } = true; // Only specials marked as active (not soft-deleted)
